@@ -4,11 +4,19 @@
 
 面试问题大都来源是其他博客。
 
-网址：[golangFamily](https://github.com/xiaobaiTech/golangFamily)
+网址：
+
+[golangFamily](https://github.com/xiaobaiTech/golangFamily)
+
+[Go Questions](https://golang.design/go-questions/)
+
+[【Golang】Go 3到5年常见的面试题](https://www.cnblogs.com/chenpingzhao/p/13358378.html) 
+
+[Golang面试前二夜准备](https://www.modb.pro/db/159470)
+
+
 
 ## GO 面试题
-
-golangFamily中的问题：
 
 ### 新手
 
@@ -17,6 +25,7 @@ golangFamily中的问题：
 ### 数据类型（map、slice、数组、set）
 
 - [连nil切片和空切片一不一样都不清楚？那BAT面试官只好让你回去等通知了。](https://mp.weixin.qq.com/s/sW4PD1MiaunURNDIU4BbQQ)
+- [golang 中的四种类型转换总结](https://learnku.com/articles/42797)
 - [golang面试题：字符串转成byte数组，会发生内存拷贝吗？](https://mp.weixin.qq.com/s/qmlPuGVISx8NYp2b9LrqnA)
 - [golang面试题：翻转含有中文、数字、英文字母的字符串](https://mp.weixin.qq.com/s/ssinnUM22PHPWRug8EzAkg)
 - [golang面试题：拷贝大切片一定比小切片代价大吗？](https://mp.weixin.qq.com/s/8Dp2eCYzDdBbxAG5-jNevQ)
@@ -76,26 +85,26 @@ golangFamily中的问题：
 - [golang面试题：怎么避免内存逃逸？](https://mp.weixin.qq.com/s/VzRTHz1JaDUvNRVB_yJa1A)
 - [golang面试题：简单聊聊内存逃逸？](https://mp.weixin.qq.com/s/wJmztRMB1ZAAIItyMcS0tw)
 - [给大家丢脸了，用了三年golang，我还是没答对这道内存泄漏题](https://mp.weixin.qq.com/s/-agtdhlW7Yj7S88a0z7KHg)
-- 内存碎片化问题
-- chan相关的goroutine泄露的问题
-- string相关的goroutine泄露的问题
+- [内存碎片化问题](https://segmentfault.com/a/1190000020338427)
+- [chan相关的goroutine泄露的问题](https://segmentfault.com/a/1190000040161853)
+- [string相关的goroutine泄露的问题](cnblogs.com/ricklz/p/11262069.html)
 - [你一定会遇到的内存回收策略导致的疑似内存泄漏的问题](https://colobu.com/2019/08/28/go-memory-leak-i-dont-think-so/)
-- sync.Pool的适用场景
-- go1.13sync.Pool对比go1.12版本优化点
+- [sync.Pool的适用场景](https://geektutu.com/post/hpg-sync-pool.html)
 
 ### 并发编程
 
+- [线程、进程、协程、goroutines ](https://zhuanlan.zhihu.com/p/27245377)
+
 - [golang面试题：对已经关闭的的chan进行读写，会怎么样？为什么？](https://mp.weixin.qq.com/s/izbZ3JRqX6jI6Wn7bV6xNQ)
 - [golang面试题：对未初始化的的chan进行读写，会怎么样？为什么？](https://mp.weixin.qq.com/s/ixJu0wrGXsCcGzveCqnr6A)
-- sync.map 的优缺点和使用场景
-- sync.Map的优化点
-- 主协程如何等其余协程完再操作
-- 有缓存的channel和没有缓存的channel区别是什么？
-- 协程通信方式有哪些？
-- channel底层实现
-- 读写锁底层是怎么实现的？
-- 请你说说golang的CSP思想
-- channel 是怎么保证线程安全？
+- [sync.map 的优缺点和使用场景](https://studygolang.com/articles/22128)
+- [主协程如何等其余协程完再操作](https://blog.csdn.net/weixin_42678507/article/details/102786680)
+- [有缓存的channel和没有缓存的channel区别是什么？](https://zhuanlan.zhihu.com/p/355487940)
+- [协程通信方式有哪些？](https://zhuanlan.zhihu.com/p/36907022)
+- [channel底层实现](https://i6448038.github.io/2019/04/11/go-channel/)
+- [读写锁底层是怎么实现的？](https://blog.csdn.net/sunxianghuang/article/details/104780010)
+- [golang的CSP思想](https://golang.design/go-questions/channel/csp/)
+- [channel 是怎么保证线程安全？](http://www.zhoubotong.site/post/25.html)
 
 ### 高级特性
 
