@@ -8,7 +8,7 @@
 
 [golangFamily](https://github.com/xiaobaiTech/golangFamily)
 
-[Go Questions](https://golang.design/go-questions/)
+[Go Questions](https://www.bookstack.cn/read/qcrao-Go-Questions/README.md)
 
 [【Golang】Go 3到5年常见的面试题](https://www.cnblogs.com/chenpingzhao/p/13358378.html) 
 
@@ -74,8 +74,6 @@
 
 - [解析 JSON 数据时，默认将数值当做哪种类型](https://zhuanlan.zhihu.com/p/388124005)
 
-
-
 ### 包管理
 
 - [学go mod就够了！](https://studygolang.com/articles/27293)
@@ -91,10 +89,9 @@
 - [你一定会遇到的内存回收策略导致的疑似内存泄漏的问题](https://colobu.com/2019/08/28/go-memory-leak-i-dont-think-so/)
 - [sync.Pool的适用场景](https://geektutu.com/post/hpg-sync-pool.html)
 
-### 并发编程
+### goroutine
 
 - [线程、进程、协程、goroutines ](https://zhuanlan.zhihu.com/p/27245377)
-
 - [golang面试题：对已经关闭的的chan进行读写，会怎么样？为什么？](https://mp.weixin.qq.com/s/izbZ3JRqX6jI6Wn7bV6xNQ)
 - [golang面试题：对未初始化的的chan进行读写，会怎么样？为什么？](https://mp.weixin.qq.com/s/ixJu0wrGXsCcGzveCqnr6A)
 - [sync.map 的优缺点和使用场景](https://studygolang.com/articles/22128)
@@ -105,47 +102,60 @@
 - [读写锁底层是怎么实现的？](https://blog.csdn.net/sunxianghuang/article/details/104780010)
 - [golang的CSP思想](https://golang.design/go-questions/channel/csp/)
 - [channel 是怎么保证线程安全？](http://www.zhoubotong.site/post/25.html)
+- [协程和线程的差别](https://segmentfault.com/a/1190000040373756)
+- [开多个线程和开多个协程会有什么区别](https://www.kancloud.cn/todo/go_learn/1222804)
+- [协程可以自己主动让出 CPU 吗？](https://studygolang.com/articles/26795)
 
-### 高级特性
+### 反射
+
+- [golang 面试题：reflect（反射包）如何获取字段 tag？为什么 json 包不能导出私有变量的 tag？](https://mp.weixin.qq.com/s/WK9StkC3Jfy-o1dUqlo7Dg)
+
+### 接口（ interface）
+
+- [开源库里会有一些类似下面这种奇怪的用法：`var _ io.Writer = (*myWriter)(nil)`，是为什么？](https://www.bookstack.cn/read/qcrao-Go-Questions/interface-%E7%BC%96%E8%AF%91%E5%99%A8%E8%87%AA%E5%8A%A8%E6%A3%80%E6%B5%8B%E7%B1%BB%E5%9E%8B%E6%98%AF%E5%90%A6%E5%AE%9E%E7%8E%B0%E6%8E%A5%E5%8F%A3.md)
+- [两个interface{} 能不能比较](https://www.jianshu.com/p/a982807819fa)
+- 断言时会发生拷贝吗
+- [接口是怎么实现的？](https://juejin.cn/post/6844904082453299207)
+
+### unsafe
 
 - [golang面试题：能说说uintptr和unsafe.Pointer的区别吗？](https://mp.weixin.qq.com/s/PSkz0zj-vqKzmIKa_b-xAA)
-- [golang 面试题：reflect（反射包）如何获取字段 tag？为什么 json 包不能导出私有变量的 tag？](https://mp.weixin.qq.com/s/WK9StkC3Jfy-o1dUqlo7Dg)
-- 协程和线程的差别
-- 垃圾回收的过程是怎么样的？
-- 什么是写屏障、混合写屏障，如何实现？
-- 开源库里会有一些类似下面这种奇怪的用法：`var _ io.Writer = (*myWriter)(nil)`，是为什么？
+
+### GC
+
+- [垃圾回收的过程是怎么样的？](https://zhuanlan.zhihu.com/p/297177002)
+- [什么是写屏障、混合写屏障，如何实现？](https://www.bookstack.cn/read/qcrao-Go-Questions/spilt.9.GC-GC.md)
+- [为什么gc会让程序变慢](https://www.bookstack.cn/read/qcrao-Go-Questions/spilt.14.GC-GC.md)
+- [gc的stw是怎么回事](https://www.bookstack.cn/read/qcrao-Go-Questions/spilt.5.GC-GC.md)
+- [为什么小对象多了会造成 gc 压力?](https://www.modb.pro/db/148423)
+- 两次 GC 周期重叠会引发什么问题，GC 触发机制是什么样的？
+
+### 调度
+
 - [GMP模型](https://zboya.github.io/post/go_scheduler/?hmsr=toutiao.io&utm_medium=toutiao.io&utm_source=toutiao.io)
 - [动图图解，GMP里为什么要有P](https://mp.weixin.qq.com/s/SEE2TUeZQZ7W1BKkmnelAA)
-- 协程之间是怎么调度的
-- gc的stw是怎么回事
-- 利用golang特性，设计一个QPS为500的服务器
-- 为什么gc会让程序变慢
-- 开多个线程和开多个协程会有什么区别
-- 两个interface{} 能不能比较
-- 必须要手动对齐内存的情况
-- [go栈扩容和栈缩容，连续栈的缺点](https://segmentfault.com/a/1190000019570427)
-- golang怎么做代码优化
-- [golang隐藏技能:怎么访问私有成员](https://www.jianshu.com/p/7b3638b47845)
-- 协程可以自己主动让出 CPU 吗？
-- 断言时会发生拷贝吗
-- 接口是怎么实现的？
-- 协程与进程，线程的区别是什么？协程有什么优势？
-- 为什么小对象多了会造成 gc 压力?
-- 一个协程能保证绑定在一个内核线程上吗？
-- 闭包怎么实现的,闭包的主要应用场景
-- 两次 GC 周期重叠会引发什么问题，GC 触发机制是什么样的？
-- Goroutinue 什么时候会被挂起？
-- Data Race 问题怎么检测？怎么解决?
-- Golang 触发异常的场景有哪些?
-- net/http包中client如何实现长连接？
-- net/http怎么做连接池和长链接？
 
 ### 问题排查
 
 - [trace](https://mp.weixin.qq.com/s?__biz=MzA4ODg0NDkzOA==&mid=2247487157&idx=1&sn=cbf1c87efe98433e07a2e58ee6e9899e&source=41#wechat_redirect)
 - [pprof](https://mp.weixin.qq.com/s/d0olIiZgZNyZsO-OZDiEoA)
-- 什么是 goroutine 泄漏?
-- 当go服务部署到线上了，发现有内存泄露，该怎么处理
+- [什么是 goroutine 泄漏?](https://segmentfault.com/a/1190000040161853)
+- [当go服务部署到线上了，发现有内存泄露，该怎么处理](https://blog.csdn.net/shudaqi2010/article/details/103362028?utm_medium=distribute.pc_relevant.none-task-blog-2~default~baidujs_baidulandingword~default-0.pc_relevant_default&spm=1001.2101.3001.4242.1&utm_relevant_index=3)
+
+### 其他
+
+- 利用golang特性，设计一个QPS为500的服务器
+- [必须要手动对齐内存的情况](https://geektutu.com/post/hpg-struct-alignment.html)
+- [go栈扩容和栈缩容，连续栈的缺点](https://segmentfault.com/a/1190000019570427)
+- [golang怎么做代码优化](https://tangheng1995.github.io/golang/2020/06/03/Golang-optimize.html)
+- [golang隐藏技能:怎么访问私有成员](https://www.jianshu.com/p/7b3638b47845)
+- [一个协程能保证绑定在一个内核线程上吗？](https://studygolang.com/articles/26795)
+- [闭包怎么实现的,闭包的主要应用场景](https://zhuanlan.zhihu.com/p/56750616)
+- [Goroutinue 什么时候会被挂起？](https://developer.51cto.com/article/681462.html)
+- [Data Race 问题怎么检测？怎么解决?](https://learnku.com/articles/45279)
+- [Golang 触发异常的场景有哪些?](http://xueyuan.coder55.com/read/go-senior-learn/go-question-14.2)
+- [net/http包中client如何实现长连接？](net/http包中client如何实现长连接？)
+- [net/http怎么做连接池和长链接？](net/http怎么做连接池和长链接？)
 
 ## 网络基础
 
