@@ -100,11 +100,14 @@
 - [协程通信方式有哪些？](https://zhuanlan.zhihu.com/p/36907022)
 - [channel底层实现](https://i6448038.github.io/2019/04/11/go-channel/)
 - [读写锁底层是怎么实现的？](https://blog.csdn.net/sunxianghuang/article/details/104780010)
-- [golang的CSP思想](https://golang.design/go-questions/channel/csp/)
+- [golang的CSP思想](https://zhuanlan.zhihu.com/p/313763247)
 - [channel 是怎么保证线程安全？](http://www.zhoubotong.site/post/25.html)
 - [协程和线程的差别](https://segmentfault.com/a/1190000040373756)
 - [开多个线程和开多个协程会有什么区别](https://www.kancloud.cn/todo/go_learn/1222804)
 - [协程可以自己主动让出 CPU 吗？](https://studygolang.com/articles/26795)
+- ==[GMP](https://learnku.com/articles/41728)==
+- [GMP模型](https://zboya.github.io/post/go_scheduler/?hmsr=toutiao.io&utm_medium=toutiao.io&utm_source=toutiao.io)
+- [动图图解，GMP里为什么要有P](https://mp.weixin.qq.com/s/SEE2TUeZQZ7W1BKkmnelAA)
 
 ### 反射
 
@@ -123,17 +126,14 @@
 
 ### GC
 
+- [==重点==](https://www.cnblogs.com/luozhiyun/p/14564903.html)
+
 - [垃圾回收的过程是怎么样的？](https://zhuanlan.zhihu.com/p/297177002)
 - [什么是写屏障、混合写屏障，如何实现？](https://www.bookstack.cn/read/qcrao-Go-Questions/spilt.9.GC-GC.md)
 - [为什么gc会让程序变慢](https://www.bookstack.cn/read/qcrao-Go-Questions/spilt.14.GC-GC.md)
 - [gc的stw是怎么回事](https://www.bookstack.cn/read/qcrao-Go-Questions/spilt.5.GC-GC.md)
 - [为什么小对象多了会造成 gc 压力?](https://www.modb.pro/db/148423)
-- 两次 GC 周期重叠会引发什么问题，GC 触发机制是什么样的？
-
-### 调度
-
-- [GMP模型](https://zboya.github.io/post/go_scheduler/?hmsr=toutiao.io&utm_medium=toutiao.io&utm_source=toutiao.io)
-- [动图图解，GMP里为什么要有P](https://mp.weixin.qq.com/s/SEE2TUeZQZ7W1BKkmnelAA)
+- [两次 GC 周期重叠会引发什么问题，GC 触发机制是什么样的？](https://www.jianshu.com/p/bfc3c65c05d1)
 
 ### 问题排查
 
@@ -170,69 +170,64 @@
 - [动图图解！收到RST，就一定会断开TCP连接吗？](https://mp.weixin.qq.com/s/Fr6o6gRiIUIspV9-jR9snw)
 - [动图图解！没有accept，能建立TCP连接吗？](https://mp.weixin.qq.com/s/n17NjGRab1u5eXkOCro1gg)
 - [来了来了！小白图解网络电子书和博客都来啦！](https://mp.weixin.qq.com/s/yZPorh6js8cq0_6FjfnGZA)
-- HTTP 是无状态的吗？需要保持状态的场景应该怎么做？
-- 粘包如何解决
-- RestFul 是什么？RestFul 请求的 URL 有什么特点？
-- 一次url访问会经历哪些过程
-- TCP 三次握手以及四次挥手的流程。为什么需要三次握手以及四次挥手？
-- TCP的拥塞控制具体是怎么实现的？UDP有拥塞控制吗？
-- 是否了解中间人劫持原理
-- TCP 与 UDP 在网络协议中的哪一层，他们之间有什么区别？
-- HTTP 与 HTTPS 有哪些区别？
-- select和epoll区别
-- TCP 如何实现数据有序性？
-- TCP长连接和短连接有那么不同的使用场景？
-- TIME_WAIT时长，为什么？
-- 什么是零拷贝？
-- HTTP 简述 HTTP 的 keepalive 的原理和使用场景
-- Cookie 和 Session 的关系和区别是什么？
-- DNS 查询服务器的基本流程是什么？DNS 劫持是什么？
-- libevent结构，内部实现
-- 简述对称与非对称加密的概念
-- epoll中的ET和LT模式
-- JWT 的原理和校验机制
-- TCP 怎么保证可靠传输？
-- 介绍下proactor和reactor
-- Accept发生在三次握手哪个阶段
-- RPC 的调用过程
-- tcp的可靠性体现在哪里
-- 如何解决 TCP 传输丢包问题？
-- 什么是 ARP 协议？简述其使用场景
-- http和https区别
-- DDOS 攻击原理，如何防范它？
-- 如何防止传输内容被篡改？
-- 介绍下滑动窗口
-- 三次握手四次握手详细过程，越详细越好
-- 什么是中间人攻击？如何防止攻击？
-- TCP 半连接发生场景
-- reactor的组成
-- udp包长度
-- IP为什么要分片
-- OSI 七层模型，TCP，IP 属于哪一层？
-- 数据包乱序会处理？
-- 什么是 SYN flood，如何防止这类攻击？
-- WebSocket 是如何进行传输的
-- 为什么需要序列化？有什么序列化的方式？
-- 有chunked的时候contentlength是什么样子
-- 如何设计一个可靠的udp
-- TCP 中常见的拥塞控制算法有哪些？
-- 如何设置非阻塞
-- 什么是跨域，什么情况下会发生跨域请求？
-- Udp的接收缓冲区和发送缓冲区和tcp的区别
-- 什么时候需要TCP四次挥手？
-- traceroute 有什么作用？
-- HTTP 的方法有哪些？
-- TIME_WAIT危害
-- select什么情况返回0
-- 半连接在哪个阶段
-- TCP 的 keepalive 了解吗？说一说它和 HTTP 的 keepalive 的区别？
-- 简述常见的 HTTP 状态码的含义（30从系统层面上，UDP 如何保证尽量可靠？
-- 指针与引用的区别
-- iPv4 和 iPv6 的区别
-- 项目中说用到线程池，开多大，为什么运用线程池？
-- 如何设计 API 接口使其实现幂等性？
-- TCP 的 TIME_WAIT 和 CLOSE_WAIT
-- HTTP 报文头部的组成结构
+- [HTTP 是无状态的吗？需要保持状态的场景应该怎么做？](https://segmentfault.com/a/1190000009518499)
+- [粘包如何解决](https://www.cnblogs.com/cangqinglang/p/11503057.html)
+- [RestFul 是什么？RestFul 请求的 URL 有什么特点？](https://www.cnblogs.com/bigsai/p/14099154.html)
+- [一次url访问会经历哪些过程](https://blog.csdn.net/Myxyj/article/details/80027700)
+- [TCP 三次握手以及四次挥手的流程。为什么需要三次握手以及四次挥手？](https://blog.csdn.net/qzcsu/article/details/72861891)
+- [TCP的拥塞控制具体是怎么实现的？UDP有拥塞控制吗？](https://blog.csdn.net/u014465934/article/details/89202797)
+- [是否了解中间人劫持原理](https://segmentfault.com/a/1190000041047662)
+- [TCP 与 UDP 在网络协议中的哪一层，他们之间有什么区别？](https://blog.fundebug.com/2019/03/22/differences-of-tcp-and-udp/)
+- [HTTP 与 HTTPS 有哪些区别？](https://zhuanlan.zhihu.com/p/72616216)
+- [select和epoll区别](https://zhuanlan.zhihu.com/p/272891398)
+- [TCP 如何实现数据有序性？](https://blog.csdn.net/dccmxj/article/details/52103800?spm=1001.2101.3001.6661.1&utm_medium=distribute.pc_relevant_t0.none-task-blog-2%7Edefault%7ECTRLIST%7ERate-1.pc_relevant_paycolumn_v3&depth_1-utm_source=distribute.pc_relevant_t0.none-task-blog-2%7Edefault%7ECTRLIST%7ERate-1.pc_relevant_paycolumn_v3&utm_relevant_index=1)
+- [TCP长连接和短连接有那么不同的使用场景？](https://blog.csdn.net/qq_16635171/article/details/104312443)
+- [TIME_WAIT时长，为什么？](https://blog.csdn.net/yzpbright/article/details/113566357)
+- [什么是零拷贝？](https://www.cnblogs.com/xiaolincoding/p/13719610.html)
+- [HTTP 简述 HTTP 的 keepalive 的原理和使用场景](https://cloud.tencent.com/developer/news/696654)
+- [Cookie 和 Session 的关系和区别是什么？](https://blog.csdn.net/ailunlee/article/details/95939660)
+- [DNS 查询服务器的基本流程是什么？DNS 劫持是什么？](https://xxxixxxx.github.io/2021/02/12/1000-009DNS%20%E6%9F%A5%E8%AF%A2%E6%9C%8D%E5%8A%A1%E5%99%A8%E7%9A%84%E5%9F%BA%E6%9C%AC%E6%B5%81%E7%A8%8B%E6%98%AF%E4%BB%80%E4%B9%88%EF%BC%9FDNS%20%E5%8A%AB%E6%8C%81%E6%98%AF%E4%BB%80%E4%B9%88%EF%BC%9F/)
+- [libevent结构，内部实现](https://segmentfault.com/a/1190000019952979)
+- [简述对称与非对称加密的概念](https://www.jianshu.com/p/de50d1489359)
+- [epoll中的ET和LT模式](https://cloud.tencent.com/developer/article/1636224)
+- [JWT 的原理和校验机制](https://www.jianshu.com/p/f111328ea8c4)
+- [TCP 怎么保证可靠传输？](https://segmentfault.com/a/1190000022944999)
+- [介绍下proactor和reactor](https://www.zhihu.com/question/26943938)
+- [Accept发生在三次握手哪个阶段](https://www.cnblogs.com/wuyepeng/p/9735978.html)
+- [RPC 的调用过程](https://waylau.com/remote-procedure-calls/)
+- [如何解决 TCP 传输丢包问题？](https://blog.csdn.net/qq_30108237/article/details/107057946)
+- [什么是 ARP 协议？简述其使用场景](https://www.cnblogs.com/jmilkfan-fanguiju/p/12789810.html)
+- [DDOS 攻击原理，如何防范它？](https://blog.csdn.net/huwei2003/article/details/45476743)
+- [如何防止传输内容被篡改？](https://juejin.cn/post/6845166890675863559)
+- [介绍下滑动窗口](https://blog.csdn.net/wdscq1234/article/details/52444277)
+- [TCP 半连接发生场景](https://www.jianshu.com/p/6a0fcb1008d6)
+- [reactor的组成](https://jishuin.proginn.com/p/763bfbd58a63)
+- [udp包长度](https://cloud.tencent.com/developer/article/1021196)
+- [IP为什么要分片](https://cloud.tencent.com/developer/article/1173790)
+- [OSI 七层模型，TCP，IP 属于哪一层？](https://cntsp.github.io/2019/12/11/OSI%E4%B8%83%E5%B1%82%E6%A8%A1%E5%9E%8B%E4%B8%8ETCP-IP%E5%9B%9B%E5%B1%82%E7%BB%93%E6%9E%84%E7%9A%84%E5%8C%BA%E5%88%AB-%E8%81%94%E7%B3%BB/)
+- [数据包乱序会处理？](https://www.1024sou.com/article/3015.html)
+- [什么是 SYN flood，如何防止这类攻击？](https://zhuanlan.zhihu.com/p/29539671)
+- [WebSocket 是如何进行传输的](https://segmentfault.com/a/1190000014643900)
+- [为什么需要序列化？有什么序列化的方式？](https://zhuanlan.zhihu.com/p/40462507)
+- [有chunked的时候contentlength是什么样子](https://zhuanlan.zhihu.com/p/81955498)
+- [如何设计一个可靠的udp](https://zhuanlan.zhihu.com/p/129218784)
+- [TCP 中常见的拥塞控制算法有哪些？](https://zhuanlan.zhihu.com/p/76023663)
+- [如何设置非阻塞](https://blog.51cto.com/e21105834/2887220)
+- [什么是跨域，什么情况下会发生跨域请求？](https://segmentfault.com/a/1190000040485198)
+- [Udp的接收缓冲区和发送缓冲区和tcp的区别](https://blog.csdn.net/Swallow_he/article/details/84392285)
+- [什么时候需要TCP四次挥手？](https://segmentfault.com/a/1190000039165592)
+- [traceroute 有什么作用？](https://zhuanlan.zhihu.com/p/36811672)
+- [HTTP 的方法有哪些？](https://www.cnblogs.com/weibanggang/p/9454581.html)
+- [TIME_WAIT危害](https://zhuanlan.zhihu.com/p/180543251)
+- [select什么情况返回0](https://blog.csdn.net/acs713/article/details/17531827)
+- [TCP 的 keepalive 了解吗？说一说它和 HTTP 的 keepalive 的区别？](https://zhuanlan.zhihu.com/p/224595048)
+- [简述常见的 HTTP 状态码的含义（30从系统层面上，UDP 如何保证尽量可靠？](https://zh.wikipedia.org/wiki/HTTP%E7%8A%B6%E6%80%81%E7%A0%81)
+- [指针与引用的区别](https://blog.nowcoder.net/n/58e03b756d924e0681e6765b30836df1)
+- [iPv4 和 iPv6 的区别](https://zhuanlan.zhihu.com/p/71684181)
+- [项目中说用到线程池，开多大，为什么运用线程池？](https://blog.51cto.com/u_14057963/2938828)
+- [如何设计 API 接口使其实现幂等性？](https://cloud.tencent.com/developer/article/1474941)
+- [TCP 的 TIME_WAIT 和 CLOSE_WAIT](https://www.cnblogs.com/cangqinglang/p/13185825.html)
+- [HTTP 报文头部的组成结构](https://blog.csdn.net/ulike_MFY/article/details/79550241)
 - RestFul 与 RPC 的区别是什么？RestFul 的优点在哪里？
 - 从输入 URL 到展现页面的全过程
 - 什么是 TCP 粘包和拆包？
