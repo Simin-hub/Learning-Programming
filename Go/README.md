@@ -4,6 +4,8 @@
 
 算法学习和实战项目都是需要通过自己的理解，跟着相关项目学习即可。
 
+整理中。。。。。。。。。
+
 ## 1. [基本语法学习](https://github.com/Simin-hub/Golang-Learning-and-Interview/blob/main/Go/%E5%9F%BA%E7%A1%80/%E5%9F%BA%E6%9C%AC%E8%AF%AD%E6%B3%95.md)
 
 1.1 [基本数据类型](https://github.com/Simin-hub/Golang-Learning-and-Interview/blob/main/Go/%E5%9F%BA%E7%A1%80/%E5%9F%BA%E6%9C%AC%E8%AF%AD%E6%B3%95.md#%E4%B8%80%E6%95%B0%E6%8D%AE%E7%B1%BB%E5%9E%8B)
@@ -67,6 +69,40 @@
 
 
 ## 6. go web
+
+
+
+## 书籍
+
+很多Go学习的项目都会推荐相关书籍。
+
+[书栈网](https://www.bookstack.cn/)，可以通过这个网站收藏自己需要看的书，能够看到自己每本书的进度。
+
+对于基础学习，选择看完一本或两本即可，其余书籍可选择性针对一些不甚理解的内容多对照参考地看。进阶学习的书籍这需要多看一些，尽量多看完基本，这些内容相对是难点和重点。
+
+基础学习
+
+[《Go入门指南》](https://github.com/unknwon/the-way-to-go_ZH_CN)
+
+[Go语言圣经（中文版）](https://books.studygolang.com/gopl-zh/)
+
+[topgoer](https://www.topgoer.com/)
+
+进阶学习
+
+[Go 语言设计与实现](https://draveness.me/golang/#go-语言设计与实现)
+
+[Go 语言高性能编程](https://geektutu.com/post/high-performance-go.html)
+
+实战学习
+
+[Go Web 编程](https://learnku.com/docs/build-web-application-with-golang)
+
+## 精品博客及网站
+
+仅仅有书籍是不够的，还需要通过博客进行查漏补缺。
+
+[Go 语言优秀资源整理](https://github.com/shockerli/go-awesome)
 
 
 
