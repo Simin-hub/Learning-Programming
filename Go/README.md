@@ -1,5 +1,9 @@
 # Golang学习
 
+前三章按照顺序学完，然后可以边学习一些实战项目边继续想学其他相关知识例如（GC等）。
+
+算法学习和实战项目都是需要通过自己的理解，跟着相关项目学习即可。
+
 ## 1. [基本语法学习](https://github.com/Simin-hub/Golang-Learning-and-Interview/blob/main/Go/%E5%9F%BA%E7%A1%80/%E5%9F%BA%E6%9C%AC%E8%AF%AD%E6%B3%95.md)
 
 1.1 [基本数据类型](https://github.com/Simin-hub/Golang-Learning-and-Interview/blob/main/Go/%E5%9F%BA%E7%A1%80/%E5%9F%BA%E6%9C%AC%E8%AF%AD%E6%B3%95.md#%E4%B8%80%E6%95%B0%E6%8D%AE%E7%B1%BB%E5%9E%8B)
@@ -62,3 +66,20 @@
 
 
 
+## 6. go web
+
+
+
+## 算法
+
+[LeetCode-Go](https://github.com/halfrost/LeetCode-Go)
+
+[algorithm-pattern](https://github.com/greyireland/algorithm-pattern)
+
+推荐先学习algorithm-pattern，然后自己在练习时可以参考LeetCode-Go的做题顺序。
+
+## 实战项目
+
+[7days-golang](https://github.com/geektutu/7days-golang)、[chitchat](https://github.com/nonfu/chitchat)、[rosedb](https://github.com/flower-corp/rosedb)或者[minidb](https://github.com/flower-corp/minidb)、[另外几个项目](https://juejin.cn/post/7038967716459315208)。
+
+首选推荐学习7days-golang，然后在学习其他项目。
