@@ -6,6 +6,10 @@
 
 整理中。。。。。。。。。
 
+来自[golangFamily](https://github.com/xiaobaiTech/golangFamily)的一张[思维导图](https://camo.githubusercontent.com/a036daa2ee9367a2145c0ac84550dc9c2f3b2cd63eb71b6b9361948c2fcaa97c/68747470733a2f2f63646e2e6a7364656c6976722e6e65742f67682f7869616f626169546563682f696d6167652f2545352539302538452545372541422541462545362538382539302545392539352542462545382542372541462545372542412542462e706e67)
+
+Go 开发者路线图的一张[思维导图](https://github.com/Alikhll/golang-developer-roadmap/blob/master/i18n/zh-CN/golang-developer-roadmap-zh-CN.png)
+
 ## 1. [基本语法学习](https://github.com/Simin-hub/Golang-Learning-and-Interview/blob/main/Go/%E5%9F%BA%E7%A1%80/%E5%9F%BA%E6%9C%AC%E8%AF%AD%E6%B3%95.md)
 
 1.1 [基本数据类型](https://github.com/Simin-hub/Golang-Learning-and-Interview/blob/main/Go/%E5%9F%BA%E7%A1%80/%E5%9F%BA%E6%9C%AC%E8%AF%AD%E6%B3%95.md#%E4%B8%80%E6%95%B0%E6%8D%AE%E7%B1%BB%E5%9E%8B)
@@ -21,6 +25,8 @@
 1.6 [接口与反射](https://github.com/Simin-hub/Golang-Learning-and-Interview/blob/main/Go/%E5%9F%BA%E7%A1%80/%E5%9F%BA%E6%9C%AC%E8%AF%AD%E6%B3%95.md#%E5%85%AD%E6%8E%A5%E5%8F%A3%E4%B8%8E%E5%8F%8D%E5%B0%84)
 
 1.7 [读写数据](https://github.com/Simin-hub/Golang-Learning-and-Interview/blob/main/Go/%E5%9F%BA%E7%A1%80/%E5%9F%BA%E6%9C%AC%E8%AF%AD%E6%B3%95.md#%E4%B8%83%E8%AF%BB%E5%86%99%E6%95%B0%E6%8D%AE)
+
+1.8 go基本命令
 
 ## 2. [高级编程](https://github.com/Simin-hub/Golang-Learning-and-Interview/blob/main/Go/%E5%9F%BA%E7%A1%80/%E9%AB%98%E7%BA%A7%E7%BC%96%E7%A8%8B.md#%E9%AB%98%E7%BA%A7%E7%BC%96%E7%A8%8B)
 
