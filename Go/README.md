@@ -26,7 +26,7 @@ Go 开发者路线图的一张[思维导图](https://github.com/Alikhll/golang-d
 
 1.7 [读写数据](https://github.com/Simin-hub/Golang-Learning-and-Interview/blob/main/Go/%E5%9F%BA%E7%A1%80/%E5%9F%BA%E6%9C%AC%E8%AF%AD%E6%B3%95.md#%E4%B8%83%E8%AF%BB%E5%86%99%E6%95%B0%E6%8D%AE)
 
-1.8 go基本命令
+1.8 [go基本命令](https://github.com/Simin-hub/Golang-Learning-and-Interview/blob/main/Go/%E5%9F%BA%E7%A1%80/go%E5%91%BD%E4%BB%A4.md)
 
 ## 2. [高级编程](https://github.com/Simin-hub/Golang-Learning-and-Interview/blob/main/Go/%E5%9F%BA%E7%A1%80/%E9%AB%98%E7%BA%A7%E7%BC%96%E7%A8%8B.md#%E9%AB%98%E7%BA%A7%E7%BC%96%E7%A8%8B)
 
