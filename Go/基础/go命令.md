@@ -64,6 +64,14 @@ go bug
 
 此命令用于编译指定的源码文件或代码包及依赖包。
 
+go build 有很多种编译方法，如无参数编译、文件列表编译、指定包编译等，使用这些方法都可以输出可执行文件。
+
+[参考地址](http://c.biancheng.net/view/120.html)
+
+- 如果源码中没有依赖 GOPATH 的包引用，那么这些源码可以使用无参数 go build。
+- **go build+文件列表**。编译同目录的多个源码文件时，可以在 go build 的后面提供多个文件名，go build 会编译这些源码，输出可执行文件，使用“go build+文件列表”方式编译时，可执行文件默认选择文件列表中第一个源码文件作为可执行文件名输出。
+- **“go build+包”**。在设置 GOPATH 后，可以直接根据包名进行编译，即便包内文件被增（加）删（除）也不影响编译指令。
+
 目录如下所示：
 
 ![img](https://pic1.zhimg.com/v2-13fe01a7761cfea5aad67d2f089986e4_r.jpg)
@@ -86,7 +94,7 @@ go build -o main.exe
 
 
 
-若有多个main函数文件，若只想编译其中某个文件，可在go build 后加入文件名即可，如："go build 文件名"
+**若有多个main函数文件，若只想编译其中某个文件，可在go build 后加入文件名即可**，如："go build 文件名"
 
 main2.go中也有一个main函数，若直接输入"go build"会编译出错：
 
@@ -108,7 +116,7 @@ go build main2.go
 
 
 
-若是在普通包下，输入"go build"后不会生成任何文件，只会检查错误。如下zarten为一个普通包，在此包下执行"go build"
+**若是在普通包下，输入"go build"后不会生成任何文件，只会检查错误**。如下zarten为一个普通包，在此包下执行"go build"
 
 ```text
 go build
