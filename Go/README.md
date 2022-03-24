@@ -112,6 +112,8 @@
 
 [Go 语言高性能编程](https://geektutu.com/post/high-performance-go.html)
 
+[Go语言高级编程](https://www.bookstack.cn/read/advanced-go-programming-book/preface.md)
+
 实战学习
 
 [Go Web 编程](https://learnku.com/docs/build-web-application-with-golang)
