@@ -6,5 +6,3 @@ go-kit是一套帮助开发者构建健壮、可靠、可维护的微服务的go
 
 go-kit自上而下采用**三层架构方式：Transport、Endpoint、Service**。**Transport层主要负责与传输协议HTTP、gRPC、Thrift等相关的逻辑**；**Endpoint层主要负责request／response格式的转换**，**以及公用拦截器相关的逻辑**；**Service层则专注于业务逻辑**。Endpoint层作为go-kit的核心，采用类似洋葱的模型，提供了对日志、限流、熔断、链路追踪、服务监控等方面的扩展能力。为了帮助开发者构建微服务，go-kit提供了对consul、etcd、zookeeper、eureka等注册中心的支持。
 
-## go-kit RESTful
-
