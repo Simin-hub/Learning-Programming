@@ -118,3 +118,7 @@ Web API 通常会使用 HTTP 来传输请求消息，并提供响应消息的结
 对于专用松散耦合服务的使用，微服务架构与 SOA 模式类似。但是，微服务架构会对传统架构进行进一步细分。在微服务架构中，服务会采用通用消息传递框架，如 RESTful API。它们会使用 RESTful API 来实现相互通信，且无需执行繁琐的数据转换处理或使用其他的集成层。使用 RESTful API 可以加速新功能和新更新的交付；甚至还可以说，是这类 API 促进了这种速度的提升。该架构中的每一个服务都呈离散状态。一个服务可以被取代、增强或丢弃，而不会影响架构中的任何其他服务。这种轻量级架构有助于优化分布式资源或云资源，而且能够支持个别服务的动态扩展。
 
 [详细了解 SOA](https://www.redhat.com/zh/topics/cloud-native-apps/what-is-service-oriented-architecture)
+
+[RESTful API](https://github.com/Simin-hub/Golang-Learning-and-Interview/blob/main/Go/%E8%BF%9B%E9%98%B6/RESTFul%20JSON%20API.md)
+
+RPC

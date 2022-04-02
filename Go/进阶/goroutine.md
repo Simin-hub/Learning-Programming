@@ -51,7 +51,41 @@ goroutine的概念类似于线程，但 goroutine是由Go的运行时（runtime�
 
 在Go语言编程中你不需要去自己写进程、线程、协程，你的技能包里只有一个技能–goroutine，当你需要让某个任务并发执行的时候，你只需要把这个任务包装成一个函数，开启一个goroutine去执行这个函数就可以了，就是这么简单粗暴。
 
-#### 使用goroutine
+### 与线程的关系
+
+可以从三个角度区别：内存消耗、创建与销毀、切换。
+
+- **内存占用**
+
+创建一个 goroutine 的栈内存消耗为 2 KB，实际运行过程中，如果栈空间不够用，会自动进行扩容。创建一个 thread 则需要消耗 1 MB 栈内存，而且还需要一个被称为 “a guard page” 的区域用于和其他 thread 的栈空间进行隔离。
+
+对于一个用 Go 构建的 HTTP Server 而言，对到来的每个请求，创建一个 goroutine 用来处理是非常轻松的一件事。而如果用一个使用线程作为并发原语的语言构建的服务，例如 Java 来说，每个请求对应一个线程则太浪费资源了，很快就会出 OOM 错误（OutOfMemoryError）。
+
+- **创建和销毀**
+
+**Thread 创建和销毀都会有巨大的消耗，因为要和操作系统打交道，是内核级的，通常解决的办法就是线程池**。而 goroutine 因为是由 Go runtime 负责管理的，**创建和销毁的消耗非常小，是用户级**。
+
+- **切换**
+
+**当 threads 切换时，需要保存各种寄存器，以便将来恢复**：
+
+> 16 general purpose registers, PC (Program Counter), SP (Stack Pointer), segment registers, 16 XMM registers, FP coprocessor state, 16 AVX registers, all MSRs etc.
+
+而 goroutines 切换只需保存**三个寄存器：Program Counter, Stack Pointer and BP**。
+
+一般而言，线程切换会消耗 1000-1500 纳秒，一个纳秒平均可以执行 12-18 条指令。所以由于线程切换，执行指令的条数会减少 12000-18000。
+
+Goroutine 的切换约为 200 ns，相当于 2400-3600 条指令。
+
+因此，goroutines 切换成本比 threads 要小得多。
+
+#### 可增长的栈
+
+**OS线程（操作系统线程）一般都有固定的栈内存（通常为2MB）**,**一个goroutine的栈在其生命周期开始时只有很小的栈（典型情况下2KB），goroutine的栈不是固定的，他可以按需增大和缩小，goroutine的栈大小限制可以达到1GB**，虽然极少会用到这个大。所以在Go语言中一次创建十万左右的goroutine也是可以的。
+
+固定了栈的大小导致了两个问题：一是对于很多只需要很小的栈空间的线程来说是一个巨大的浪费，二是对于少数需要巨大栈空间的线程来说又面临栈溢出的风险。针对这两个问题的解决方案是：要么降低固定的栈大小，提升空间的利用率；要么增大栈的大小以允许更深的函数递归调用，但这两者是没法同时兼得的。
+
+### 使用goroutine
 
 Go语言中使用goroutine非常简单，只需要在调用函数的时候在前面加上go关键字，就可以为一个函数创建一个goroutine。
 
@@ -90,8 +124,6 @@ func main() {
 
 - **启动一个新的协程时，协程的调用会立即返回。与函数不同，程序控制不会去等待 Go 协程执行完毕。在调用 Go 协程之后，程序控制会立即返回到代码的下一行，忽略该协程的任何返回值。**
 - **如果希望运行其他 Go 协程，Go 主协程必须继续运行着。如果 Go 主协程终止，则程序终止，于是其他 Go 协程也不会继续运行。**
-
-
 
 **在程序启动时，Go程序就会为main()函数创建一个默认的goroutine**。
 
@@ -170,12 +202,6 @@ func main() {
 
 主协程退出了，其他任务退出
 
-###  goroutine与线程
-
-#### 可增长的栈
-
-OS线程（操作系统线程）一般都有固定的栈内存（通常为2MB）,一个goroutine的栈在其生命周期开始时只有很小的栈（典型情况下2KB），goroutine的栈不是固定的，他可以按需增大和缩小，goroutine的栈大小限制可以达到1GB，虽然极少会用到这个大。所以在Go语言中一次创建十万左右的goroutine也是可以的。
-
 #### goroutine调度
 
 GPM是Go语言运行时（runtime）层面的实现，是go语言自己实现的一套调度系统。区别于操作系统调度OS线程。
@@ -196,7 +222,7 @@ P的个数是通过runtime.GOMAXPROCS设定（最大256），Go1.5版本之后�
 
 ### CSP是什么
 
-CSP（Communicating Sequential Process，通讯顺序进程）。是一种并发编程模型，是一个很强大的并发数据模型，是上个世纪七十年代提出的，**用于描述两个独立的并发实体通过共享的通讯 channel(管道)进行通信的并发模型**。相对于Actor模型，CSP中channel是第一类对象，它不关注发送消息的实体，而关注与发送消息时使用的channel。
+CSP（Communicating Sequential Process，**通信顺序进程**）。是一种并发编程模型，是一个很强大的并发数据模型，是上个世纪七十年代提出的，**用于描述两个独立的并发实体通过共享的通讯 channel(管道)进行通信的并发模型**。相对于Actor模型，CSP中channel是第一类对象，它不关注发送消息的实体，而关注与发送消息时使用的channel。
 
 Golang，其实只用到了 CSP 的很小一部分，即理论中的 Process/Channel（对应到语言中的 goroutine/channel）：**这两个并发原语之间没有从属关系， Process 可以订阅任意个 Channel，Channel 也并不关心是哪个 Process 在利用它进行通信；Process 围绕 Channel 进行读写，形成一套有序阻塞和可预测的并发模型**。
 
@@ -206,6 +232,8 @@ Go语言的CSP模型是由协程Goroutine与通道Channel实现：
 - **通道channel: 类似Unix的Pipe，用于协程之间通讯和同步。协程之间虽然解耦，但是它们和Channel有着耦合。**
 
 ### Channel
+
+[底层实现](https://github.com/Simin-hub/Golang-Learning-and-Interview/blob/main/Go/%E8%BF%9B%E9%98%B6/array%E3%80%81slice%E3%80%81map%E3%80%81channel.md#channel)
 
 Goroutine 和 channel 是 Go 语言并发编程的 两大基石。Goroutine 用于执行并发任务，channel 用于 goroutine 之间的同步、通信。
 
@@ -779,6 +807,17 @@ G8 创建了 G9，假如 G8 进行了非阻塞系统调用。
 
 
  **M2 和 P2会解绑，但 M2 会记住 P2，然后 G8 和 M2 进入系统调用状态**。当 G8 和 M2 退出系统调用时，会尝试获取 P2，如果无法获取，则获取空闲的 P，如果依然没有，G8 会被记为可运行状态，并加入到全局队列，M2 因为没有 P 的绑定而变成休眠状态 (长时间休眠等待 GC 回收销毁)。
+
+### 调度时机
+
+在四种情形下，goroutine 可能会发生调度，但也并不一定会发生，只是说 Go scheduler 有机会进行调度。
+
+|      情形       |                             说明                             |
+| :-------------: | :----------------------------------------------------------: |
+| 使用关键字 `go` |      go 创建一个新的 goroutine，Go scheduler 会考虑调度      |
+|       GC        | 由于进行 GC 的 goroutine 也需要在 M 上运行，因此肯定会发生调度。当然，Go scheduler 还会做很多其他的调度，例如调度不涉及堆访问的 goroutine 来运行。GC 不管栈上的内存，只会回收堆上的内存 |
+|    系统调用     | 当 goroutine 进行系统调用时，会阻塞 M，所以它会被调度走，同时一个新的 goroutine 会被调度上来 |
+|  内存同步访问   | atomic，mutex，channel 操作等会使 goroutine 阻塞，因此会被调度走。等条件满足后（例如其他 goroutine 解锁了）还会被调度上来继续运行 |
 
 ### 小结
 
@@ -1460,4 +1499,10 @@ func (mc *MyChannel) SafeClose() {
 - 情形三：M个接收者和N个发送者，它们中的任何协程都可以让一个中间调解协程帮忙发出停止数据传送的信号。
 - 情形四：“M个接收者和一个发送者”情形的一个变种：用来传输数据的通道的关闭请求由第三方发出
 - 情形五：“N个发送者”的一个变种：用来传输数据的通道必须被关闭以通知各个接收者数据发送已经结束了
+
+### Channel 可能会引发 goroutine 泄漏
+
+**泄漏的原因是 goroutine 操作 channel 后，处于发送或接收阻塞状态，而 channel 处于满或空的状态，一直得不到改变。同时，垃圾回收器也不会回收此类资源，进而导致 gouroutine 会一直处于等待队列中，不见天日**。
+
+另外，程序运行过程中，对于一个 channel，如果没有任何 goroutine 引用了，gc 会对其进行回收操作，不会引起内存泄漏。
 
