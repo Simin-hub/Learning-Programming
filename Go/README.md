@@ -36,25 +36,13 @@
 
 2.3 [网络、模板与网页应用](https://github.com/Simin-hub/Golang-Learning-and-Interview/blob/main/Go/%E5%9F%BA%E7%A1%80/%E9%AB%98%E7%BA%A7%E7%BC%96%E7%A8%8B.md#%E4%B8%89%E7%BD%91%E7%BB%9C%E6%A8%A1%E6%9D%BF%E4%B8%8E%E7%BD%91%E9%A1%B5%E5%BA%94%E7%94%A8)
 
-## 3. [Goroutine](https://github.com/Simin-hub/Golang-Learning-and-Interview/blob/main/Go/%E8%BF%9B%E9%98%B6/goroutine.md) and [channel](https://github.com/Simin-hub/Golang-Learning-and-Interview/blob/main/Go/%E5%9F%BA%E7%A1%80/channel.md)
+## 3. 进阶
 
-3.1 [channel](https://github.com/Simin-hub/Golang-Learning-and-Interview/blob/main/Go/%E5%9F%BA%E7%A1%80/channel.md)
+3.1 [Goroutine](https://github.com/Simin-hub/Golang-Learning-and-Interview/blob/main/Go/%E8%BF%9B%E9%98%B6/goroutine.md) and [channel](https://github.com/Simin-hub/Golang-Learning-and-Interview/blob/main/Go/%E5%9F%BA%E7%A1%80/channel.md)
 
-3.2 [并发介绍](https://github.com/Simin-hub/Golang-Learning-and-Interview/blob/main/Go/%E8%BF%9B%E9%98%B6/goroutine.md#%E5%B9%B6%E5%8F%91%E4%BB%8B%E7%BB%8D)
+3.2 CGO
 
-3.3 [goroutine](https://github.com/Simin-hub/Golang-Learning-and-Interview/blob/main/Go/%E8%BF%9B%E9%98%B6/goroutine.md#goroutine-1)
-
-3.4 [CSP（Communicating Sequential Process，通讯顺序进程）](https://github.com/Simin-hub/Golang-Learning-and-Interview/blob/main/Go/%E8%BF%9B%E9%98%B6/goroutine.md#csp)
-
-3.5 [Goroutine 调度器](https://github.com/Simin-hub/Golang-Learning-and-Interview/blob/main/Go/%E8%BF%9B%E9%98%B6/goroutine.md#goroutine-%E8%B0%83%E5%BA%A6%E5%99%A8)
-
-3.6 [常见的并发模式](https://github.com/Simin-hub/Golang-Learning-and-Interview/blob/main/Go/%E8%BF%9B%E9%98%B6/goroutine.md#%E5%B8%B8%E8%A7%81%E7%9A%84%E5%B9%B6%E5%8F%91%E6%A8%A1%E5%BC%8F)
-
-3.7 [控制并发数](https://github.com/Simin-hub/Golang-Learning-and-Interview/blob/main/Go/%E8%BF%9B%E9%98%B6/goroutine.md#%E6%8E%A7%E5%88%B6%E5%B9%B6%E5%8F%91%E6%95%B0)
-
-3.8 [并发的退出](https://github.com/Simin-hub/Golang-Learning-and-Interview/blob/main/Go/%E8%BF%9B%E9%98%B6/goroutine.md#%E5%B9%B6%E5%8F%91%E7%9A%84%E5%AE%89%E5%85%A8%E9%80%80%E5%87%BA)
-
-3.9 [相关问题](https://github.com/Simin-hub/Golang-Learning-and-Interview/blob/main/Go/%E8%BF%9B%E9%98%B6/goroutine.md)
+3.3 GC
 
 ## 4. 编程规范
 
