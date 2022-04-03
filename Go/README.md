@@ -38,21 +38,17 @@
 
 ## 3. 进阶
 
-3.1 [Goroutine](https://github.com/Simin-hub/Golang-Learning-and-Interview/blob/main/Go/%E8%BF%9B%E9%98%B6/goroutine.md) and [channel](https://github.com/Simin-hub/Golang-Learning-and-Interview/blob/main/Go/%E5%9F%BA%E7%A1%80/channel.md)
+3.1 [Goroutine](https://github.com/Simin-hub/Golang-Learning-and-Interview/blob/main/Go/%E8%BF%9B%E9%98%B6/goroutine.md) 和 [channel](https://github.com/Simin-hub/Golang-Learning-and-Interview/blob/main/Go/%E5%9F%BA%E7%A1%80/channel.md)
 
-3.2 CGO
+3.2 [CGO](https://github.com/Simin-hub/Golang-Learning-and-Interview/blob/main/Go/%E8%BF%9B%E9%98%B6/CGO.md)
 
-3.3 GC
+3.3 [GC](https://github.com/Simin-hub/Golang-Learning-and-Interview/blob/main/Go/%E8%BF%9B%E9%98%B6/GC.md)
 
-## 4. 编程规范
+3.4 [RPC](https://github.com/Simin-hub/Golang-Learning-and-Interview/blob/main/Go/%E8%BF%9B%E9%98%B6/RPC.md) 和 [REST](https://github.com/Simin-hub/Golang-Learning-and-Interview/blob/main/Go/%E8%BF%9B%E9%98%B6/RESTFul%20JSON%20API.md)
 
-4.1 命名规范
+3.5  [编程规范](https://github.com/Simin-hub/Golang-Learning-and-Interview/blob/main/Go/%E8%BF%9B%E9%98%B6/Go%E7%BC%96%E7%A8%8B%E8%A7%84%E8%8C%83.md)
 
-4.2 导入规范
-
-
-
-## 5. 相关标准库的学习
+## 4. 相关标准库的学习
 
 4.1 [sync](https://github.com/Simin-hub/Golang-Learning-and-Interview/blob/main/Go/标准库/sync.md)
 
@@ -66,27 +62,15 @@
 
 4.5 reflect
 
-time/rate
+4.6 time/rate
 
-## 5. GC
+## 5. 相关问题
 
+5.1 数据类型
 
+5.2 编译
 
-## 6. go web
-
-6.1 web基础
-
-6.2 表单
-
-6.3 访问数据库
-
-6.4 认证与授权
-
-6.5 文本处理
-
-6.6 安全与加密
-
-
+5.3 内存
 
 ## 书籍
 
