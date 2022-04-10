@@ -2,7 +2,7 @@
 
 [参考地址](https://www.redhat.com/zh/topics/api/what-are-application-programming-interfaces)
 
-**应用编程接口（API）是一组用于构建和集成应用软件的定义和协议。**
+**应用编程接口（**application programming interface, API）是一组用于构建和集成应用软件的定义和协议。
 
 API 由一组定义和协议组合而成，可用于构建和集成应用软件。有时我们可以把它们当做信息提供者和信息用户之间的合同——**建立消费者（呼叫）所需的内容和制作者（响应）要求的内容**。例如，天气服务的 API 可指定用户提供邮编，制作者回复的答案由两部分组成，第一部分是最高温度，第二部分是最低温度。
 
