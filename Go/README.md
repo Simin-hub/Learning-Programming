@@ -10,67 +10,71 @@
 
 [Go 开发者路线图](https://github.com/Alikhll/golang-developer-roadmap)的一张[思维导图](https://raw.githubusercontent.com/Alikhll/golang-developer-roadmap/master/i18n/zh-CN/golang-developer-roadmap-zh-CN.png)
 
-## 1. [基本语法学习](https://github.com/Simin-hub/Golang-Learning-and-Interview/blob/main/Go/%E5%9F%BA%E7%A1%80/%E5%9F%BA%E6%9C%AC%E8%AF%AD%E6%B3%95.md)
+## [基本语法学习](https://github.com/Simin-hub/Golang-Learning-and-Interview/blob/main/Go/%E5%9F%BA%E7%A1%80/%E5%9F%BA%E6%9C%AC%E8%AF%AD%E6%B3%95.md)
 
-1.1 [基本数据类型](https://github.com/Simin-hub/Golang-Learning-and-Interview/blob/main/Go/%E5%9F%BA%E7%A1%80/%E5%9F%BA%E6%9C%AC%E8%AF%AD%E6%B3%95.md#%E4%B8%80%E6%95%B0%E6%8D%AE%E7%B1%BB%E5%9E%8B)
+[基本数据类型](https://github.com/Simin-hub/Golang-Learning-and-Interview/blob/main/Go/%E5%9F%BA%E7%A1%80/%E5%9F%BA%E6%9C%AC%E8%AF%AD%E6%B3%95.md#%E4%B8%80%E6%95%B0%E6%8D%AE%E7%B1%BB%E5%9E%8B)
 
-1.2 [控制结构](https://github.com/Simin-hub/Golang-Learning-and-Interview/blob/main/Go/%E5%9F%BA%E7%A1%80/%E5%9F%BA%E6%9C%AC%E8%AF%AD%E6%B3%95.md#%E4%BA%8C%E6%8E%A7%E5%88%B6%E7%BB%93%E6%9E%84)
+[控制结构](https://github.com/Simin-hub/Golang-Learning-and-Interview/blob/main/Go/%E5%9F%BA%E7%A1%80/%E5%9F%BA%E6%9C%AC%E8%AF%AD%E6%B3%95.md#%E4%BA%8C%E6%8E%A7%E5%88%B6%E7%BB%93%E6%9E%84)
 
-1.3 [函数](https://github.com/Simin-hub/Golang-Learning-and-Interview/blob/main/Go/%E5%9F%BA%E7%A1%80/%E5%9F%BA%E6%9C%AC%E8%AF%AD%E6%B3%95.md#%E4%B8%89%E5%87%BD%E6%95%B0)
+[函数](https://github.com/Simin-hub/Golang-Learning-and-Interview/blob/main/Go/%E5%9F%BA%E7%A1%80/%E5%9F%BA%E6%9C%AC%E8%AF%AD%E6%B3%95.md#%E4%B8%89%E5%87%BD%E6%95%B0)
 
-1.4 [包](https://github.com/Simin-hub/Golang-Learning-and-Interview/blob/main/Go/%E5%9F%BA%E7%A1%80/%E5%9F%BA%E6%9C%AC%E8%AF%AD%E6%B3%95.md#%E5%9B%9B%E5%8C%85)
+[包](https://github.com/Simin-hub/Golang-Learning-and-Interview/blob/main/Go/%E5%9F%BA%E7%A1%80/%E5%9F%BA%E6%9C%AC%E8%AF%AD%E6%B3%95.md#%E5%9B%9B%E5%8C%85)
 
-1.5 [编写事项](https://github.com/Simin-hub/Golang-Learning-and-Interview/blob/main/Go/%E5%9F%BA%E7%A1%80/%E5%9F%BA%E6%9C%AC%E8%AF%AD%E6%B3%95.md#%E4%BA%94%E7%BC%96%E5%86%99%E6%B3%A8%E6%84%8F%E4%BA%8B%E9%A1%B9)
+[编写事项](https://github.com/Simin-hub/Golang-Learning-and-Interview/blob/main/Go/%E5%9F%BA%E7%A1%80/%E5%9F%BA%E6%9C%AC%E8%AF%AD%E6%B3%95.md#%E4%BA%94%E7%BC%96%E5%86%99%E6%B3%A8%E6%84%8F%E4%BA%8B%E9%A1%B9)
 
-1.6 [接口与反射](https://github.com/Simin-hub/Golang-Learning-and-Interview/blob/main/Go/%E5%9F%BA%E7%A1%80/%E5%9F%BA%E6%9C%AC%E8%AF%AD%E6%B3%95.md#%E5%85%AD%E6%8E%A5%E5%8F%A3%E4%B8%8E%E5%8F%8D%E5%B0%84)
+[接口与反射](https://github.com/Simin-hub/Golang-Learning-and-Interview/blob/main/Go/%E5%9F%BA%E7%A1%80/%E5%9F%BA%E6%9C%AC%E8%AF%AD%E6%B3%95.md#%E5%85%AD%E6%8E%A5%E5%8F%A3%E4%B8%8E%E5%8F%8D%E5%B0%84)
 
-1.7 [读写数据](https://github.com/Simin-hub/Golang-Learning-and-Interview/blob/main/Go/%E5%9F%BA%E7%A1%80/%E5%9F%BA%E6%9C%AC%E8%AF%AD%E6%B3%95.md#%E4%B8%83%E8%AF%BB%E5%86%99%E6%95%B0%E6%8D%AE)
+[读写数据](https://github.com/Simin-hub/Golang-Learning-and-Interview/blob/main/Go/%E5%9F%BA%E7%A1%80/%E5%9F%BA%E6%9C%AC%E8%AF%AD%E6%B3%95.md#%E4%B8%83%E8%AF%BB%E5%86%99%E6%95%B0%E6%8D%AE)
 
-1.8 [go基本命令](https://github.com/Simin-hub/Golang-Learning-and-Interview/blob/main/Go/%E5%9F%BA%E7%A1%80/go%E5%91%BD%E4%BB%A4.md)
+[go基本命令](https://github.com/Simin-hub/Golang-Learning-and-Interview/blob/main/Go/%E5%9F%BA%E7%A1%80/go%E5%91%BD%E4%BB%A4.md)
 
-## 2. [高级编程](https://github.com/Simin-hub/Golang-Learning-and-Interview/blob/main/Go/%E5%9F%BA%E7%A1%80/%E9%AB%98%E7%BA%A7%E7%BC%96%E7%A8%8B.md#%E9%AB%98%E7%BA%A7%E7%BC%96%E7%A8%8B)
+## [高级编程](https://github.com/Simin-hub/Golang-Learning-and-Interview/blob/main/Go/%E5%9F%BA%E7%A1%80/%E9%AB%98%E7%BA%A7%E7%BC%96%E7%A8%8B.md#%E9%AB%98%E7%BA%A7%E7%BC%96%E7%A8%8B)
 
-2.1 [错误处理](https://github.com/Simin-hub/Golang-Learning-and-Interview/blob/main/Go/%E5%9F%BA%E7%A1%80/%E9%AB%98%E7%BA%A7%E7%BC%96%E7%A8%8B.md#%E4%B8%80%E9%94%99%E8%AF%AF%E5%A4%84%E7%90%86)
+[错误处理](https://github.com/Simin-hub/Golang-Learning-and-Interview/blob/main/Go/%E5%9F%BA%E7%A1%80/%E9%AB%98%E7%BA%A7%E7%BC%96%E7%A8%8B.md#%E4%B8%80%E9%94%99%E8%AF%AF%E5%A4%84%E7%90%86)
 
-2.2 [协程与通道](https://github.com/Simin-hub/Golang-Learning-and-Interview/blob/main/Go/%E5%9F%BA%E7%A1%80/%E9%AB%98%E7%BA%A7%E7%BC%96%E7%A8%8B.md#%E4%BA%8C%E5%8D%8F%E7%A8%8B%E5%92%8C%E9%80%9A%E9%81%93)
+[协程与通道](https://github.com/Simin-hub/Golang-Learning-and-Interview/blob/main/Go/%E5%9F%BA%E7%A1%80/%E9%AB%98%E7%BA%A7%E7%BC%96%E7%A8%8B.md#%E4%BA%8C%E5%8D%8F%E7%A8%8B%E5%92%8C%E9%80%9A%E9%81%93)
 
-2.3 [网络、模板与网页应用](https://github.com/Simin-hub/Golang-Learning-and-Interview/blob/main/Go/%E5%9F%BA%E7%A1%80/%E9%AB%98%E7%BA%A7%E7%BC%96%E7%A8%8B.md#%E4%B8%89%E7%BD%91%E7%BB%9C%E6%A8%A1%E6%9D%BF%E4%B8%8E%E7%BD%91%E9%A1%B5%E5%BA%94%E7%94%A8)
+[网络、模板与网页应用](https://github.com/Simin-hub/Golang-Learning-and-Interview/blob/main/Go/%E5%9F%BA%E7%A1%80/%E9%AB%98%E7%BA%A7%E7%BC%96%E7%A8%8B.md#%E4%B8%89%E7%BD%91%E7%BB%9C%E6%A8%A1%E6%9D%BF%E4%B8%8E%E7%BD%91%E9%A1%B5%E5%BA%94%E7%94%A8)
 
-## 3. 进阶
+## 进阶
 
-3.1 [Goroutine](https://github.com/Simin-hub/Golang-Learning-and-Interview/blob/main/Go/%E8%BF%9B%E9%98%B6/goroutine.md) 和 [channel](https://github.com/Simin-hub/Golang-Learning-and-Interview/blob/main/Go/%E5%9F%BA%E7%A1%80/channel.md)
+[Goroutine](https://github.com/Simin-hub/Golang-Learning-and-Interview/blob/main/Go/%E8%BF%9B%E9%98%B6/goroutine.md) 和 [channel](https://github.com/Simin-hub/Golang-Learning-and-Interview/blob/main/Go/%E5%9F%BA%E7%A1%80/channel.md)
 
-3.2 [CGO](https://github.com/Simin-hub/Golang-Learning-and-Interview/blob/main/Go/%E8%BF%9B%E9%98%B6/CGO.md)
+[数据类型的底层实现](https://github.com/Simin-hub/Golang-Learning-and-Interview/blob/main/Go/%E8%BF%9B%E9%98%B6/%E5%9F%BA%E7%A1%80%E6%95%B0%E6%8D%AE%E7%B1%BB%E5%9E%8B.md)
 
-3.3 [GC](https://github.com/Simin-hub/Golang-Learning-and-Interview/blob/main/Go/%E8%BF%9B%E9%98%B6/GC.md)
+[函数、接口和方法](https://github.com/Simin-hub/Golang-Learning-and-Interview/blob/main/Go/%E8%BF%9B%E9%98%B6/%E5%87%BD%E6%95%B0%E3%80%81%E6%8E%A5%E5%8F%A3%E4%B8%8E%E6%96%B9%E6%B3%95.md)
 
-3.4 [RPC](https://github.com/Simin-hub/Golang-Learning-and-Interview/blob/main/Go/%E8%BF%9B%E9%98%B6/RPC.md) 和 [REST](https://github.com/Simin-hub/Golang-Learning-and-Interview/blob/main/Go/%E8%BF%9B%E9%98%B6/RESTFul%20JSON%20API.md)
+[CGO](https://github.com/Simin-hub/Golang-Learning-and-Interview/blob/main/Go/%E8%BF%9B%E9%98%B6/CGO.md)
 
-3.5  [编程规范](https://github.com/Simin-hub/Golang-Learning-and-Interview/blob/main/Go/%E8%BF%9B%E9%98%B6/Go%E7%BC%96%E7%A8%8B%E8%A7%84%E8%8C%83.md)
+[内存管理](https://github.com/Simin-hub/Golang-Learning-and-Interview/blob/main/Go/%E8%BF%9B%E9%98%B6/%E5%86%85%E5%AD%98%E7%AE%A1%E7%90%86.md)
 
-## 4. 相关标准库的学习
+[RPC](https://github.com/Simin-hub/Golang-Learning-and-Interview/blob/main/Go/%E8%BF%9B%E9%98%B6/RPC.md) 和 [REST](https://github.com/Simin-hub/Golang-Learning-and-Interview/blob/main/Go/%E8%BF%9B%E9%98%B6/RESTFul%20JSON%20API.md)
 
-4.1 [sync](https://github.com/Simin-hub/Golang-Learning-and-Interview/blob/main/Go/标准库/sync.md)
+[编程规范](https://github.com/Simin-hub/Golang-Learning-and-Interview/blob/main/Go/%E8%BF%9B%E9%98%B6/Go%E7%BC%96%E7%A8%8B%E8%A7%84%E8%8C%83.md)
 
-4.2 [sync/atomic](https://github.com/Simin-hub/Golang-Learning-and-Interview/blob/main/Go/标准库/atomic.md)
+## 相关标准库的学习
 
-4.3 [==net==](https://github.com/Simin-hub/Golang-Learning-and-Interview/blob/main/Go/%E6%A0%87%E5%87%86%E5%BA%93/net.md)
+[sync](https://github.com/Simin-hub/Golang-Learning-and-Interview/blob/main/Go/标准库/sync.md)
 
-4.4 [==net/http==](net/http)
+[sync/atomic](https://github.com/Simin-hub/Golang-Learning-and-Interview/blob/main/Go/标准库/atomic.md)
 
-4.4 context
+[net](https://github.com/Simin-hub/Golang-Learning-and-Interview/blob/main/Go/%E6%A0%87%E5%87%86%E5%BA%93/net.md)
 
-4.5 reflect
+[net/http](net/http)
 
-4.6 time/rate
+context
 
-## 5. 相关问题
+reflect
 
-5.1 数据类型
+time/rate
 
-5.2 编译
+## 相关问题
 
-5.3 内存
+数据类型
+
+编译
+
+内存
 
 ## 书籍
 
