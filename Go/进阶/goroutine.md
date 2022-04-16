@@ -279,8 +279,7 @@ Channel 分为两种：**带缓冲、不带缓冲**。对不带缓冲的 channel
 
 **小结一下**：同步模式下，必须要使发送方和接收方配对，操作才会成功，否则会被阻塞；异步模式下，缓冲槽要有剩余容量，操作才会成功，否则也会被阻塞。
 
-简单来说，CSP 模型由并发执行的实体（线程或者进程或者协程）所组成，实体之间通过发送消息进行通信，
-这里发送消息时使用的就是通道，或者叫 channel。
+简单来说，CSP 模型由并发执行的实体（线程或者进程或者协程）所组成，实体之间通过发送消息进行通信，这里发送消息时使用的就是通道，或者叫 channel。
 
 CSP 模型的关键是关注 channel，而不关注发送消息的实体。Go 语言实现了 CSP 部分理论，goroutine 对应 CSP 中并发执行的实体，channel 也就对应着 CSP 中的 channel。
 
@@ -1409,6 +1408,471 @@ func main() {
 
 并发是一个非常大的主题，我们这里只是展示几个非常基础的并发编程的例子。官方文档也有很多关于并发编程的讨论，国内也有专门讨论Go语言并发编程的书籍。读者可以根据自己的需求查阅相关的文献。
 
+## 协程栈
+
+[参考](https://segmentfault.com/a/1190000019570427)
+
+在1.4版本之前go的协程栈管理使用[分段栈](https://link.segmentfault.com/?enc=zGkSQfB0kyvvTw3f%2FiHL9w%3D%3D.4%2FbUxtYQaekP4cSF0VzsCgXsDkxul0iLlB6r1ZlrQDXcX01ZfwpYc1%2Bxxh8b0pr%2B)机制实现。实现方式：当检测到函数需要更多栈时，分配一块新栈，旧栈和新栈使用指针连接起来，函数返回就释放。 这样的机制存在2个问题：
+
+- 多次循环调用同一个函数会出现“hot split”问题，例子：[stacksplit.go](https://link.segmentfault.com/?enc=okmdG59zUtY5Ckw0btU%2B8g%3D%3D.uM3%2FQfL%2Fh9RWnms37wwgFwHSD00x4ab%2FWdqZKtY34I8%2FCMhd9UPwAxJ5WIWmzrU%2BD6qCqhCIsxTCfuO%2FKwwA1wPrmqfjuV9Z13BTYGhxLzuQgr1Er19ZyMReOwNOhifV%2FUY4oDl%2FnJU32%2FoQQxOZgA%3D%3D)
+- 每次分配和释放都要额外消耗
+
+为了解决这2个问题，官方使用：**连续栈**。**连续栈的实现方式：当检测到需要更多栈时，分配一块比原来大一倍的栈，把旧栈数据copy到新栈，释放旧栈。**
+
+### 连续栈
+
+> 栈的扩容和缩容代码量很大，所以精简了很大一部分。在看连续栈的源码前我们不妨思考一下下面的问题：
+
+- 扩容和缩容的触发条件是什么？
+- 扩容和缩容的大小如何计算出来？
+- 扩容和缩容这个过程做了什么？对性能是否有影响？
+
+### [栈扩容](https://link.segmentfault.com/?enc=e0xuM5OUi4cZs5%2FJlgzsNA%3D%3D.Vsv3jx1Vc5UcF0qTe9NX3kzNEtNQjEaMgAmI%2FgoFeBq8r2cKuXMkoAmCg%2BSlhrXXfOL%2BwpW8muLuOlmxbJDEIO%2BOWMRMnqOVDxzT3%2BYCdd0%3D)
+
+```go
+func newstack() {
+    thisg := getg()
+    ......
+    gp := thisg.m.curg
+    ......
+    // Allocate a bigger segment and move the stack.
+    oldsize := gp.stack.hi - gp.stack.lo
+    newsize := oldsize * 2 // 比原来大一倍
+    ......
+    // The goroutine must be executing in order to call newstack,
+    // so it must be Grunning (or Gscanrunning).
+    casgstatus(gp, _Grunning, _Gcopystack) //修改协程状态
+
+    // The concurrent GC will not scan the stack while we are doing the copy since
+    // the gp is in a Gcopystack status.
+    copystack(gp, newsize, true) //在下面会讲到
+    ......
+    casgstatus(gp, _Gcopystack, _Grunning)
+    gogo(&gp.sched)
+}
+```
+
+每一个函数执行都要占用栈空间，用于保存变量，参数等。运行在协程里的函数自然是占用运行它的协程栈。但协程的栈是有限的，如果发现不够用，会调用`stackalloc`分配一块新的栈，大小比原来大一倍。
+
+### [栈缩容](https://link.segmentfault.com/?enc=GyVIakqU9PsrteMqE9DToQ%3D%3D.CxP1bufEuXdcM7i3k%2Fegol3EU593XROGfr9oRYzIObXb6ExdnUPfLib4nA60umfX5csJxF1fZwbcdgo5gnPsQpwRiWw1daeu%2FVfm2GlfU4I%3D)
+
+```go
+func shrinkstack(gp *g) {
+    gstatus := readgstatus(gp)
+    ......
+    oldsize := gp.stack.hi - gp.stack.lo
+    newsize := oldsize / 2 // 比原来小1倍
+    // Don't shrink the allocation below the minimum-sized stack
+    // allocation.
+    if newsize < _FixedStack {
+        return
+    }
+    // Compute how much of the stack is currently in use and only
+    // shrink the stack if gp is using less than a quarter of its
+    // current stack. The currently used stack includes everything
+    // down to the SP plus the stack guard space that ensures
+    // there's room for nosplit functions.
+    avail := gp.stack.hi - gp.stack.lo
+    //当已使用的栈占不到总栈的1/4 进行缩容
+    if used := gp.stack.hi - gp.sched.sp + _StackLimit; used >= avail/4 {
+        return
+    }
+
+    copystack(gp, newsize, false) //在下面会讲到
+}
+```
+
+栈的缩容主要是发生在GC期间。一个协程变成常驻状态，繁忙时需要占用很大的内存，但空闲时占用很少，这样会浪费很多内存，为了避免浪费Go在GC时对协程的栈进行了缩容，缩容也是分配一块新的内存替换原来的，大小只有原来的1/2。
+
+### 扩容和缩容这个过程做了什么？
+
+```go
+func copystack(gp *g, newsize uintptr, sync bool) {
+    ......
+    old := gp.stack
+    ......
+    used := old.hi - gp.sched.sp
+
+    // allocate new stack
+    new := stackalloc(uint32(newsize))
+    ......
+    // Compute adjustment.
+    var adjinfo adjustinfo
+    adjinfo.old = old
+    adjinfo.delta = new.hi - old.hi //用于旧栈指针的调整
+
+    //后面有机会和 select / chan 一起分析
+    // Adjust sudogs, synchronizing with channel ops if necessary.
+    ncopy := used
+    if sync {
+        adjustsudogs(gp, &adjinfo)
+    } else {
+        ......
+        adjinfo.sghi = findsghi(gp, old)
+
+        // Synchronize with channel ops and copy the part of
+        // the stack they may interact with.
+        ncopy -= syncadjustsudogs(gp, used, &adjinfo)
+    }
+    //把旧栈数据复制到新栈
+    // Copy the stack (or the rest of it) to the new location
+    memmove(unsafe.Pointer(new.hi-ncopy), unsafe.Pointer(old.hi-ncopy), ncopy)
+
+    // Adjust remaining structures that have pointers into stacks.
+    // We have to do most of these before we traceback the new
+    // stack because gentraceback uses them.
+    adjustctxt(gp, &adjinfo)
+    adjustdefers(gp, &adjinfo)
+    adjustpanics(gp, &adjinfo)
+    ......
+    // Swap out old stack for new one
+    gp.stack = new
+    gp.stackguard0 = new.lo + _StackGuard // NOTE: might clobber a preempt request
+    gp.sched.sp = new.hi - used
+    gp.stktopsp += adjinfo.delta
+    // Adjust pointers in the new stack.
+    gentraceback(^uintptr(0), ^uintptr(0), 0, gp, 0, nil, 0x7fffffff, adjustframe, noescape(unsafe.Pointer(&adjinfo)), 0)
+    ......
+    //释放旧栈
+    stackfree(old)
+}
+```
+
+在扩容和缩容这个过程中，做了很多调整。从连续栈的实现方式上我们了解到，不管是扩容还是缩容，都重新申请一块新栈，然后把旧栈的数据复制到新栈。协程占用的物理内存完全被替换了，而Go在运行时会把指针保存到内存里面，例如：`gp.sched.ctxt` ，`gp._defer` ，`gp._panic`，包括函数里的指针。这部分指针值会被转换成整数型`uintptr`，然后 `+ delta`进行调整。
+
+```go
+func adjustpointer(adjinfo *adjustinfo, vpp unsafe.Pointer) {
+    pp := (*uintptr)(vpp)
+    p := *pp
+    ......
+    //如果这个整数型数字在旧栈的范围，就调整
+    if adjinfo.old.lo <= p && p < adjinfo.old.hi {
+        *pp = p + adjinfo.delta
+        ......
+    }
+}
+```
+
+### Frame调整
+
+如果只是想了解栈的扩缩容，上面就够了。这部分深入到细节，没兴趣可以跳过。在了解Frame调整前，先了解下 [Stack Frame](https://link.segmentfault.com/?enc=oGx%2F8G34QHoNz5Vgd%2Fjk7g%3D%3D.v2jzBAGCb%2Bhw72X5pdBm01v5otvvtgQj%2B1Dusc8hsXqqzEUTw3WdhXf8KcdY2VQ7SpTQW9fa%2Fw2lzRxXPHlTmRg53sDgqcy6clLIZvipRHU%3D)。Stack Frame ：函数运行时占用的内存空间，是栈上的数据集合，它包括：
+
+- Local variables
+- Saved copies of registers modified by subprograms that could need restoration
+- Argument parameters
+- Return address
+
+#### `FP`，`SP`，`PC` ，`LR`
+
+- FP: Frame Pointer
+
+  – Points to the bottom of the argument list
+
+- SP: Stack Pointer
+
+  – Points to the top of the space allocated for local variables
+
+- PC: Program Counter
+
+- LR：Caller's Program Counter
+
+#### [Stack frame layout](https://link.segmentfault.com/?enc=OvI8cIf9hjQH1PgBC%2FjrKw%3D%3D.TewNLBjwYaw6RMyqZDj860PElZHD1hZ1dc6WZcGU%2FYyGMDvOFyvqfwhZCNs9vhtfvHh85QSoWrfMImOxS9VJU11b5pWDelxZgJ8sYy0blAA03dte3j1DCc73v7nXOuK6)
+
+```go
+// (x86)  
+// +------------------+  
+// | args from caller |  
+// +------------------+ <- frame->argp  
+// |  return address  |  
+// +------------------+  
+// |  caller's BP (*) | (*) if framepointer_enabled && varp < sp  
+// +------------------+ <- frame->varp  
+// |     locals       |  
+// +------------------+  
+// |  args to callee  |  
+// +------------------+ <- frame->sp
+```
+
+在Go里针对X86和ARM的[Stack frame layout](https://link.segmentfault.com/?enc=54LYECseNlJ2AC%2Bg28KQVQ%3D%3D.X%2BcQzSeem2U27E%2By232pDSJ3Vdm0jUIcTb82%2B1RFh24IvUKK7bpLB4Fx98Fj%2BkkUN7PzAMMSl07T6%2FqfdItkfLPYEFT%2B3Ymfke%2BSz7ZHD6LMFvKfjurv6gUg2km5pLVE)会不一样，这里只对X86进行分析。
+
+> 为了直观看到Frame调整的结果，我们看下面的例子：
+
+```go
+func bb(a *int, aa *int) {
+    var v1 int
+    println("v1 before morestack", uintptr(unsafe.Pointer(&v1)))
+
+    cc(0)
+
+    println("a after morestack", uintptr(unsafe.Pointer(a)))
+    println("aa after morestack", uintptr(unsafe.Pointer(aa)))
+    println("v1 after morestack", uintptr(unsafe.Pointer(&v1)))
+}
+
+// for morestack
+func cc(i int){
+    i++
+    if i >= 30 {
+        println("morestack done")
+    }else{
+        cc(i)
+    }
+}
+
+func main()  {
+    wg := sync.WaitGroup{}
+    wg.Add(1)
+    go func() {
+        var a, aa int
+        a = 1000
+        aa = 1000
+
+        println("a before morestack", uintptr(unsafe.Pointer(&a)))
+        println("aa before morestack", uintptr(unsafe.Pointer(&aa)))
+
+        bb(&a, &aa)
+        wg.Done()
+    }()
+    wg.Wait()
+}
+```
+
+结果：
+
+```go
+a before morestack 824633925560
+aa before morestack 824633925552
+v1 before morestack 824633925504
+morestack done
+a after morestack 824634142648
+aa after morestack 824634142640
+v1 after morestack 824634142592
+```
+
+从结果看出bb的参数a，aa和变量v1地址在经过扩容后发生了变化，这个变化是怎么实现的呢？我们主要围绕下面3个问题进行分析：
+
+1. 如何确认函数Frame的位置
+2. 如何找到函数参数，变量的指针
+3. 如何确认父函数的Frame
+
+#### 从[gentraceback](https://link.segmentfault.com/?enc=51GqctJaEwuajiZKQWGGtQ%3D%3D.6Vvf3dJ1FyB5LnylKnjhskVq7FWB4WJL374uiD5yQzA06ZJssv309nsOAhcLzB7QU4EobahREY%2BhyJEMq65LUQqBu%2FRugn8Wz%2B3tMN0XSASIsvdD%2FxC7tsStg8878sCh)开始
+
+```go
+func gentraceback(pc0, sp0, lr0 uintptr, gp *g, skip int, pcbuf *uintptr, max int, callback func(*stkframe, unsafe.Pointer) bool, v unsafe.Pointer, flags uint) int {
+    ......
+    g := getg()
+    ......
+    if pc0 == ^uintptr(0) && sp0 == ^uintptr(0) { // Signal to fetch saved values from gp.
+        if gp.syscallsp != 0 {
+            ......
+        } else {
+            //运行位置
+            pc0 = gp.sched.pc
+            sp0 = gp.sched.sp
+            ......
+        }
+    }
+    nprint := 0
+    var frame stkframe
+    frame.pc = pc0
+    frame.sp = sp0
+    ......
+    f := findfunc(frame.pc)
+    ......
+    frame.fn = f
+
+    n := 0
+    for n < max {
+        ......
+        f = frame.fn
+        if f.pcsp == 0 {
+            // No frame information, must be external function, like race support.
+            // See golang.org/issue/13568.
+            break
+        }
+        ......
+        if frame.fp == 0 {
+            sp := frame.sp
+            ......
+            //计算FP
+            frame.fp = sp + uintptr(funcspdelta(f, frame.pc, &cache))
+            if !usesLR {
+                // On x86, call instruction pushes return PC before entering new function.
+                frame.fp += sys.RegSize
+            }
+        }
+        var flr funcInfo
+        if topofstack(f, gp.m != nil && gp == gp.m.g0) {
+            ......
+        } else if usesLR && f.funcID == funcID_jmpdefer {
+            ......
+        } else {
+            var lrPtr uintptr
+            if usesLR {
+                ......
+            } else {
+                if frame.lr == 0 {
+                    //获取调用函数的PC值
+                    lrPtr = frame.fp - sys.RegSize
+                    frame.lr = uintptr(*(*sys.Uintreg)(unsafe.Pointer(lrPtr)))
+                }
+            }
+            flr = findfunc(frame.lr)
+            ......
+        }
+
+        frame.varp = frame.fp
+        if !usesLR {
+            // On x86, call instruction pushes return PC before entering new function.
+            frame.varp -= sys.RegSize
+        }
+        ......
+        if framepointer_enabled && GOARCH == "amd64" && frame.varp > frame.sp {
+            frame.varp -= sys.RegSize
+        }
+        ......
+        if callback != nil || printing {
+            frame.argp = frame.fp + sys.MinFrameSize
+            ......
+        }
+        ......
+        //当前为调整frame
+        if callback != nil {
+            if !callback((*stkframe)(noescape(unsafe.Pointer(&frame))), v) {
+                return n
+            }
+        }
+        ......
+        n++
+    skipped:
+        ......
+    //确认父Frame
+        // Unwind to next frame.
+        frame.fn = flr
+        frame.pc = frame.lr
+        frame.lr = 0
+        frame.sp = frame.fp
+        frame.fp = 0
+        frame.argmap = nil
+        ......
+    }
+    ......
+    return n
+}
+```
+
+> [gentraceback](https://link.segmentfault.com/?enc=F74VJuFMNscrXUFs0LqL7Q%3D%3D.Rz6%2FpDlhTp%2FrkZfqJb7py%2FBpPhraA2ta%2F8dhafGUQb7jCq8zQdTnvuxxraY1s26vvecFyr4A0%2Fmv1c8yolR1VrsuMBwiL746QcA%2FXqY6S2FSy0Hf%2B3LJKnHbli%2F36g6H)代码量很大，这里根据Frame调整传的参数和我们将要探索部分进行了精简。精简后还是很长，不用担心，我们一层一层剥开这个函数。
+
+- 确认当前位置
+
+  > 当发生扩缩容时，Go的runtime已经把PC保存到`gp.sched.pc`，SP保存到`gp.sched.sp`。
+
+- 找出函数信息
+
+  > 函数的参数、变量个数，frame size，file line等信息，编译通过后被保存进执行文件，执行时被加载进内存，这部分数据可以通过PC获取出来：[findfunc](https://link.segmentfault.com/?enc=NXrRTTQwXf9RJEfbB6zL5A%3D%3D.BRlSXhk%2F58%2FEZr5oC0HfqnH2jk%2FuFVsCqJyoUYHZaqfh0CVRQ80Tr2L9owRv879DZOpBLRcw0K6dG0%2Fw13NSzyXBodtQ%2FGl3I6%2B3bvu7Tof4crFFkSOTg3o48uwoEhgg) -> [findmoduledatap](https://link.segmentfault.com/?enc=U%2FgcpJCEq95vPYtRElGHJg%3D%3D.2euHB62QU7LBsHp%2BMi%2BxPvRPJLK%2BOvsa2qr8zOlT1RF0UNE%2FHemGFaGEFy2bUoMa25eNrPNvo8oAdi9k%2FiGmRlNCz3J3MzqARDRMRBzz9SAAD5AqH94qCrTw3TFozDXt)
+
+  ```go
+  func findmoduledatap(pc uintptr) *moduledata {
+         for datap := &firstmoduledata; datap != nil; datap = datap.next {
+             if datap.minpc <= pc && pc < datap.maxpc {
+                 return datap
+             }
+         }
+         return nil
+  }
+  ```
+
+- 计算FP
+
+```go
+frame.fp = sp + uintptr(funcspdelta(f, frame.pc, &cache))
+```
+
+> SP我们可以理解为函数的顶端，FP是函数的底部，有了SP，缺函数长度（frame size）。其实我们可以根据pcsp获取，因为它已经被映射进了内存，详情请看[Go 1.2 Runtime Symbol Information](https://link.segmentfault.com/?enc=s7ZUNsmlzYk86R4W5t1ZxA%3D%3D.ifwM75yEa7dJUiYG02i4AjJoLW%2F2psU3paX%2FkMNfVVgFZc6hcTTjTkSNXJIelD228nDGlwjg1oHrGpqrDeSwKw0X4nuzfJtwfyFl2vNRCURAebF%2FZR%2FidU%2F4bNxNj0y2)。知道了FP和SP，我们就可以知道函数在协程栈的具体位置。
+
+- 获取父函数PC指令(LR)
+
+  ```go
+  lrPtr = frame.fp - sys.RegSize
+  frame.lr = uintptr(*(*sys.Uintreg)(unsafe.Pointer(lrPtr)))
+  ```
+
+  > 父函数的PC指令放在了stack frame图的`return address`位置，我们可以直接拿出来，根据这个指令我们获得父函数的信息。
+
+- 确认父函数Frame
+
+```go
+frame.fn = flr
+frame.pc = frame.lr
+frame.lr = 0
+frame.sp = frame.fp
+frame.fp = 0
+frame.argmap = nil
+```
+
+> 从stack frame图可以看到子函数的FP等于父函数SP。知道了父函数的SP和PC，重复上面的步骤就可以找出函数所在整条调用链，我们平时看到panic出现的调用链就是这样出来的。
+
+#### 以[adjustframe](https://link.segmentfault.com/?enc=lvDGbP276%2Fgpo70wGoj5Hw%3D%3D.QHEhjT%2BJjX6Qj1XLJNUHYSrP2GxXa9fKX%2F38OksJSLZpS7YhGKEF1p0FkYTuxSfF%2FXkHJvScLwvK5RL05STL%2Bs41mQpIEis1x%2BtcBWuc%2F6gd%2FGRWapsuEb%2FrAncZeUE%2F)结束
+
+```go
+func adjustframe(frame *stkframe, arg unsafe.Pointer) bool {
+    adjinfo := (*adjustinfo)(arg)
+    ......
+    f := frame.fn
+    ......
+    locals, args := getStackMap(frame, &adjinfo.cache, true)
+    // Adjust local variables if stack frame has been allocated.
+    if locals.n > 0 {
+        size := uintptr(locals.n) * sys.PtrSize
+        adjustpointers(unsafe.Pointer(frame.varp-size), &locals, adjinfo, f)
+    }
+
+    // Adjust saved base pointer if there is one.
+    if sys.ArchFamily == sys.AMD64 && frame.argp-frame.varp == 2*sys.RegSize {
+        ......
+        adjustpointer(adjinfo, unsafe.Pointer(frame.varp))
+    }
+    // Adjust arguments.
+    if args.n > 0 {
+        ......
+        adjustpointers(unsafe.Pointer(frame.argp), &args, adjinfo, f)
+    }
+    return true
+}
+```
+
+> 通过[gentraceback](https://link.segmentfault.com/?enc=oxaZFrUBr05r7VrM5CELtw%3D%3D.Sb89sacXxirf%2FNUcworO0n%2B%2Be2gNDizea4cdIQS3Ftzo1Dn4PhZUGkx16576E1rylgP9lgn35xg07b2BlfnVGIYRjod%2B4U1tJ8V8TpWP3JxZKxMwQBmVZEDMMQGHtlxK)获取frame在协程栈的准确位置，结合 [Stack frame layout](https://link.segmentfault.com/?enc=uPzYGRTVjvbsKw9AV6XftA%3D%3D.0GN0MJY2Wl%2FVvEH9W%2FSj48um4QcV548VPabiy6BPNkEJz3xeIVqCFIYfg%2BQNPMB17s3mFPykcH0v4ePirWI3%2Fh1Kw9wS3ENWiva2iKwfJIvGhFI%2Bi0Muu8stz9wyxnE%2B)，我们就可以知道函数参数`argp`和变量`varp`地址。在64位系统，每个指针占用8个字节。以8做为步长，就可得出函数参数和变量里的指针并进行调整。
+
+来到这里协程栈的源码分析已经完成，通过上面我们了解到连续栈具体实现方式，收获不少，接下来看看连续栈缺点和收益。
+
+#### 连续栈的缺点
+
+连续栈虽然解决了分段栈的2个问题，但这种实现方式也会带来其他问题：
+
+- 更多的虚拟内存碎片。尤其是你需要更大的栈时，分配一块连续的内存空间会变得更困难
+- 指针会被限制放入栈。在go里面不允许二个协程的指针相互指向。这会增加实现的复杂性。
+
+#### 收益
+
+这部分数据来自[Contiguous stacks](https://link.segmentfault.com/?enc=%2F3PW0C07acVJxUn6mRv%2B2g%3D%3D.Jq2f4ocI0k27qLwu6Sd9HyLep9km9aQpjiiBPcUd80nx%2FUO3ItHv%2Fxx8uckhBPtVrF3r3PadB4LBZcSP%2FiE%2BnyJsmXOwQCJ0WlUcV7k62EAYpDaXNj%2BfDDVoVBbrzpuC)。
+
+- 栈增长1倍快了10%，增长50%只快了2%，增长25%慢了20%
+- `Hot split`性能问题。
+
+```apache
+segmented stacks:
+
+no split: 1.25925147s
+with split: 5.372118558s   <- 出发了 hot split 问题
+both split: 1.293200571s
+
+contiguous stacks:
+
+no split: 1.261624848s
+with split: 1.262939769s
+both split: 1.29008309s
+```
+
 ## 相关问题
 
 ### 强制 kill goroutine 可能吗
@@ -1500,9 +1964,438 @@ func (mc *MyChannel) SafeClose() {
 - 情形四：“M个接收者和一个发送者”情形的一个变种：用来传输数据的通道的关闭请求由第三方发出
 - 情形五：“N个发送者”的一个变种：用来传输数据的通道必须被关闭以通知各个接收者数据发送已经结束了
 
+### 什么是Goroutine泄漏以及原因、解决办法
+
+[参考](https://segmentfault.com/a/1190000040161853)
+
+#### Goroutine 泄露
+
+了解清楚大家爱问的原因后，我们开始对 Goroutine 泄露的 N 种方法进行研究，希望通过前人留下的 “坑”，了解其原理和避开这些问题。
+
+泄露的原因大多集中在：
+
+- Goroutine 内正在进行 channel/mutex 等读写操作，但由于逻辑问题，某些情况下会被一直阻塞。
+- Goroutine 内的业务逻辑进入死循环，资源一直无法释放。
+- Goroutine 内的业务逻辑进入长时间等待，有不断新增的 Goroutine 进入等待。
+
+#### channel 使用不当
+
+Goroutine+Channel 是最经典的组合，因此不少泄露都出现于此。
+
+最经典的就是上面提到的 channel 进行读写操作时的逻辑问题。
+
+##### 发送不接收
+
+第一个例子：
+
+```go
+func main() {
+    for i := 0; i < 4; i++ {
+        queryAll()
+        fmt.Printf("goroutines: %d\n", runtime.NumGoroutine())
+    }
+}
+
+func queryAll() int {
+    ch := make(chan int)
+    for i := 0; i < 3; i++ {
+        go func() { ch <- query() }()
+        }
+    return <-ch
+}
+
+func query() int {
+    n := rand.Intn(100)
+    time.Sleep(time.Duration(n) * time.Millisecond)
+    return n
+}
+```
+
+输出结果：
+
+```apache
+goroutines: 3
+goroutines: 5
+goroutines: 7
+goroutines: 9
+```
+
+在这个例子中，我们调用了多次 `queryAll` 方法，并在 `for` 循环中利用 Goroutine 调用了 `query` 方法。其重点在于调用 `query` 方法后的结果会写入 `ch` 变量中，接收成功后再返回 `ch` 变量。
+
+最后可看到输出的 goroutines 数量是在不断增加的，每次多 2 个。也就是每调用一次，都会泄露 Goroutine。
+
+原因在于 channel 均已经发送了（每次发送 3 个），但是在接收端并没有接收完全（只返回 1 个 ch），所诱发的 Goroutine 泄露。
+
+##### 接收不发送
+
+第二个例子：
+
+```go
+func main() {
+    defer func() {
+        fmt.Println("goroutines: ", runtime.NumGoroutine())
+    }()
+
+    var ch chan struct{}
+    go func() {
+        ch <- struct{}{}
+    }()
+    
+    time.Sleep(time.Second)
+}
+```
+
+输出结果：
+
+```apache
+goroutines:  2
+```
+
+在这个例子中，与 “发送不接收” 两者是相对的，channel 接收了值，但是不发送的话，同样会造成阻塞。
+
+但在实际业务场景中，一般更复杂。基本是一大堆业务逻辑里，有一个 channel 的读写操作出现了问题，自然就阻塞了。
+
+##### nil channel
+
+第三个例子：
+
+```go
+func main() {
+    defer func() {
+        fmt.Println("goroutines: ", runtime.NumGoroutine())
+    }()
+
+    var ch chan int
+    go func() {
+        <-ch
+    }()
+    
+    time.Sleep(time.Second)
+}
+```
+
+输出结果：
+
+```apache
+goroutines:  2
+```
+
+在这个例子中，可以得知 channel 如果忘记初始化，那么无论你是读，还是写操作，都会造成阻塞。
+
+正常的初始化姿势是：
+
+```go
+    ch := make(chan int)
+    go func() {
+        <-ch
+    }()
+    ch <- 0
+    time.Sleep(time.Second)
+```
+
+调用 `make` 函数进行初始化。
+
+#### 奇怪的慢等待
+
+第四个例子：
+
+```go
+func main() {
+    for {
+        go func() {
+            _, err := http.Get("https://www.xxx.com/")
+            if err != nil {
+                fmt.Printf("http.Get err: %v\n", err)
+            }
+            // do something...
+    }()
+
+    time.Sleep(time.Second * 1)
+    fmt.Println("goroutines: ", runtime.NumGoroutine())
+    }
+}
+```
+
+输出结果：
+
+```avrasm
+goroutines:  5
+goroutines:  9
+goroutines:  13
+goroutines:  17
+goroutines:  21
+goroutines:  25
+...
+```
+
+在这个例子中，展示了一个 Go 语言中经典的事故场景。也就是一般我们会在应用程序中去调用第三方服务的接口。
+
+**但是第三方接口，有时候会很慢，久久不返回响应结果**。恰好，Go 语言中默认的 `http.Client` 是没有设置超时时间的。
+
+因此就会导致一直阻塞，一直阻塞就一直爽，Goroutine 自然也就持续暴涨，不断泄露，最终占满资源，导致事故。
+
+在 Go 工程中，我们一般建议至少对 `http.Client` 设置超时时间：
+
+```go
+    httpClient := http.Client{
+        Timeout: time.Second * 15,
+    }
+```
+
+并且要做限流、熔断等措施，以防突发流量造成依赖崩塌，依然吃 P0。
+
+#### 互斥锁忘记解锁
+
+第五个例子：
+
+```go
+func main() {
+    total := 0
+    defer func() {
+        time.Sleep(time.Second)
+        fmt.Println("total: ", total)
+        fmt.Println("goroutines: ", runtime.NumGoroutine())
+    }()
+
+    var mutex sync.Mutex
+    for i := 0; i < 10; i++ {
+        go func() {
+            mutex.Lock()
+            total += 1
+        }()
+    }
+}
+```
+
+输出结果：
+
+```apache
+total:  1
+goroutines:  10
+```
+
+在这个例子中，第一个互斥锁 `sync.Mutex` 加锁了，但是他可能在处理业务逻辑，又或是忘记 `Unlock` 了。
+
+因此导致后面的所有 `sync.Mutex` 想加锁，却因未释放又都阻塞住了。一般在 Go 工程中，我们建议如下写法：
+
+```go
+    var mutex sync.Mutex
+    for i := 0; i < 10; i++ {
+        go func() {
+            mutex.Lock()
+            defer mutex.Unlock()
+            total += 1
+    }()
+    }
+```
+
+#### 同步锁使用不当
+
+第六个例子：
+
+```go
+func handle(v int) {
+    var wg sync.WaitGroup
+    wg.Add(5)
+    for i := 0; i < v; i++ {
+        fmt.Println("脑子进煎鱼了")
+        wg.Done()
+    }
+    wg.Wait()
+}
+
+func main() {
+    defer func() {
+        fmt.Println("goroutines: ", runtime.NumGoroutine())
+    }()
+
+    go handle(3)
+    time.Sleep(time.Second)
+}
+```
+
+在这个例子中，我们调用了同步编排 `sync.WaitGroup`，模拟了一遍我们会从外部传入循环遍历的控制变量。
+
+但由于 `wg.Add` 的数量与 `wg.Done` 数量并不匹配，因此在调用 `wg.Wait` 方法后一直阻塞等待。
+
+在 Go 工程中使用，我们会建议如下写法：
+
+```go
+    var wg sync.WaitGroup
+    for i := 0; i < v; i++ {
+        wg.Add(1)
+        defer wg.Done()
+        fmt.Println("脑子进煎鱼了")
+    }
+    wg.Wait()
+```
+
+#### 排查方法
+
+我们可以调用 `runtime.NumGoroutine` 方法来获取 Goroutine 的运行数量，进行前后一比较，就能知道有没有泄露了。
+
+但在业务服务的运行场景中，Goroutine 内导致的泄露，大多数处于生产、测试环境，因此更多的是使用 PProf：
+
+```go
+import (
+    "net/http"
+     _ "net/http/pprof"
+)
+
+http.ListenAndServe("localhost:6060", nil))
+```
+
+只要我们调用 `http://localhost:6060/debug/pprof/goroutine?debug=1`，PProf 会返回所有带有堆栈跟踪的 Goroutine 列表。
+
+也可以利用 PProf 的其他特性进行综合查看和分析，这块参考我之前写的《Go 大杀器之性能剖析 PProf》，基本是全村最全的教程了。
+
+#### 解决办法
+
+[参考](http://xueyuan.coder55.com/read/go-senior-learn/go-question-14.13)
+
+可以通过 context 包来避免内存泄漏。
+
 ### Channel 可能会引发 goroutine 泄漏
 
 **泄漏的原因是 goroutine 操作 channel 后，处于发送或接收阻塞状态，而 channel 处于满或空的状态，一直得不到改变。同时，垃圾回收器也不会回收此类资源，进而导致 gouroutine 会一直处于等待队列中，不见天日**。
 
 另外，程序运行过程中，对于一个 channel，如果没有任何 goroutine 引用了，gc 会对其进行回收操作，不会引起内存泄漏。
+
+### 会诱发 Goroutine 挂起的 27 个原因
+
+[参考](https://developer.51cto.com/article/681462.html)
+
+#### 第一部分
+
+| 标识                      | 含义              |
+| :------------------------ | :---------------- |
+| waitReasonZero            | 无                |
+| waitReasonGCAssistMarking | GC assist marking |
+| waitReasonIOWait          | IO wait           |
+
+- waitReasonZero：无正式解释，从使用情况来看。主要在 sleep 和 lock 的 2 个场景中使用。
+- waitReasonGCAssistMarking：GC 辅助标记阶段会使得阻塞等待。
+- waitReasonIOWait：IO 阻塞等待时，例如：网络请求等。
+
+
+
+#### 第二部分
+
+| 标识                         | 含义                    |
+| :--------------------------- | :---------------------- |
+| waitReasonChanReceiveNilChan | chan receive (nil chan) |
+| waitReasonChanSendNilChan    | chan send (nil chan)    |
+
+- waitReasonChanReceiveNilChan：对未初始化的 channel 进行读操作。
+- waitReasonChanSendNilChan：对未初始化的 channel 进行写操作。
+
+#### 第三部分
+
+| 标识                            | 含义                    |
+| :------------------------------ | :---------------------- |
+| waitReasonDumpingHeap           | dumping heap            |
+| waitReasonGarbageCollection     | garbage collection      |
+| waitReasonGarbageCollectionScan | garbage collection scan |
+
+- waitReasonDumpingHeap：对 Go Heap 堆 dump 时，这个的使用场景仅在 runtime.debug 时，也就是常见的 pprof 这一类采集时阻塞。
+- waitReasonGarbageCollection：在垃圾回收时，主要场景是 GC 标记终止(GC Mark Termination)阶段时触发。
+- waitReasonGarbageCollectionScan：在垃圾回收扫描时，主要场景是 GC 标记(GC Mark)扫描 Root 阶段时触发。
+
+#### 第四部分
+
+| 标识                    | 含义              |
+| :---------------------- | :---------------- |
+| waitReasonPanicWait     | panicwait         |
+| waitReasonSelect        | select            |
+| waitReasonSelectNoCases | select (no cases) |
+
+- waitReasonPanicWait：在 main goroutine 发生 panic 时，会触发。
+- waitReasonSelect：在调用关键字 select 时会触发。
+- waitReasonSelectNoCases：在调用关键字 select 时，若一个 case 都没有，会直接触发。
+
+#### 第五部分
+
+| 标识                     | 含义             |
+| :----------------------- | :--------------- |
+| waitReasonGCAssistWait   | GC assist wait   |
+| waitReasonGCSweepWait    | GC sweep wait    |
+| waitReasonGCScavengeWait | GC scavenge wait |
+
+- waitReasonGCAssistWait：GC 辅助标记阶段中的结束行为，会触发。
+- waitReasonGCSweepWait：GC 清扫阶段中的结束行为，会触发。
+- waitReasonGCScavengeWait：GC scavenge 阶段的结束行为，会触发。GC Scavenge 主要是新空间的垃圾回收，是一种经常运行、快速的 GC，负责从新空间中清理较小的对象。
+
+#### 第六部分
+
+| 标识                    | 含义           |
+| :---------------------- | :------------- |
+| waitReasonChanReceive   | chan receive   |
+| waitReasonChanSend      | chan send      |
+| waitReasonFinalizerWait | finalizer wait |
+
+- waitReasonChanReceive：在 channel 进行读操作，会触发。
+- waitReasonChanSend：在 channel 进行写操作，会触发。
+- waitReasonFinalizerWait：在 finalizer 结束的阶段，会触发。在 Go 程序中，可以通过调用 runtime.SetFinalizer 函数来为一个对象设置一个终结者函数。这个行为对应着结束阶段造成的回收。
+
+#### 第七部分
+
+| 标识                  | 含义            |
+| :-------------------- | :-------------- |
+| waitReasonForceGCIdle | force gc (idle) |
+| waitReasonSemacquire  | semacquire      |
+| waitReasonSleep       | sleep           |
+
+- waitReasonForceGCIdle：强制 GC(空闲时间)结束时，会触发。
+- waitReasonSemacquire：信号量处理结束时，会触发。
+- waitReasonSleep：经典的 sleep 行为，会触发。
+
+#### 第八部分
+
+| 标识                         | 含义                   |
+| :--------------------------- | :--------------------- |
+| waitReasonSyncCondWait       | sync.Cond.Wait         |
+| waitReasonTimerGoroutineIdle | timer goroutine (idle) |
+| waitReasonTraceReaderBlocked | trace reader (blocked) |
+
+- waitReasonSyncCondWait：结合 sync.Cond 用法能知道，是在调用 sync.Wait 方法时所触发。
+- waitReasonTimerGoroutineIdle：与 Timer 相关，在没有定时器需要执行任务时，会触发。
+- waitReasonTraceReaderBlocked：与 Trace 相关，ReadTrace会返回二进制跟踪数据，将会阻塞直到数据可用。
+
+#### 第九部分
+
+| 标识                     | 含义              |
+| :----------------------- | :---------------- |
+| waitReasonWaitForGCCycle | wait for GC cycle |
+| waitReasonGCWorkerIdle   | GC worker (idle)  |
+| waitReasonPreempted      | preempted         |
+| waitReasonDebugCall      | debug call        |
+
+- waitReasonWaitForGCCycle：等待 GC 周期，会休眠造成阻塞。
+- waitReasonGCWorkerIdle：GC Worker 空闲时，会休眠造成阻塞。
+- waitReasonPreempted：发生循环调用抢占时，会会休眠等待调度。
+- waitReasonDebugCall：调用 GODEBUG 时，会触发。
+
+#### 总结
+
+今天这篇文章是对开头 runtime.gopark 函数的详解文章的一个补充，我们能够对此了解到其诱发的因素。
+
+主要场景为：
+
+- 通道(Channel)。
+- 垃圾回收(GC)。
+- 休眠(Sleep)。
+- 锁等待(Lock)。
+- 抢占(Preempted)。
+- IO 阻塞(IO Wait)
+- 其他，例如：panic、finalizer、select 等。
+
+我们可以根据这些特性，去拆解可能会造成阻塞的原因。其实也就没必要记了，他们会导致阻塞肯定是由于存在影响控制流的因素，才会导致 gopark 的调用。
+
+### 跳出 for select循环
+
+[参考](https://blog.csdn.net/bravezhe/article/details/81674591)
+
+使用break lable 和 goto lable 都能跳出for循环；不同之处在于：break标签只能用于for循环，且标签位于for循环前面，goto是指跳转到指定标签处。
+
+
 

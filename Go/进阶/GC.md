@@ -312,13 +312,15 @@ STW时期可能会影响系统调用，因为系统调用可能会在stw时期�
 
 ```go
  func main() {  
-  var wg sync.WaitGroup  
-  wg.Add(10)   for i :\= 0; i < 10; i++ {  
-  go func() {  
-  http.Get(\`https://httpstat.us/200\`)  
-  wg.Done()  
-  }()  
-  }   wg.Wait()  
+  	var wg sync.WaitGroup  
+  	wg.Add(10)   
+	for i :\= 0; i < 10; i++ {  
+         go func() {  
+             http.Get(\`https://httpstat.us/200\`)  
+             wg.Done()  
+         }()  
+     }   
+     wg.Wait()  
  }
 ```
 
@@ -336,11 +338,11 @@ STW的第三步将所有的M与P分离。然而，go将等待调度程序运行�
  func main() {  
   var t int  
   for i :\= 0;i < 20 ;i++  {  
-  go func() {  
-  for i :\= 0;i < 1000000000 ;i++ {  
-  t++  
-  }  
-  }()  
+      go func() {  
+          for i := 0;i < 1000000000 ;i++ {  
+          	t++  
+      	 }  
+      }()  
   }  
    
   runtime.GC()  
