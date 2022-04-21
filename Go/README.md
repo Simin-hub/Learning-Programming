@@ -76,6 +76,26 @@ time/rate
 
 内存
 
+## 计算机基础
+
+计算机网络
+
+操作系统
+
+Linux
+
+## 其他相关学习
+
+[数据库](https://github.com/Simin-hub/Golang-Learning-and-Interview/blob/main/Go/%E5%9F%BA%E7%A1%80/%E6%95%B0%E6%8D%AE%E5%BA%93.md)
+
+[Redis](https://github.com/Simin-hub/Golang-Learning-and-Interview/blob/main/Go/%E5%AE%9E%E6%88%98/Redis.md)
+
+缓存
+
+分布式
+
+docker
+
 ## 书籍
 
 很多Go学习的项目都会推荐相关书籍。
