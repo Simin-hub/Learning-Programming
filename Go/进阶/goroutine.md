@@ -57,9 +57,9 @@ goroutine的概念类似于线程，但 goroutine是由Go的运行时（runtime�
 
 - **内存占用**
 
-创建一个 goroutine 的栈内存消耗为 2 KB，实际运行过程中，如果栈空间不够用，会自动进行扩容。创建一个 thread 则需要消耗 1 MB 栈内存，而且还需要一个被称为 “a guard page” 的区域用于和其他 thread 的栈空间进行隔离。
+创建一个 goroutine 的**栈内存消耗为 2 KB**，实际运行过程中，如果栈空间不够用，会自动进行扩容。创建一个 thread 则需要**消耗 1 MB 栈内存**，而且还需要一个被称为 “a guard page” 的区域用于和其他 thread 的栈空间进行隔离。
 
-对于一个用 Go 构建的 HTTP Server 而言，对到来的每个请求，创建一个 goroutine 用来处理是非常轻松的一件事。而如果用一个使用线程作为并发原语的语言构建的服务，例如 Java 来说，每个请求对应一个线程则太浪费资源了，很快就会出 OOM 错误（OutOfMemoryError）。
+对于一个用 Go 构建的 HTTP Server 而言，对到来的每个请求，创建一个 goroutine 用来处理是非常轻松的一件事。而如果用一个使用线程作为并发原语的语言构建的服务，例如 Java 来说，每个请求对应一个线程则太浪费资源了，很快就会出 OOM 错误（Out Of Memory Error）。
 
 - **创建和销毀**
 
@@ -81,7 +81,7 @@ Goroutine 的切换约为 200 ns，相当于 2400-3600 条指令。
 
 #### 可增长的栈
 
-**OS线程（操作系统线程）一般都有固定的栈内存（通常为2MB）**,**一个goroutine的栈在其生命周期开始时只有很小的栈（典型情况下2KB），goroutine的栈不是固定的，他可以按需增大和缩小，goroutine的栈大小限制可以达到1GB**，虽然极少会用到这个大。所以在Go语言中一次创建十万左右的goroutine也是可以的。
+**OS线程（操作系统线程）一般都有固定的栈内存（通常为2MB）**,**一个[goroutine的栈](http://www.huamo.online/2019/06/25/%E6%B7%B1%E5%85%A5%E7%A0%94%E7%A9%B6goroutine%E6%A0%88/)在其生命周期开始时只有很小的栈（典型情况下2KB），goroutine的栈不是固定的，他可以按需增大和缩小，goroutine的栈大小限制可以达到1GB**，虽然极少会用到这个大。所以在Go语言中一次创建十万左右的goroutine也是可以的。
 
 固定了栈的大小导致了两个问题：一是对于很多只需要很小的栈空间的线程来说是一个巨大的浪费，二是对于少数需要巨大栈空间的线程来说又面临栈溢出的风险。针对这两个问题的解决方案是：要么降低固定的栈大小，提升空间的利用率；要么增大栈的大小以允许更深的函数递归调用，但这两者是没法同时兼得的。
 
@@ -208,11 +208,11 @@ GPM是Go语言运行时（runtime）层面的实现，是go语言自己实现的
 
 - G很好理解，就是个goroutine的，里面除了存放本goroutine信息外 还有与所在P的绑定等信息。
 - P管理着一组goroutine队列，P里面会存储当前goroutine运行的上下文环境（函数指针，堆栈地址及地址边界），P会对自己管理的goroutine队列做一些调度（比如把占用CPU时间较长的goroutine暂停、运行后续的goroutine等等）当自己的队列消费完了就去全局队列里取，如果全局队列里也消费完了会去其他P的队列里抢任务。
-- M（machine）是Go运行时（runtime）对操作系统内核线程的虚拟， M与内核线程一般是一一映射的关系， 一个groutine最终是要放到M上执行的；
+- M（machine）是Go运行时（runtime）**对操作系统内核线程的虚拟**， M与内核线程一般是一一映射的关系， 一个groutine最终是要放到M上执行的；
 
 P与M一般也是一一对应的。他们关系是： P管理着一组G挂载在M上运行。当一个G长久阻塞在一个M上时，runtime会新建一个M，阻塞G所在的P会把其他的G 挂载在新建的M上。当旧的G阻塞完成或者认为其已经死掉时 回收旧的M。
 
-P的个数是通过runtime.GOMAXPROCS设定（最大256），Go1.5版本之后默认为物理线程数。 在并发量大的时候会增加一些P和M，但不会太多，切换太频繁的话得不偿失。
+P的个数是通过runtime.GOMAXPROCS设定（最大256），Go1.5版本之后**默认为物理线程数**。 在并发量大的时候会增加一些P和M，但不会太多，切换太频繁的话得不偿失。
 
 单从线程调度讲，Go语言相比起其他语言的优势在于OS线程是由OS内核来调度的，goroutine则是由Go运行时（runtime）自己的调度器调度的，这个调度器使用一个称为m:n调度的技术（复用/调度m个goroutine到n个OS线程）。 其一大特点是goroutine的调度是在用户态下完成的， 不涉及内核态与用户态之间的频繁切换，包括内存的分配与释放，都是在用户态维护着一块大的内存池， 不直接调用系统的malloc函数（除非内存池需要改变），成本比调度OS线程低很多。 另一方面充分利用了多核的硬件资源，近似的把若干goroutine均分在物理线程上， 再加上本身goroutine的超轻量，以上种种保证了go调度方面的性能。
 
@@ -235,7 +235,7 @@ Go语言的CSP模型是由协程Goroutine与通道Channel实现：
 
 [底层实现](https://github.com/Simin-hub/Golang-Learning-and-Interview/blob/main/Go/%E8%BF%9B%E9%98%B6/array%E3%80%81slice%E3%80%81map%E3%80%81channel.md#channel)
 
-Goroutine 和 channel 是 Go 语言并发编程的 两大基石。Goroutine 用于执行并发任务，channel 用于 goroutine 之间的同步、通信。
+Goroutine 和 channel 是 Go 语言并发编程的两大基石。Goroutine 用于执行并发任务，channel 用于 goroutine 之间的同步、通信。
 
 Channel 在 gouroutine 间架起了一条管道，在管道里传输数据，实现 gouroutine 间的通信；由于它是线程安全的，所以用起来非常方便；channel 还提供 “先进先出” 的特性；它还能影响 goroutine 的阻塞和唤醒。
 
@@ -298,7 +298,7 @@ CSP 模型的关键是关注 channel，而不关注发送消息的实体。Go �
 - spinning
   `spinning` 表示自旋，字面的意思是自己围绕自己转。在程序里一般指一直重复某块代码。
 - systemstack、mcall或asmcgocall
-  每个M启动都有一个叫g0的系统堆栈，runtime通常使用`systemstack`、`mcall`或`asmcgocall`临时切换到系统堆栈，以执行必须不被抢占的任务、不得增加用户堆栈的任务或切换用户goroutines。在系统堆栈上运行的代码隐式不可抢占，垃圾收集器不扫描系统堆栈。在系统堆栈上运行时，不会使用当前用户堆栈执行。
+  每个M启动都有一个叫g0的系统堆栈，runtime通常使用`systemstack`、`mcall`或`asmcgocall`临时**切换到系统堆栈**，以**执行必须不被抢占的任务、不得增加用户堆栈的任务或切换用户goroutines**。在系统堆栈上运行的代码隐式不可抢占，垃圾收集器不扫描系统堆栈。在系统堆栈上运行时，不会使用当前用户堆栈执行。
 
 ### Golang “调度器” 的由来？
 
@@ -436,15 +436,15 @@ Go 目前使用的调度器是 2012 年重新设计的，因为之前的调度�
 
 **Processor，它包含了运行 goroutine 的资源，如果线程想运行 goroutine，必须先获取 P，P 中还包含了可运行的 G 队列。**
 
-- P表示逻辑processor，代表线程M的执行的上下文。
-- P的最大作用是其拥有的各种G对象队列、链表、cache和状态。
+- P表示**逻辑processor**，**代表线程M的执行的上下文**。
+- P的最大作用是其拥有的**各种G对象队列、链表、cache和状态**。
 - P的数量也代表了golang的执行并发度，即有多少goroutine可以同时运行
 
 这里的p虽然表示逻辑处理器，但P并不执行任何代码，对G来说，P相当于CPU核，G只有绑定到P才能被调度。 对M来说，P提供了相关的执行环境(Context)，如内存分配状态(mcache)，任务队列(G)等
 
 **M（machine）**
 
-- M代表着真正的执行计算资源，可以认为它就是os thread（系统线程）。
+- **M代表着真正的执行计算资源**，可以认为它就是os thread（系统线程）。
 - M是真正调度系统的执行者，每个M就像一个勤劳的工作者，总是从各种队列中找到可运行的G，而且这样M的可以同时存在多个。
 - M在绑定有效的P后，进入调度循环，而且M并不保留G状态，这是G可以跨M调度的基础。
 
@@ -456,7 +456,7 @@ Go 目前使用的调度器是 2012 年重新设计的，因为之前的调度�
 
 **全局队列（Global Queue）**：存放等待运行的 G。
 
-**P 的本地队列**：同全局队列类似，存放的也是等待运行的 G，**存的数量有限，不超过 256 个**。新建 G’时，G’优先加入到 P 的本地队列，如果队列满了，则会把本地队列中一半的 G 移动到全局队列。
+**P 的本地队列**：同全局队列类似，存放的也是等待运行的 G，**存的数量有限，不超过 256 个**。新建 G 时，G 优先加入到 P 的本地队列，如果队列满了，则会把**本地队列中一半**的 G 移动到全局队列。
 
 **P 列表**：所有的 P 都在程序启动时创建，并保存在数组中，**最多有 GOMAXPROCS(可配置) 个**。
 
@@ -468,7 +468,7 @@ Go 目前使用的调度器是 2012 年重新设计的，因为之前的调度�
 
 **1、P 的数量：**
 
-由启动时环境变量 `GOMAXPROCS `或者是由 runtime 的方法 `GOMAXPROCS() `决定。这意味着在程序执行的任意时刻都只有 `GOMAXPROCS` 个 goroutine 在同时运行。
+P的个数是通过runtime.GOMAXPROCS设定（最大256），Go1.5版本之后**默认为物理线程数**。启动时环境变量 `GOMAXPROCS `或者是由 runtime 的方法 `GOMAXPROCS() `决定。这意味着在程序执行的**任意时刻都只有 `GOMAXPROCS` 个 goroutine 在同时运行**。
 
 **2、M 的数量:**
 
@@ -482,7 +482,7 @@ Go 目前使用的调度器是 2012 年重新设计的，因为之前的调度�
 
 1、P 何时创建：在确定了 P 的最大数量 n 后，运行时系统会根据这个数量创建 n 个 P。
 
-2、M 何时创建：没有足够的 M 来关联 P 并运行其中的可运行的 G。比如所有的 M 此时都阻塞住了，而 P 中还有很多就绪任务，就会去寻找空闲的 M，而没有空闲的，就会去创建新的 M。
+2、M 何时创建：**没有足够的 M 来关联 P 并运行其中的可运行的 G**。比如所有的 M 此时都阻塞住了，而 P 中还有很多就绪任务，就会去寻找空闲的 M，而没有空闲的，就会去创建新的 M。
 
 #### (2) 调度器的设计策略
 
@@ -496,9 +496,9 @@ Go 目前使用的调度器是 2012 年重新设计的，因为之前的调度�
 
  当本线程因为 G 进行系统调用阻塞时，线程释放绑定的 P，把 P 转移给其他空闲的线程执行。
 
-利用并行：GOMAXPROCS 设置 P 的数量，最多有 GOMAXPROCS 个线程分布在多个 CPU 上同时运行。GOMAXPROCS 也限制了并发的程度，比如 **GOMAXPROCS = 核数/2**，则最多利用了一半的 CPU 核进行并行。
+利用并行：GOMAXPROCS 设置 P 的数量，最多有 GOMAXPROCS 个线程分布在多个 CPU 上同时运行。GOMAXPROCS 也限制了并发的程度，比如 **GOMAXPROCS = 核数/2**，则**最多利用了一半的 CPU 核进行并行**。
 
-抢占：在 coroutine 中要等待一个协程主动让出 CPU 才执行下一个协程，在 Go 中，一个 goroutine 最多占用 CPU 10ms，防止其他 goroutine 被饿死，这就是 goroutine 不同于 coroutine 的一个地方。
+抢占：在 coroutine 中要等待一个协程主动让出 CPU 才执行下一个协程，在 Go 中，**一个 goroutine 最多占用 CPU 10ms**，防止其他 goroutine 被饿死，这就是 goroutine 不同于 coroutine 的一个地方。
 
 全局 G 队列：在新的调度器中依然有全局 G 队列，但功能已经被弱化了，当 M 执行 work stealing 从其他 P 偷不到 G 时，它可以从全局 G 队列获取 G。
 
@@ -524,7 +524,7 @@ Go 目前使用的调度器是 2012 年重新设计的，因为之前的调度�
 
 ![](https://raw.githubusercontent.com/jiutiananshu/Picture/master/img/j37FX8nek9.png)
 
-特殊的 M0 和 G0
+**特殊的 M0 和 G0**
 
 **M0**
 
@@ -532,7 +532,7 @@ Go 目前使用的调度器是 2012 年重新设计的，因为之前的调度�
 
 **G0**
 
-**G0 是每次启动一个 M 都会第一个创建的 goroutine**，**G0 仅用于负责调度的 G**，G0 不指向任何可执行的函数，每个 M 都会有一个自己的 G0。在调度或系统调用时会使用 G0 的栈空间，全局变量的 G0 是 M0 的 G0。
+**G0 是每次启动一个 M 都会第一个创建的 goroutine**，**G0 仅用于负责调度的 G**，G0 不指向任何可执行的函数，**每个 M 都会有一个自己的 G0**。在调度或系统调用时会使用 G0 的栈空间，全局变量的 G0 是 M0 的 G0。
 
 我们来跟踪一段代码
 
@@ -564,7 +564,7 @@ func main() {
 
 7. G 退出，再次回到 M 获取可运行的 G，这样重复下去，直到 main.main 退出，runtime.main 执行 Defer 和 Panic 处理，或调用 runtime.exit 退出程序。
 
-8. 调度器的生命周期几乎占满了一个 Go 程序的一生，runtime.main 的 goroutine 执行之前都是为调度器做准备工作，runtime.main 的 goroutine 运行，才是调度器的真正开始，直到 runtime.main 结束而结束。
+8. 调度器的生命周期几乎占满了一个 Go 程序的一生，runtime.main 的 goroutine 执行之前都是为调度器做准备工作，**runtime.main 的 goroutine 运行，才是调度器的真正开始，直到 runtime.main 结束而结束**。
 
 
 #### (5) 可视化 GMP 编程
@@ -728,6 +728,7 @@ P 拥有 G1，M1 获取 P 后开始运行 G1，G1 使用 go func() 创建了 G2�
 ![](https://raw.githubusercontent.com/jiutiananshu/Picture/master/img/Pm8LOYcsWQ.png)
 
 (2) 场景 2
+
 G1 运行完成后 (函数：`goexit`)，M 上运行的 goroutine 切换为 G0，G0 负责调度时协程的切换（函数：`schedule`）。从 P 的本地队列取 G2，从 G0 切换到 G2，并开始运行 G2 (函数：execute)。实现了线程 M1 的复用。
 
 ![](https://raw.githubusercontent.com/jiutiananshu/Picture/master/img/JWDtmKG3rK.png)
@@ -814,7 +815,7 @@ G8 创建了 G9，假如 G8 进行了非阻塞系统调用。
 |      情形       |                             说明                             |
 | :-------------: | :----------------------------------------------------------: |
 | 使用关键字 `go` |      go 创建一个新的 goroutine，Go scheduler 会考虑调度      |
-|       GC        | 由于进行 GC 的 goroutine 也需要在 M 上运行，因此肯定会发生调度。当然，Go scheduler 还会做很多其他的调度，例如调度不涉及堆访问的 goroutine 来运行。GC 不管栈上的内存，只会回收堆上的内存 |
+|       GC        | 由于进行 GC 的 goroutine 也需要在 M 上运行，因此肯定会发生调度。当然，Go scheduler 还会做很多其他的调度，例如调度不涉及堆访问的 goroutine 来运行。**GC 不管栈上的内存，只会回收堆上的内存** |
 |    系统调用     | 当 goroutine 进行系统调用时，会阻塞 M，所以它会被调度走，同时一个新的 goroutine 会被调度上来 |
 |  内存同步访问   | atomic，mutex，channel 操作等会使 goroutine 阻塞，因此会被调度走。等条件满足后（例如其他 goroutine 解锁了）还会被调度上来继续运行 |
 
@@ -970,7 +971,7 @@ func main() {
 }
 ```
 
-在发布订阅模型中，每条消息都会传送给多个订阅者。发布者通常不会知道、也不关心哪一个订阅者正在接收主题消息。订阅者和发布者可以在运行时动态添加，是一种松散的耦合关系，这使得系统的复杂性可以随时间的推移而增长。在现实生活中，像天气预报之类的应用就可以应用这个并发模式。
+在发布订阅模型中，**每条消息都会传送给多个订阅者。发布者通常不会知道、也不关心哪一个订阅者正在接收主题消息。**订阅者和发布者可以在运行时动态添加，是一种松散的耦合关系，这使得系统的复杂性可以随时间的推移而增长。在现实生活中，像天气预报之类的应用就可以应用这个并发模式。
 
 ## 控制并发数
 
@@ -1342,7 +1343,8 @@ func worker(ctx context.Context, wg *sync.WaitGroup) error {
         case <-ctx.Done():            
         	return ctx.Err()        
     	}    
-    }}
+    }
+}
 func main() {    
     ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)    
     var wg sync.WaitGroup    
@@ -1412,7 +1414,7 @@ func main() {
 
 [参考](https://segmentfault.com/a/1190000019570427)
 
-在1.4版本之前go的协程栈管理使用[分段栈](https://link.segmentfault.com/?enc=zGkSQfB0kyvvTw3f%2FiHL9w%3D%3D.4%2FbUxtYQaekP4cSF0VzsCgXsDkxul0iLlB6r1ZlrQDXcX01ZfwpYc1%2Bxxh8b0pr%2B)机制实现。实现方式：当检测到函数需要更多栈时，分配一块新栈，旧栈和新栈使用指针连接起来，函数返回就释放。 这样的机制存在2个问题：
+在1.4版本之前go的协程栈管理使用[分段栈](https://link.segmentfault.com/?enc=zGkSQfB0kyvvTw3f%2FiHL9w%3D%3D.4%2FbUxtYQaekP4cSF0VzsCgXsDkxul0iLlB6r1ZlrQDXcX01ZfwpYc1%2Bxxh8b0pr%2B)机制实现。实现方式：**当检测到函数需要更多栈时，分配一块新栈，旧栈和新栈使用指针连接起来，函数返回就释放**。 这样的机制存在2个问题：
 
 - 多次循环调用同一个函数会出现“hot split”问题，例子：[stacksplit.go](https://link.segmentfault.com/?enc=okmdG59zUtY5Ckw0btU%2B8g%3D%3D.uM3%2FQfL%2Fh9RWnms37wwgFwHSD00x4ab%2FWdqZKtY34I8%2FCMhd9UPwAxJ5WIWmzrU%2BD6qCqhCIsxTCfuO%2FKwwA1wPrmqfjuV9Z13BTYGhxLzuQgr1Er19ZyMReOwNOhifV%2FUY4oDl%2FnJU32%2FoQQxOZgA%3D%3D)
 - 每次分配和释放都要额外消耗
@@ -1452,7 +1454,7 @@ func newstack() {
 }
 ```
 
-每一个函数执行都要占用栈空间，用于保存变量，参数等。运行在协程里的函数自然是占用运行它的协程栈。但协程的栈是有限的，如果发现不够用，会调用`stackalloc`分配一块新的栈，大小比原来大一倍。
+每一个函数执行都要占用栈空间，用于保存变量，参数等。运行在协程里的函数自然是占用运行它的协程栈。但协程的栈是有限的，如果**发现不够用，会调用`stackalloc`分配一块新的栈，大小比原来大一倍**。
 
 ### [栈缩容](https://link.segmentfault.com/?enc=GyVIakqU9PsrteMqE9DToQ%3D%3D.CxP1bufEuXdcM7i3k%2Fegol3EU593XROGfr9oRYzIObXb6ExdnUPfLib4nA60umfX5csJxF1fZwbcdgo5gnPsQpwRiWw1daeu%2FVfm2GlfU4I%3D)
 
@@ -1482,7 +1484,7 @@ func shrinkstack(gp *g) {
 }
 ```
 
-栈的缩容主要是发生在GC期间。一个协程变成常驻状态，繁忙时需要占用很大的内存，但空闲时占用很少，这样会浪费很多内存，为了避免浪费Go在GC时对协程的栈进行了缩容，缩容也是分配一块新的内存替换原来的，大小只有原来的1/2。
+**栈的缩容主要是发生在GC期间**。一个协程变成常驻状态，繁忙时需要占用很大的内存，但空闲时占用很少，这样会浪费很多内存，为了避免浪费Go在GC时对协程的栈进行了缩容，**缩容也是分配一块新的内存替换原来的，大小只有原来的1/2**。
 
 ### 扩容和缩容这个过程做了什么？
 
@@ -1538,7 +1540,7 @@ func copystack(gp *g, newsize uintptr, sync bool) {
 }
 ```
 
-在扩容和缩容这个过程中，做了很多调整。从连续栈的实现方式上我们了解到，不管是扩容还是缩容，都重新申请一块新栈，然后把旧栈的数据复制到新栈。协程占用的物理内存完全被替换了，而Go在运行时会把指针保存到内存里面，例如：`gp.sched.ctxt` ，`gp._defer` ，`gp._panic`，包括函数里的指针。这部分指针值会被转换成整数型`uintptr`，然后 `+ delta`进行调整。
+在扩容和缩容这个过程中，做了很多调整。从连续栈的实现方式上我们了解到，**不管是扩容还是缩容，都重新申请一块新栈，然后把旧栈的数据复制到新栈**。协程占用的物理内存完全被替换了，而Go在运行时会把指针保存到内存里面，例如：`gp.sched.ctxt` ，`gp._defer` ，`gp._panic`，包括函数里的指针。这部分指针值会被转换成整数型`uintptr`，然后 `+ delta`进行调整。
 
 ```go
 func adjustpointer(adjinfo *adjustinfo, vpp unsafe.Pointer) {
@@ -1849,8 +1851,8 @@ func adjustframe(frame *stkframe, arg unsafe.Pointer) bool {
 
 连续栈虽然解决了分段栈的2个问题，但这种实现方式也会带来其他问题：
 
-- 更多的虚拟内存碎片。尤其是你需要更大的栈时，分配一块连续的内存空间会变得更困难
-- 指针会被限制放入栈。在go里面不允许二个协程的指针相互指向。这会增加实现的复杂性。
+- **更多的虚拟内存碎片**。尤其是你需要更大的栈时，分配一块连续的内存空间会变得更困难
+- **指针会被限制放入栈**。在go里面不允许二个协程的指针相互指向。这会增加实现的复杂性。
 
 #### 收益
 
@@ -1890,11 +1892,13 @@ both split: 1.29008309s
 - 杀死一个 goroutine 设计上会有很多挑战，当前所拥有的资源如何处理？堆栈如何处理？defer 语句需要执行么？
 - 如果允许 defer 语句执行，那么 defer 语句可能阻塞 goroutine 退出，这种情况下怎么办呢？
 
+**当父协程是main协程时，父协程退出，父协程下的所有子协程也会跟着退出；当父协程不是main协程时，父协程退出，父协程下的所有子协程并不会跟着退出（子协程直到自己的所有逻辑执行完或者是main协程结束才结束）**
+
 ### 一些建议
 
 因为 goroutine 不能被强制 kill，在超时或其他类似的场景下，为了 goroutine 尽可能正常退出，建议如下：
 
-- 尽量使用非阻塞 I/O（非阻塞 I/O 常用来实现高性能的网络库），阻塞 I/O 很可能导致 goroutine 在某个调用一直等待，而无法正确结束。
+- **尽量使用非阻塞 I/O**（非阻塞 I/O 常用来实现高性能的网络库），阻塞 I/O 很可能导致 goroutine 在某个调用一直等待，而无法正确结束。
 - 业务逻辑总是考虑退出机制，避免死循环。
 - 任务分段执行，超时后即时退出，避免 goroutine 无用的执行过多，浪费资源。
 
@@ -1958,9 +1962,9 @@ func (mc *MyChannel) SafeClose() {
 
 #### 优雅的方式
 
-- 情形一：M个接收者和一个发送者，发送者通过关闭用来传输数据的通道来传递发送结束信号。
-- 情形二：一个接收者和N个发送者，此唯一接收者通过关闭一个额外的信号通道来通知发送者不要再发送数据了。
-- 情形三：M个接收者和N个发送者，它们中的任何协程都可以让一个中间调解协程帮忙发出停止数据传送的信号。
+- 情形一：M个接收者和一个发送者，发送者**通过关闭用来传输数据的通道**来传递发送结束信号。
+- 情形二：一个接收者和N个发送者，此唯一接收者**通过关闭一个额外的信号通道来通知发送者不要再发送数据了**。
+- 情形三：M个接收者和N个发送者，它们中的任何协程都可以**让一个中间调解协程帮忙发出停止数据传送**的信号。
 - 情形四：“M个接收者和一个发送者”情形的一个变种：用来传输数据的通道的关闭请求由第三方发出
 - 情形五：“N个发送者”的一个变种：用来传输数据的通道必须被关闭以通知各个接收者数据发送已经结束了
 
@@ -1974,7 +1978,7 @@ func (mc *MyChannel) SafeClose() {
 
 泄露的原因大多集中在：
 
-- Goroutine 内正在进行 channel/mutex 等读写操作，但由于逻辑问题，某些情况下会被一直阻塞。
+- Goroutine 内正在进行 channel/mutex 等读写操作，但由于逻辑问题，某些情况下会**被一直阻塞**。
 - Goroutine 内的业务逻辑进入死循环，资源一直无法释放。
 - Goroutine 内的业务逻辑进入长时间等待，有不断新增的 Goroutine 进入等待。
 
