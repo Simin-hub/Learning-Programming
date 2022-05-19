@@ -271,7 +271,7 @@ type readOnly struct {
     m  map[interface{}]*entry
     amended bool 
 }
-复制代码
+
 ```
 
 | 说明    | 类型                   | 作用                                                   |
