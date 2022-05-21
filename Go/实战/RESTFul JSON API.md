@@ -24,8 +24,6 @@ REST API 也称为 RESTful API，是遵循 REST 架构规范的应用编程接�
 
 REST这个词，是[Roy Thomas Fielding](https://en.wikipedia.org/wiki/Roy_Fielding)在他2000年的[博士论文](https://www.ics.uci.edu/~fielding/pubs/dissertation/top.htm)中提出的。
 
-![img](https://www.ruanyifeng.com/blogimg/asset/201109/bg2011091201.jpg)
-
 Fielding是一个非常重要的人，他是HTTP协议（1.0版和1.1版）的主要设计者、Apache服务器软件的作者之一、Apache基金会的第一任主席。所以，他的这篇论文一经发表，就引起了关注，并且立即对互联网开发产生了深远的影响。
 
 他这样介绍论文的写作目的：

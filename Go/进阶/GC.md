@@ -8,7 +8,7 @@
 
 ### 1. 什么是GC
 
-在早期经常遭到唾弃的就是在垃圾回收 (Garbage Collection，下称：GC) 机制中 STW (Stop-The-World) 的时间过长。那么这个时候，我们又会好奇一点，作为 STW 的起始，Go 语言中什么时候才会触发 GC 呢？当程序向操作系统申请的内存不再需要时，垃圾回收主动将其回收并供其他代码进行内存申请时候复用，或者将其归还给操作系统，这种针对内存级别资源的自动回收过程，即为垃圾回收。而负责垃圾回收的程序组件，即为垃圾回收器。
+在早期经常遭到唾弃的就是在垃圾回收 (Garbage Collection，下称：GC) 机制中 STW (Stop-The-World) 的时间过长。那么这个时候，我们又会好奇一点，作为 STW 的起始，Go 语言中什么时候才会触发 GC 呢？**当程序向操作系统申请的内存不再需要时，垃圾回收主动将其回收并供其他代码进行内存申请时候复用，或者将其归还给操作系统，这种针对内存级别资源的自动回收过程，即为垃圾回收**。而负责垃圾回收的程序组件，即为垃圾回收器。
 
 在计算机科学中，**垃圾回收 (GC) 是一种自动管理内存的机制**，垃圾回收器会去尝试回收程序不再使用的对象及其占用的内存。
 
@@ -27,9 +27,9 @@
 
 **根对象在垃圾回收的术语中又叫做根集合**，它是垃圾回收器在标记过程时最先检查的对象，包括：
 
-1. 全局变量：程序在编译期就能确定的那些存在于程序整个生命周期的变量。
-2. 执行栈：每个 goroutine 都包含自己的执行栈，这些执行栈上包含栈上的变量及指向分配的堆内存区块的指针。
-3. 寄存器：寄存器的值可能表示一个指针，参与计算的这些指针可能指向某些赋值器分配的堆内存区块。
+1. **全局变量**：程序在编译期就能确定的那些存在于程序整个生命周期的变量。
+2. **执行栈**：每个 goroutine 都包含自己的执行栈，这些执行栈上包含栈上的变量及指向分配的堆内存区块的指针。
+3. **寄存器**：寄存器的值可能表示一个指针，参与计算的这些指针可能指向某些赋值器分配的堆内存区块。
 
 ### 4. 常见的GC实现方式有哪些？Go语言的GC使用的是什么？
 
@@ -60,15 +60,44 @@
 
 ### 3、GC 触发场景
 
-**Go 语言中 GC 的流程是什么？**
+#### **Go 语言中 GC 的流程是什么？**
+
+[参考](https://www.luozhiyun.com/archives/475)
 
 当前版本的 Go 以 STW 为界限，可以将 GC 划分为五个阶段：
 
 ![image-20220408153248786](https://raw.githubusercontent.com/Simin-hub/Picture/master/img/image-20220408153248786.png)
 
+1. sweep termination（清理终止）
+   1. 会触发 STW ，所有的 P（处理器） 都会进入 safe-point（安全点）；
+   2. 清理未被清理的 span ，不知道什么是 span 的同学可以看看我的：详解Go中内存分配源码实现 https://www.luozhiyun.com/archives/434；
+2. the mark phase（标记阶段）
+   1. 将 `_GCoff` GC 状态 改成 `_GCmark`，开启 Write Barrier （写入屏障）、mutator assists（协助线程），将根对象入队；
+   2. 恢复程序执行，mark workers（标记进程）和 mutator assists（协助线程）会开始并发标记内存中的对象。对于任何指针写入和新的指针值，都会被写屏障覆盖，而所有新创建的对象都会被直接标记成黑色；
+   3. GC 执行根节点的标记，这包括扫描所有的栈、全局对象以及不在堆中的运行时数据结构。扫描goroutine 栈绘导致 goroutine 停止，并对栈上找到的所有指针加置灰，然后继续执行 goroutine。
+   4. GC 在遍历灰色对象队列的时候，会将灰色对象变成黑色，并将该对象指向的对象置灰；
+   5. GC 会使用分布式终止算法（distributed termination algorithm）来检测何时不再有根标记作业或灰色对象，如果没有了 GC 会转为mark termination（标记终止）；
+3. mark termination（标记终止）
+   1. STW，然后将 GC 阶段转为 `_GCmarktermination`,关闭 GC 工作线程以及 mutator assists（协助线程）；
+   2. 执行清理，如 flush mcache；
+4. the sweep phase（清理阶段）
+   1. 将 GC 状态转变至 `_GCoff`，初始化清理状态并关闭 Write Barrier（写入屏障）；
+   2. 恢复程序执行，从此开始新创建的对象都是白色的；
+   3. 后台并发清理所有的内存管理单元
+
+需要注意的是，上面提到了 mutator assists，因为有一种情况：
+
+> during the collection that the Goroutine dedicated to GC will not finish the Marking work before the heap memory in-use reaches its limit
+
+因为 GC 标记的工作是分配 25% 的 CPU 来进行 GC 操作，所以有可能 GC 的标记工作线程比应用程序的分配内存慢，导致永远标记不完，那么这个时候就需要应用程序的线程来协助完成标记工作：
+
+> If the collector determines that it needs to slow down allocations, it will recruit the application Goroutines to assist with the Marking work. This is called a Mutator Assist. One positive side effect of Mutator Assist is that it helps to finish the collection faster.
+
 具体而言，各个阶段的触发函数分别为：
 
 ![img](https://433327134-files.gitbook.io/~/files/v0/b/gitbook-legacy-files/o/assets%2F-LjLtSYqqsBQODAJIhQ5%2F-Lxxz34HPuUqSYyGYrbb%2F-Lxxz3x6DZ0Z9lfqgQEU%2Fgc-process.png?generation=1578366687417405&alt=media)
+
+#### GC 触发的场景
 
 GC 触发的场景主要分为两大类，分别是：
 
@@ -221,7 +250,7 @@ func sysmon() {
 
 在了解定时触发的机制后，另外一个场景就是分配的堆空间的时候，那么我们要看的地方就非常明确了。
 
-那就是运行时申请堆内存的 mallocgc 方法。核心代码如下：
+那就是**运行时申请堆内存的 mallocgc 方法**。核心代码如下：
 
 ```go
 func mallocgc(size uintptr, typ *_type, needzero bool) unsafe.Pointer { 
@@ -261,9 +290,9 @@ func mallocgc(size uintptr, typ *_type, needzero bool) unsafe.Pointer {
 } 
 ```
 
-小对象：如果申请小对象时，发现当前内存空间不存在空闲跨度时，将会需要调用 nextFree 方法获取新的可用的对象，可能会触发 GC 行为。
+小对象：**如果申请小对象时，发现当前内存空间不存在空闲跨度时，将会需要调用 nextFree 方法获取新的可用的对象，可能会触发 GC 行为**。
 
-大对象：如果申请大于 32k 以上的大对象时，可能会触发 GC 行为。
+大对象：**如果申请大于 32k 以上的大对象时，可能会触发 GC 行为**。
 
 
 
@@ -282,15 +311,15 @@ func mallocgc(size uintptr, typ *_type, needzero bool) unsafe.Pointer {
 
 **在这个过程中整个用户代码被停止或者放缓执行**， `STW` 越长，对用户代码造成的影响（例如延迟）就越大，早期 Go 对垃圾回收器的实现中 `STW` 长达几百毫秒，对时间敏感的实时通信等应用程序会造成巨大的影响。
 
-[stw工作过程](https://segmentfault.com/a/1190000022499402)
-
 #### STW的步骤
+
+[参考](https://segmentfault.com/a/1190000022499402)
 
 第一步，抢占所有正在运行的`goroutines`
 
 ![img](https://raw.githubusercontent.com/Simin-hub/Picture/master/img/1460000022499414)
 
-第二步，一旦 `goroutines`被抢占，正在运行的`goroutines`将在安全的地方暂停，然后所有的p[1]都将被标记为暂停，停止运行任何代码。
+第二步，一旦 `goroutines`被抢占，正在运行的`goroutines`将**在安全的地方暂停**，然后所有的p[1]都将被标记为暂停，停止运行任何代码。
 
 ![img](https://raw.githubusercontent.com/Simin-hub/Picture/master/img/1460000022499409)
 
@@ -308,7 +337,7 @@ func mallocgc(size uintptr, typ *_type, needzero bool) unsafe.Pointer {
 
 #### System calls
 
-STW时期可能会影响系统调用，因为系统调用可能会在stw时期返回，通过密集执行系统调用的程序来看看怎样处理这种情况，
+**STW时期可能会影响系统调用，因为系统调用可能会在stw时期返回**，通过密集执行系统调用的程序来看看怎样处理这种情况，
 
 ```go
  func main() {  
@@ -461,17 +490,17 @@ Golang 为了解决这个问题，引入了写屏障这个机制。
 
 **写屏障：该屏障之前的写操作和之后的写操作相比，先被系统其它组件感知。**
 
-通俗的讲：就是在 gc 跑的过程中，可以监控对象的内存修改，并对对象进行重新标记。(实际上也是超短暂的 stw，然后对对象进行标记)
+通俗的讲：就是在 gc 跑的过程中，**可以监控对象的内存修改，并对对象进行重新标记**。(实际上也是超短暂的 stw，然后对对象进行标记)
 
-每次堆中的指针被修改写屏障都会去执行。如果堆中对象的指针被修改，就意味着那个对象现在是可触达的，写屏障会把它标记为灰色并把它放到灰色集合中。
+每次堆中的指针被修改写屏障都会去执行。如果**堆中对象的指针被修改，就意味着那个对象现在是可触达的，写屏障会把它标记为灰色并把它放到灰色集合中**。
 
 **修改器 运行写屏障，从而保证黑色集合中没有任何元素的指针去指向白色集合中的元素。**
 
 写屏障直观作用有两个:
 
-1. process 新生成的内存对象会被直接标记成灰色
+1. process **新生成的内存对象会被直接标记成灰色**
 
-2. 位于黑色集合中的内存对象引用了一个白色集合中的对象，写屏障会将白色集合的这个对象标记为灰色
+2. 位于**黑色集合中的内存对象引用了一个白色集合中的对象，写屏障会将白色集合的这个对象标记为灰色**
 
 gc 一旦开始，无论是创建对象还是对象的引用改变，都会先变为灰色。
 
@@ -514,6 +543,8 @@ gc 一旦开始，无论是创建对象还是对象的引用改变，都会先�
 
 有两种非常经典的写屏障：**Dijkstra 插入屏障和 Yuasa 删除屏障。**
 
+##### Dijkstra 插入屏障
+
 灰色赋值器的 Dijkstra 插入屏障的基本思想是避免满足条件 1：
 
 ```
@@ -524,14 +555,28 @@ func DijkstraWritePointer(slot *unsafe.Pointer, ptr unsafe.Pointer) {
 }
 ```
 
+```
+添加下游对象(当前下游对象slot, 新下游对象ptr) {   
+  //1
+  标记灰色(新下游对象ptr)   
+  
+  //2
+  当前下游对象slot = 新下游对象ptr                    
+}
+```
+
 为了防止黑色对象指向白色对象，应该假设 `*slot` 可能会变为黑色，为了确保 `ptr` 不会在被赋值到 `*slot` 前变为白色，`shade(ptr)` 会先将指针 `ptr` 标记为灰色，进而避免了条件 1。如图所示：
 
 ![img](https://433327134-files.gitbook.io/~/files/v0/b/gitbook-legacy-files/o/assets%2F-LjLtSYqqsBQODAJIhQ5%2F-Lxxz34HPuUqSYyGYrbb%2F-LxWIclhYCSYqaN6skbo%2Fgc-wb-dijkstra.png?generation=1578366683649015&alt=media)
 
 Dijkstra 插入屏障的好处在于可以立刻开始并发标记。但存在两个缺点：
 
-1. 由于 Dijkstra 插入屏障的“保守”，在一次回收过程中可能会残留一部分对象没有回收成功，只有在下一个回收过程中才会被回收；
-2. 在标记阶段中，每次进行指针赋值操作时，都需要引入写屏障，这无疑会增加大量性能开销；为了避免造成性能问题，Go 团队在最终实现时，没有为所有栈上的指针写操作，启用写屏障，而是当发生栈上的写操作时，将栈标记为灰色，但此举产生了灰色赋值器，将会需要标记终止阶段 STW 时对这些栈进行重新扫描。
+1. 由于 Dijkstra 插入屏障的“保守”，**在一次回收过程中可能会残留一部分对象没有回收成功，只有在下一个回收过程中才会被回收**；
+2. **在标记阶段中，每次进行指针赋值操作时，都需要引入写屏障，这无疑会增加大量性能开销**；为了避免造成性能问题，Go 团队在最终实现时，没有为所有栈上的指针写操作，启用写屏障，而是当发生栈上的写操作时，将栈标记为灰色，但此举产生了灰色赋值器，将会需要标记终止阶段 STW 时对这些栈进行重新扫描。
+
+“插入屏障”机制,在**栈空间的对象操作中不使用**. 而仅仅使用在堆空间对象的操作中.
+
+##### Yuasa 删除屏障
 
 另一种比较经典的写屏障是黑色赋值器的 Yuasa 删除屏障。其基本思想是避免满足条件 2：
 
@@ -543,11 +588,27 @@ func YuasaWritePointer(slot *unsafe.Pointer, ptr unsafe.Pointer) {
 }
 ```
 
+```
+添加下游对象(当前下游对象slot， 新下游对象ptr) {
+  //1
+  if (当前下游对象slot是灰色 || 当前下游对象slot是白色) {
+          标记灰色(当前下游对象slot)     //slot为被删除对象， 标记为灰色
+  }
+  
+  //2
+  当前下游对象slot = 新下游对象ptr
+}
+```
+
 为了防止丢失从灰色对象到白色对象的路径，应该假设 `*slot` 可能会变为黑色，为了确保 `ptr` 不会在被赋值到 `*slot` 前变为白色，`shade(*slot)` 会先将 `*slot` 标记为灰色，进而该写操作总是创造了一条灰色到灰色或者灰色到白色对象的路径，进而避免了条件 2。
 
-Yuasa 删除屏障的优势则在于不需要标记结束阶段的重新扫描，结束时候能够准确的回收所有需要回收的白色对象。缺陷是 Yuasa 删除屏障会拦截写操作，进而导致波面的退后，产生“冗余”的扫描：
+Yuasa 删除屏障的**优势则在于不需要标记结束阶段的重新扫描**，结束时候能够准确的回收所有需要回收的白色对象。缺陷是 Yuasa 删除屏障会拦截写操作，进而导致波面的退后，产生“冗余”的扫描：
 
 ![img](https://433327134-files.gitbook.io/~/files/v0/b/gitbook-legacy-files/o/assets%2F-LjLtSYqqsBQODAJIhQ5%2F-Lxxz34HPuUqSYyGYrbb%2F-LxWIcljJBnHL1q8dFqC%2Fgc-wb-yuasa.png?generation=1578366685654095&alt=media)
+
+这种方式的回收精度低，一个对象即使被删除了最后一个指向它的指针也依旧可以活过这一轮，在下一轮GC中被清理掉。
+
+##### 混合写屏障
 
 Go 在 1.8 的时候为了简化 GC 的流程，同时减少标记终止阶段的重扫成本，将 Dijkstra 插入屏障和 Yuasa 删除屏障进行混合，形成混合写屏障。该屏障提出时的基本思想是：**对正在被覆盖的对象进行着色，且如果当前栈未扫描完成，则同样对指针进行着色。**
 
@@ -589,7 +650,22 @@ Go V1.8版本引入了混合写屏障机制（hybrid write barrier），避免�
 
 `满足`: 变形的**弱三色不变式**.
 
+```
+添加下游对象(当前下游对象slot, 新下游对象ptr) {
+      //1 
+        标记灰色(当前下游对象slot)    //只要当前下游对象被移走，就标记灰色
+      
+      //2 
+      标记灰色(新下游对象ptr)
+          
+      //3
+      当前下游对象slot = 新下游对象ptr
+}
+```
 
+*这里我们注意， 屏障技术是不在栈上应用的，因为要保证栈的运行效率。*
+
+Golang中的混合写屏障满足`弱三色不变式`，结合了删除写屏障和插入写屏障的优点，只需要在开始时并发扫描各个goroutine的栈，使其变黑并一直保持，这个过程不需要STW，而标记结束后，因为栈在扫描后始终是黑色的，也无需再进行re-scan操作了，减少了STW的时间
 
 ## GC 的优化问题
 
@@ -597,10 +673,10 @@ Go V1.8版本引入了混合写屏障机制（hybrid write barrier），避免�
 
 **Go 的 GC 被设计为成比例触发、大部分工作与赋值器并发、不分代、无内存移动且会主动向操作系统归还申请的内存**。因此最主要关注的、能够影响赋值器的性能指标有：
 
-- CPU 利用率：回收算法会在多大程度上拖慢程序？有时候，这个是通过回收占用的 CPU 时间与其它 CPU 时间的百分比来描述的。
-- GC 停顿时间：回收器会造成多长时间的停顿？目前的 GC 中需要考虑 STW 和 Mark Assist 两个部分可能造成的停顿。
-- GC 停顿频率：回收器造成的停顿频率是怎样的？目前的 GC 中需要考虑 STW 和 Mark Assist 两个部分可能造成的停顿。
-- GC 可扩展性：当堆内存变大时，垃圾回收器的性能如何？但大部分的程序可能并不一定关心这个问题。
+- **CPU 利用率**：回收算法会在多大程度上拖慢程序？有时候，这个是通过回收占用的 CPU 时间与其它 CPU 时间的百分比来描述的。
+- **GC 停顿时间**：回收器会造成多长时间的停顿？目前的 GC 中需要考虑 STW 和 Mark Assist 两个部分可能造成的停顿。
+- **GC 停顿频率**：回收器造成的停顿频率是怎样的？目前的 GC 中需要考虑 STW 和 Mark Assist 两个部分可能造成的停顿。
+- **GC 可扩展性**：当堆内存变大时，垃圾回收器的性能如何？但大部分的程序可能并不一定关心这个问题。
 
 ### Go 的 GC 如何调优？
 
