@@ -40,19 +40,13 @@ API 是通过云原生应用开发来连接您自己的基础架构的一个简�
 
 这类 API 仅供内部使用，能让公司最大限度地控制自己的 API。
 
-
-
 #### 合作伙伴
 
 您会和特定的业务合作伙伴共享这类 API。它能在不影响质量的情况下带来额外收益。
 
-
-
 #### 公共
 
 这类 API 可供所有人使用。第三方可以使用这类 API 来开发应用，以便与您的 API 进行互动或实现某种创新。
-
-
 
 ## 利用 API 实现创新
 
@@ -86,9 +80,9 @@ Web API 通常会使用 HTTP 来传输请求消息，并提供响应消息的结
 
 ## SOAP VS REST
 
-随着 Web API 的不断普及，相应的协议规范也随之产生了，从而推动了信息交换的标准化：简单对象访问协议，简称 SOAP。使用 SOAP 设计的 API 会使用 XML 格式来收发消息，并通过 HTTP 或 SMTP 来接收请求。使用 SOAP 时，在不同环境中运行的应用或使用不同语言编写的应用能够更加轻松地共享信息。
+随着 Web API 的不断普及，相应的协议规范也随之产生了，从而推动了信息交换的标准化：**简单对象访问协议，简称 SOAP**。使用 **SOAP 设计的 API 会使用 XML 格式来收发消息，并通过 HTTP 或 SMTP 来接收请求**。使用 SOAP 时，在不同环境中运行的应用或使用不同语言编写的应用能够更加轻松地共享信息。
 
-相关的规范还有一个，即[表述性状态传递（REST）](https://www.redhat.com/zh/topics/api/what-is-a-rest-api)。遵循 REST 架构约束的 Web API 被称为 RESTful API。REST 与 SOAP 有着根本区别：SOAP 是一种协议，而 REST 是一种架构模式。这意味着 RESTful Web API 没有官方标准。正如 Roy Fielding 在论文"Architectural Styles and the Design of Network-based Software Architectures"（架构模式以及基于网络的软件架构的设计）中定义的那样，只要 API 符合 RESTful 系统的 6 个导向性约束，就算作 RESTful API：
+相关的规范还有一个，即[表述性状态传递（REST）](https://www.redhat.com/zh/topics/api/what-is-a-rest-api)。**遵循 REST 架构约束的 Web API 被称为 RESTful API**。REST 与 SOAP 有着根本区别：SOAP 是一种协议，而 REST 是一种架构模式。这意味着 RESTful Web API 没有官方标准。正如 Roy Fielding 在论文"Architectural Styles and the Design of Network-based Software Architectures"（架构模式以及基于网络的软件架构的设计）中定义的那样，只要 API 符合 RESTful 系统的 6 个导向性约束，就算作 RESTful API：
 
 - **客户端/服务器架构：**REST 架构由客户端、服务器和资源构成，通过 HTTP 来处理请求。
 - **无状态：**请求所经过的服务器上不会存储任何客户端内容。与会话状态相关的信息会存储在客户端上。
@@ -119,6 +113,8 @@ Web API 通常会使用 HTTP 来传输请求消息，并提供响应消息的结
 
 [详细了解 SOA](https://www.redhat.com/zh/topics/cloud-native-apps/what-is-service-oriented-architecture)
 
-[RESTful API](https://github.com/Simin-hub/Golang-Learning-and-Interview/blob/main/Go/%E8%BF%9B%E9%98%B6/RESTFul%20JSON%20API.md)
+## [RESTful API](https://github.com/Simin-hub/Golang-Learning-and-Interview/blob/main/Go/%E5%AE%9E%E6%88%98/RESTFul%20JSON%20API.md)
 
-[RPC](https://github.com/Simin-hub/Golang-Learning-and-Interview/blob/main/Go/%E8%BF%9B%E9%98%B6/RPC.md)
+
+
+## [RPC](https://github.com/Simin-hub/Golang-Learning-and-Interview/blob/main/Go/%E8%BF%9B%E9%98%B6/RPC.md)
