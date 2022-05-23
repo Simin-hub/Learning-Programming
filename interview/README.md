@@ -14,8 +14,6 @@
 
 [Golang面试前二夜准备](https://www.modb.pro/db/159470)
 
-
-
 ## GO 面试题
 
 ### 新手
@@ -159,6 +157,8 @@
 - [net/http怎么做连接池和长链接？](net/http怎么做连接池和长链接？)
 
 ## 网络基础
+
+[计算机网络](https://github.com/Simin-hub/Golang-Learning-and-Interview/blob/main/Go/%E5%9F%BA%E7%A1%80/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BD%91%E7%BB%9C.md)
 
 - [漫画图解HTTP知识点+面试题](https://mp.weixin.qq.com/s/wNRoDoW_VEqiq8JelePj2g)
 - [TCP粘包 数据包：我只是犯了每个数据包都会犯的错](https://mp.weixin.qq.com/s/0-YBxU1cSbDdzcZEZjmQYA)
