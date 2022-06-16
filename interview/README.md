@@ -64,7 +64,7 @@
 - [昨天那个在for循环里append元素的同事，今天还在么？](https://studygolang.com/articles/30844)
 - [golang面试官：for select时，如果通道已经关闭会怎么样？如果只有一个case呢？](https://cloud.tencent.com/developer/article/1796708)
 - [go defer（for defer）](https://draveness.me/golang/docs/part2-foundation/ch05-keyword/golang-defer/)
-- [select可以用于什么？](https://blog.singee.me/2020/09/24/e8cb67835ea44243b136e3cdf8d5ea84/)
+- [select可以用于什么？](https://blog.csdn.net/zhaominpro/article/details/77570290)
 - [context包的用途？](https://zhuanlan.zhihu.com/p/76555349)
 - [switch 中如何强制执行下一个 case 代码块?](https://www.cnblogs.com/gwyy/p/13670090.html)
 - [如何从 panic 中恢复?](https://learnku.com/docs/the-way-to-go/133-recovery-from-panic-recover/3676)
