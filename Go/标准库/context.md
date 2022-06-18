@@ -120,7 +120,7 @@ func (*emptyCtx) Value(key interface{}) interface{} {
 
 ![golang-context-hierarchy](https://raw.githubusercontent.com/jiutiananshu/Picture/master/img/golang-context-hierarchy.png)
 
-从源代码来看，[`context.Background`](https://draveness.me/golang/tree/context.Background) 和 [`context.TODO`](https://draveness.me/golang/tree/context.TODO) 也只是互为别名，没有太大的差别，只是在使用和语义上稍有不同：
+从源代码来看，[`context.Background`](https://draveness.me/golang/tree/context.Background) 和 [`context.TODO`](https://draveness.me/golang/tree/context.TODO) 也**只是互为别名，没有太大的差别**，只是在使用和语义上稍有不同：
 
 - [`context.Background`](https://draveness.me/golang/tree/context.Background) 是上下文的默认值，所有其他的上下文都应该从它衍生出来；
 - [`context.TODO`](https://draveness.me/golang/tree/context.TODO) 应该仅在不确定应该使用哪种上下文时使用；
@@ -284,7 +284,7 @@ func (c *timerCtx) cancel(removeFromParent bool, err error) {
 
 [`context.timerCtx.cancel`](https://draveness.me/golang/tree/context.timerCtx.cancel) 方法不仅调用了 [`context.cancelCtx.cancel`](https://draveness.me/golang/tree/context.cancelCtx.cancel)，还会停止持有的定时器减少不必要的资源浪费。
 
-## 6.1.4 传值方法
+## 传值方法
 
 在最后我们需要了解如何使用上下文传值，[`context`](https://github.com/golang/go/tree/master/src/context) 包中的 [`context.WithValue`](https://draveness.me/golang/tree/context.WithValue) 能从父上下文中创建一个子上下文，传值的子上下文使用 [`context.valueCtx`](https://draveness.me/golang/tree/context.valueCtx) 类型：
 
@@ -318,13 +318,25 @@ func (c *valueCtx) Value(key interface{}) interface{} {
 
 如果 [`context.valueCtx`](https://draveness.me/golang/tree/context.valueCtx) 中存储的键值对与 [`context.valueCtx.Value`](https://draveness.me/golang/tree/context.valueCtx.Value) 方法中传入的参数不匹配，就会从父上下文中查找该键对应的值直到某个父上下文中返回 `nil` 或者查找到对应的值。
 
-## 6.1.5 小结 
+## context使用规范
+
+最后，Context虽然是神器，但开发者使用也要遵循基本法，以下是一些Context使用的规范：
+
+- Do not store Contexts inside a struct type; instead, pass a Context explicitly to each function that needs it. The Context should be the first parameter, typically named ctx；**不要把Context存在一个结构体当中，显式地传入函数**。**Context变量需要作为第一个参数使用，一般命名为ctx**；
+
+- Do not pass a nil Context, even if a function permits it. Pass context.TODO if you are unsure about which Context to use；**即使方法允许，也不要传入一个nil的Context，如果你不确定你要用什么Context的时候传一个context.TODO**；
+- Use context Values only for request-scoped data that transits processes and APIs, not for passing optional parameters to functions；**使用context的Value相关方法只应该用于在程序和接口中传递的和请求相关的元数据，不要用它来传递一些可选的参数**；
+- The same Context may be passed to functions running in different goroutines; Contexts are safe for simultaneous use by multiple goroutines；**同样的Context可以用来传递到不同的goroutine中，Context在多个goroutine中是安全的**；
+
+## 小结 
 
 Go 语言中的 [`context.Context`](https://draveness.me/golang/tree/context.Context) 的主要作用还是在多个 Goroutine 组成的树中同步取消信号以减少对资源的消耗和占用，虽然它也有传值的功能，但是这个功能我们还是很少用到。
 
 在真正使用传值的功能时我们也应该非常谨慎，使用 [`context.Context`](https://draveness.me/golang/tree/context.Context) 传递请求的所有参数一种非常差的设计，比较常见的使用场景是传递请求对应用户的认证令牌以及用于进行分布式追踪的请求 ID。
 
-## 6.1.6 延伸阅读 
+
+
+## 延伸阅读 
 
 - [Package context · Golang](https://golang.org/pkg/context/)
 - [Go Concurrency Patterns: Context](https://blog.golang.org/context)

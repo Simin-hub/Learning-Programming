@@ -92,7 +92,7 @@
 
 - [线程、进程、协程、goroutines ](https://zhuanlan.zhihu.com/p/27245377)
 - [golang面试题：对已经关闭的的chan进行读写，会怎么样？为什么？](https://mp.weixin.qq.com/s/izbZ3JRqX6jI6Wn7bV6xNQ)
-- [golang面试题：对未初始化的的chan进行读写，会怎么样？为什么？](https://mp.weixin.qq.com/s/ixJu0wrGXsCcGzveCqnr6A)
+- [golang面试题：对未初始化的的chan进行读写，会怎么样？为什么？](https://juejin.cn/post/6844904196181852173)
 - [sync.map 的优缺点和使用场景](https://studygolang.com/articles/22128)
 - [主协程如何等其余协程完再操作](https://blog.csdn.net/weixin_42678507/article/details/102786680)
 - [有缓存的channel和没有缓存的channel区别是什么？](https://zhuanlan.zhihu.com/p/355487940)
@@ -104,7 +104,7 @@
 - [协程和线程的差别](https://segmentfault.com/a/1190000040373756)
 - [开多个线程和开多个协程会有什么区别](https://www.kancloud.cn/todo/go_learn/1222804)
 - [协程可以自己主动让出 CPU 吗？](https://studygolang.com/articles/26795)
-- ==[GMP](https://learnku.com/articles/41728)==
+- [GMP](https://learnku.com/articles/41728)
 - [GMP模型](https://zboya.github.io/post/go_scheduler/?hmsr=toutiao.io&utm_medium=toutiao.io&utm_source=toutiao.io)
 - [动图图解，GMP里为什么要有P](https://mp.weixin.qq.com/s/SEE2TUeZQZ7W1BKkmnelAA)
 
