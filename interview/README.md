@@ -116,7 +116,7 @@
 
 - [开源库里会有一些类似下面这种奇怪的用法：`var _ io.Writer = (*myWriter)(nil)`，是为什么？](https://www.bookstack.cn/read/qcrao-Go-Questions/interface-%E7%BC%96%E8%AF%91%E5%99%A8%E8%87%AA%E5%8A%A8%E6%A3%80%E6%B5%8B%E7%B1%BB%E5%9E%8B%E6%98%AF%E5%90%A6%E5%AE%9E%E7%8E%B0%E6%8E%A5%E5%8F%A3.md)
 - [两个interface{} 能不能比较](https://www.jianshu.com/p/a982807819fa)
-- 断言时会发生拷贝吗
+- [断言时会发生拷贝吗](https://blog.csdn.net/qq_39397165/article/details/115500314)
 - [接口是怎么实现的？](https://juejin.cn/post/6844904082453299207)
 
 ### unsafe
@@ -125,7 +125,7 @@
 
 ### GC
 
-- [==重点==](https://www.cnblogs.com/luozhiyun/p/14564903.html)
+- [重点](https://www.cnblogs.com/luozhiyun/p/14564903.html)
 
 - [垃圾回收的过程是怎么样的？](https://zhuanlan.zhihu.com/p/297177002)
 - [什么是写屏障、混合写屏障，如何实现？](https://www.bookstack.cn/read/qcrao-Go-Questions/spilt.9.GC-GC.md)
