@@ -243,10 +243,10 @@
 - [seq为1000，发送了1000个数据，下一个seq是多少?](https://blog.csdn.net/HappyRocking/article/details/78198776)
 - [chunked块了解？介绍下](https://blog.csdn.net/zam183/article/details/103275025)
 - [BGP 协议和 OSPF 协议的区别](https://cloud.tencent.com/developer/article/1898179)
-- 简述在四层和七层网络协议中负载均衡的原理
-- http协议格式，几种方法，功能是什么
-- syn如果丢了，重传多少次
-- epoll可读情况有哪些
+- [简述在四层和七层网络协议中负载均衡的原理](https://cloud.tencent.com/developer/article/1082047)
+- [http协议格式，几种方法，功能是什么](https://www.jianshu.com/p/8fe93a14754c)
+- [syn如果丢了，重传多少次](https://www.csdn.net/tags/NtTagg1sNjU4NjMtYmxvZwO0O0OO0O0O.html)
+- [epoll可读情况有哪些](https://zhuanlan.zhihu.com/p/427512269)
 
 ## 操作系统
 
