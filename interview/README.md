@@ -229,24 +229,20 @@
 - [如何设计 API 接口使其实现幂等性？](https://cloud.tencent.com/developer/article/1474941)
 - [TCP 的 TIME_WAIT 和 CLOSE_WAIT](https://www.cnblogs.com/cangqinglang/p/13185825.html)
 - [HTTP 报文头部的组成结构](https://blog.csdn.net/ulike_MFY/article/details/79550241)
-- RestFul 与 RPC 的区别是什么？RestFul 的优点在哪里？
-- 从输入 URL 到展现页面的全过程
-- 什么是 TCP 粘包和拆包？
-- HTTP 中 GET 和 POST 区别
-- 讲一下拥塞控制和流量控制
-- TCP 协议的延迟 ACK 和累计应答
-- TCP 挥手时出现大量 CLOSE_WAIT 或 TIME_WAIT 怎么解决？
-- ARP协议工作流程
-- tcp与udp的区别以及应用场景
-- HTTPS 的加密与认证过程
-- TCP 中 SYN 攻击是什么？如何防止？
-- HTTP 短链接与长链接的区别
-- TCP 的报文头部结构
-- http长连接与短连接的区别
-- TCP 滑动窗口以及重传机制
-- seq为1000，发送了1000个数据，下一个seq是多少?
-- chunked块了解？介绍下
-- BGP 协议和 OSPF 协议的区别
+- [RestFul 与 RPC 的区别是什么？RestFul 的优点在哪里？](https://zhuanlan.zhihu.com/p/102760613)
+- [从输入 URL 到展现页面的全过程](https://juejin.cn/post/6844904194801926157)
+- [什么是 TCP 粘包和拆包？](https://cloud.tencent.com/developer/article/1804413)
+- [HTTP 中 GET 和 POST 区别](https://learnku.com/articles/25881)
+- [讲一下拥塞控制和流量控制](https://zhuanlan.zhihu.com/p/37379780)
+- [TCP 协议的延迟 ACK 和累计应答](https://blog.csdn.net/dangzhangjing97/article/details/81485347)
+- [ARP协议工作流程](https://cloud.tencent.com/developer/article/1910772)
+- [tcp与udp的区别以及应用场景](https://segmentfault.com/a/1190000021815671)
+- [HTTPS 的加密与认证过程](https://juejin.cn/post/6987022244509646862)
+- [TCP 中 SYN 攻击是什么？如何防止？](https://www.cnblogs.com/sunsky303/p/11811097.html)
+- [HTTP 短链接与长链接的区别](https://www.cnblogs.com/0201zcr/p/4694945.html)
+- [seq为1000，发送了1000个数据，下一个seq是多少?](https://blog.csdn.net/HappyRocking/article/details/78198776)
+- [chunked块了解？介绍下](https://blog.csdn.net/zam183/article/details/103275025)
+- [BGP 协议和 OSPF 协议的区别](https://cloud.tencent.com/developer/article/1898179)
 - 简述在四层和七层网络协议中负载均衡的原理
 - http协议格式，几种方法，功能是什么
 - syn如果丢了，重传多少次

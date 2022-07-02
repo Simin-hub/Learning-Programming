@@ -66,6 +66,101 @@ jwt通过json传输，php、java、golang等很多语言支持，通用性比较
 - Payload：载荷又称为Claim，**携带的信息**，比如用户名、过期时间等，一般叫做 Claim
 - Signature：签名，是**由header、payload 和你自己维护的一个 secret 经过加密**得来的
 
+如下图 红色的为Header,指定token类型与签名类型,紫色的为载荷(playload),存储用户id等关键信息,最后蓝色的为签名,保证整个信息的完整性,可靠性。
+
+![img](https://raw.githubusercontent.com/Simin-hub/Picture/master/img/189732-b1a2ac306b37514d.png)
+
+#### 头部（Header）
+
+JWT的头部用于描述关于该JWT的最基本的信息，例如其类型以及签名所用的算法等。这可以被表示成一个JSON对象。
+
+
+
+```json
+{
+  "typ": "JWT",
+  "alg": "HS256"
+}
+```
+
+在这里，我们说明了这是一个JWT，并且我们所用的签名算法是HS256算法。对它进行Base64编码，之后的字符串就成了JWT的Header（头部）。
+
+
+
+```undefined
+eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9
+```
+
+#### 载荷(playload)
+
+在载荷(playload)中定义了以下属性
+
+
+
+```cpp
+iss: 该JWT的签发者 
+sub: 该JWT所面向的用户 
+aud: 接收该JWT的一方 
+exp(expires): 什么时候过期，这里是一个Unix时间戳 
+iat(issued at): 在什么时候签发的
+```
+
+也可以用一个JSON对象来描述
+将上面的JSON对象进行[base64编码]可以得到下面的字符串。这个字符串我们将它称作JWT的Payload（载荷）。
+
+
+
+```undefined
+eyJpc3MiOiIyOWZmMDE5OGJlOGM0YzNlYTZlZTA4YjE1MGRhNTU0NC1XRUIiLCJleHAiOjE1MjI0OTE5MTV9
+```
+
+#### 签名（Signature）
+
+在官方文档中是如下描述的
+
+```bash
+HMACSHA256(
+  base64UrlEncode(header) + "." +
+  base64UrlEncode(payload),
+  secret)
+```
+
+将上面的两个[base64编码]后的字符串都用句号.连接在一起（头部在前），就形成了如下字符串。
+
+```css
+eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiIyOWZmMDE5OGJlOGM0YzNlYTZlZTA4YjE1MGRhNTU0NC1XRUIiLCJleHAiOjE1MjI0OTE5MTV9
+```
+
+最后，我们将上面拼接完的字符串用HS256算法进行加密。在加密的时候，我们还需要提供一个密钥（secret）。那么就可以得到我们加密后的内容
+
+```undefined
+P-k-vIzxElzyzFbzR4tUxAAET8xT9EP49b7hpcPazd0 
+```
+
+这个就是我们JWT的签名了。
+
+## 签名的目的
+
+**最后一步签名的过程，实际上是对头部以及载荷内容进行签名**。一般而言，加密算法对于不同的输入产生的输出总是不一样的。
+所以，**如果有人对头部以及载荷的内容解码之后进行修改，再进行编码的话，那么新的头部和载荷的签名和之前的签名就将是不一样的**。而且，如果不知道服务器加密的时候用的密钥的话，得出来的签名也一定会是不一样的。
+
+服务器应用在接受到JWT后，会首先**对头部和载荷的内容用同一算法再次签名**。那么服务器应用是怎么知道我们用的是哪一种算法呢？别忘了，我们在JWT的头部中已经用alg字段指明了我们的加密算法了。
+
+如果服务器应用对头部和载荷再次以同样方法签名之后发现，自己计算出来的签名和接受到的签名不一样，那么就说明这个Token的内容被别人动过的，我们应该拒绝这个Token，返回一个HTTP 401 Unauthorized响应。
+
+## JWT的流程
+
+![img](https://raw.githubusercontent.com/Simin-hub/Picture/master/img/189732-068ae45f8d91787e.png)
+
+
+
+流程如下：
+
+- 客户端使用账户密码请求登录接口
+- 登录成功后服务器使用签名密钥生成JWT ,然后返回JWT给客户端。
+- 客户端再次向服务端请求其他接口时带上JWT
+- 服务端接收到JWT后验证签名的有效性.对客户端做出相应的响应
+
 ## jwt使用
 
 这里推荐个使用比较多的开源项目[github.com/dgrijalva/jwt-go]()，[更多文档](https://link.segmentfault.com/?enc=dW79%2B6ro6mVWLWfSIAASwQ%3D%3D.mA4XxXYXEbfp6DFnrY4P7DwNtywfU6OPh9a2khqLjqzjCzt4zimAR%2FtWJMq9ew1G)。
