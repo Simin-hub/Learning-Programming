@@ -2,7 +2,7 @@
 
 
 
-[参考地址](https://geektutu.com/post/quick-go-gin.html)
+[参考地址](https://geektutu.com/post/quick-go-gin.html)、[参考地址](https://heary.cn/posts/%E4%BB%8E%E6%BA%90%E7%A0%81%E7%90%86%E8%A7%A3Gin%E6%A1%86%E6%9E%B6%E5%8E%9F%E7%90%86/)
 
 ## Gin 简介
 
