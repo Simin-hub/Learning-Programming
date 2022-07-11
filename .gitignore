@@ -1,8 +1,3 @@
-resume
+interview/resume/
 面试过程及总结.md
-*.zip
-ACM-ICPC_Algorithm_Template
-*svg
-*drawio
-.png
-book
+book/
