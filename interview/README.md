@@ -252,54 +252,50 @@
 
 ## 操作系统
 
-- 如何调试服务器内存占用过高的问题？
-- 简述操作系统如何进行内存管理
-- 简述创建进程的流程
-- 简述操作系统中 malloc 的实现原理
-- 简述僵尸进程和孤儿进程及其危害和处理
+- [如何调试服务器内存占用过高的问题？](https://blog.51cto.com/u_14490033/3133424)
+- [简述操作系统如何进行内存管理](https://www.nowcoder.com/questionTerminal/56f6e3d6a4d94361993eba1d2f4664c8)
+- [简述创建进程的流程](https://www.csdn.net/tags/MtjaAgwsNzk0NzMtYmxvZwO0O0OO0O0O.html)
+- [简述操作系统中 malloc 的实现原理](https://www.nowcoder.com/questionTerminal/5aae63b290c542f0ab0582d293e6c791)
+- [简述僵尸进程和孤儿进程及其危害和处理](https://blog.csdn.net/a745233700/article/details/120715371)
 - 两个线程交替打印一个共享变量
-- 进程通信中的管道实现原理是什么？
-- 简述同步与异步的区别，阻塞与非阻塞的区别
-- malloc 创建的对象在堆还是栈中？
-- 死锁产生的条件、死锁避免方法
-- 进程的三状态模型、五状态模型、七状态模型
-- 什么情况下，进程会进行切换？
-- Linux 系统态与用户态，什么时候会进入系统态？
-- Linux 下如何查看端口被哪个进程占用？
-- 共享内存是如何实现的？
+- [进程通信中的管道实现原理是什么？](https://segmentfault.com/a/1190000009528245)
+- [简述同步与异步的区别，阻塞与非阻塞的区别](https://cloud.tencent.com/developer/article/1592939)
+- [malloc 创建的对象在堆还是栈中？](https://www.cnblogs.com/will-boot/p/3302936.html)
+- [死锁产生的条件、死锁避免方法](https://blog.csdn.net/zhangpower1993/article/details/89518780)
+- [进程的三状态模型、五状态模型、七状态模型](https://hsuloong.github.io/operating-system/process-state-model.html)
+- [什么情况下，进程会进行切换？](https://blog.csdn.net/Mind_programmonkey/article/details/116722482)
+- [Linux 系统态与用户态，什么时候会进入系统态？](https://blog.csdn.net/Shangxingya/article/details/113664779)
+- [Linux 下如何查看端口被哪个进程占用？](https://blog.csdn.net/xiangwanpeng/article/details/78804225)
+- [共享内存是如何实现的？](https://cloud.tencent.com/developer/article/1878790)
 - 进程有多少种状态？
-- 线程间有哪些通信方式？
+- [线程间有哪些通信方式？](https://www.cnblogs.com/fanguangdexiaoyuer/p/10834737.html)
 - Linux 下如何排查 CPU 以及 内存占用过多？
-- 操作系统中，虚拟地址与物理地址之间如何映射？
-- CPU L1, L2缓存是什么
-- 信号量是如何实现的？
-- 什么时候会由用户态陷入内核态？
-- Linux 如何查看实时的滚动日志？
-- Linux 进程调度的算法
-- 简述分页与分段，分页与分段的区别
-- Linux 虚拟内存的页面置换算法
-- Linux 中虚拟内存和物理内存有什么区别？有什么优点？
-- traceroute 命令的原理
-- 操作系统是通过什么机制触发系统调用的？
-- Linux 零拷贝的原理
-- 系统调用的过程是怎样的？
-- Linux 的 IO模型有哪些
-- 简述自旋锁与互斥锁的使用场景
-- 多线程和多进程的区别是什么？
-- 简述几个常用的 Linux 命令以及他们的功能
-- 进程空间从高位到低位都有些什么？
-- 简述缓冲区溢出及其危害
-- mmap 的使用场景以及原理
-- BIO、NIO 有什么区别？怎么判断写文件时 Buffer 已经写满？
-- 线程有多少种状态，状态之间如何转换
-- 简述操作系统中的缺页中断
+- [操作系统中，虚拟地址与物理地址之间如何映射？](https://blog.51cto.com/u_15169172/2795114)
+- [CPU L1, L2缓存是什么](https://zhuanlan.zhihu.com/p/31875174)
+- [信号量是如何实现的？](http://c.biancheng.net/view/1232.html)
+- [Linux 如何查看实时的滚动日志？](https://cloud.tencent.com/developer/article/1740866)
+- [Linux 进程调度的算法](https://www.cnblogs.com/alantu2018/p/8460451.html)
+- [简述分页与分段，分页与分段的区别](https://blog.csdn.net/m0_37637511/article/details/123635892)
+- [Linux 虚拟内存的页面置换算法](https://blog.csdn.net/weixin_44164489/article/details/109030383)
+- [Linux 中虚拟内存和物理内存有什么区别？有什么优点？](https://zhuanlan.zhihu.com/p/486112490)
+- [traceroute 命令的原理](https://zhuanlan.zhihu.com/p/36811672)
+- [操作系统是通过什么机制触发系统调用的？](https://zhuanlan.zhihu.com/p/505419261)
+- [Linux 零拷贝的原理](https://juejin.cn/post/6995519558475841550)
+- [系统调用的过程是怎样的？](https://blog.csdn.net/wangquan1992/article/details/108496821)
+- [Linux 的 IO模型有哪些](https://zhuanlan.zhihu.com/p/127170201)
+- [简述自旋锁与互斥锁的使用场景](https://cloud.tencent.com/developer/news/695304)
+- [多线程和多进程的区别是什么？](https://blog.csdn.net/linraise/article/details/12979473)
+- [简述几个常用的 Linux 命令以及他们的功能](https://www.jianshu.com/p/0056d671ea6d)
+- [进程空间从高位到低位都有些什么？](https://blog.csdn.net/hezhongla0811/article/details/109552107)
+- [简述缓冲区溢出及其危害](https://blog.csdn.net/qq_35642036/article/details/82809845)
+- [mmap 的使用场景以及原理](https://juejin.cn/post/6956031662916534279)
+- [简述操作系统中的缺页中断](https://www.nowcoder.com/questionTerminal/e5671c51ef704d5291a3af70ffc5c255?orderByHotValue=1&page=12&onlyReference=false)
 - Linux 下如何查看 CPU 荷载，正在运行的进程，某个端口对应的进程？
-- 进程和线程之间有什么区别？
-- 进程间有哪些通信方式？
-- 为什么进程切换慢，线程切换快？
-- 线程从进程继承了哪些资源？线程独享哪些资源？
-- Linux 页大小是多少？
-- select, poll, epoll 的使用场景以及区别，epoll 中水平触发以及边缘触发有什么不同？
+- [进程间有哪些通信方式？](https://cloud.tencent.com/developer/article/1690556)
+- [为什么进程切换慢，线程切换快？](https://blog.csdn.net/qq_34417408/article/details/110393655)
+- [线程从进程继承了哪些资源？线程独享哪些资源？](https://blog.csdn.net/weixin_41983309/article/details/109029494)
+- [Linux 页大小是多少？](https://draveness.me/whys-the-design-linux-default-page/)
+- [select, poll, epoll 的使用场景以及区别，epoll 中水平触发以及边缘触发有什么不同？](https://zhuanlan.zhihu.com/p/272891398)
 
 ## 数据库
 
