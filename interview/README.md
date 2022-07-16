@@ -299,207 +299,175 @@
 
 ## 数据库
 
-- 数据库三大范式是什么
+- [数据库三大范式是什么](https://www.cnblogs.com/linjiqin/archive/2012/04/01/2428695.html)
 
-- mysql有关权限的表都有哪几个
+- [mysql有关权限的表都有哪几个](https://github.com/Simin-hub/Learning-Programming/blob/main/Go/%E5%9F%BA%E7%A1%80/%E6%95%B0%E6%8D%AE%E5%BA%93.md#mysql-%E6%9C%89%E5%85%B3%E6%9D%83%E9%99%90%E7%9A%84%E8%A1%A8%E9%83%BD%E6%9C%89%E5%93%AA%E5%87%A0%E4%B8%AA)
 
-- MySQL的binlog有有几种录入格式？分别有什么区别？
+- [MySQL的binlog有有几种录入格式？分别有什么区别？](https://github.com/Simin-hub/Learning-Programming/blob/main/Go/%E5%9F%BA%E7%A1%80/%E6%95%B0%E6%8D%AE%E5%BA%93.md#mysql-%E7%9A%84-binlog-%E6%9C%89%E6%9C%89%E5%87%A0%E7%A7%8D%E5%BD%95%E5%85%A5%E6%A0%BC%E5%BC%8F)
 
-- mysql有哪些数据类型
+- [mysql有哪些数据类型](https://m.html.cn/qa/other/1110119351025.html)
 
-- MySQL存储引擎MyISAM与InnoDB区别
+- [MySQL存储引擎MyISAM与InnoDB区别](https://segmentfault.com/a/1190000008227211)
 
-- MyISAM索引与InnoDB索引的区别？
+- [MyISAM索引与InnoDB索引的区别？](https://segmentfault.com/a/1190000022206424)
 
-- InnoDB引擎的4大特性
+- [InnoDB引擎的4大特性](https://zhuanlan.zhihu.com/p/109528131)
 
-- 存储引擎选择
+- [存储引擎选择](https://segmentfault.com/a/1190000038935511)
 
-- 什么是索引？
+- [什么是索引？](https://github.com/Simin-hub/Learning-Programming/blob/main/Go/%E5%9F%BA%E7%A1%80/%E6%95%B0%E6%8D%AE%E5%BA%93.md#%E4%BB%80%E4%B9%88%E6%98%AF%E7%B4%A2%E5%BC%95)
 
-- 索引有哪些优缺点？
+- [索引有哪些优缺点？](https://github.com/Simin-hub/Learning-Programming/blob/main/Go/%E5%9F%BA%E7%A1%80/%E6%95%B0%E6%8D%AE%E5%BA%93.md#%E7%B4%A2%E5%BC%95%E6%9C%89%E5%93%AA%E4%BA%9B%E4%BC%98%E7%BC%BA%E7%82%B9)
 
-- 索引使用场景（重点）
+- [索引使用场景（重点）](https://github.com/Simin-hub/Learning-Programming/blob/main/Go/%E5%9F%BA%E7%A1%80/%E6%95%B0%E6%8D%AE%E5%BA%93.md#%E7%B4%A2%E5%BC%95%E7%9A%84%E4%BD%BF%E7%94%A8%E5%9C%BA%E6%99%AF)
 
-- 索引有哪几种类型？
+- [索引有哪几种类型？](https://github.com/Simin-hub/Learning-Programming/blob/main/Go/%E5%9F%BA%E7%A1%80/%E6%95%B0%E6%8D%AE%E5%BA%93.md#%E7%B4%A2%E5%BC%95%E6%9C%89%E5%93%AA%E5%87%A0%E7%A7%8D%E7%B1%BB%E5%9E%8B)
 
-- 索引的数据结构（b树，hash）
+- [索引的数据结构（b树，hash）](https://developer.aliyun.com/ask/281188)
 
-- 索引的基本原理
+- [索引的基本原理](https://zhuanlan.zhihu.com/p/143659858)
 
-- 索引算法有哪些？
+- [索引算法有哪些？](https://zhuanlan.zhihu.com/p/422491906)
 
-- 索引设计的原则？
+- [索引设计的原则？](https://juejin.cn/post/6844904009329803277)
 
-- 创建索引的原则
+- [创建索引的原则](https://developer.aliyun.com/article/6719)
 
-- 创建索引的三种方式，删除索引
+- [创建索引的三种方式，删除索引](https://juejin.cn/post/6897504840583217159)
 
-- 创建索引时需要注意什么？
+- [创建索引时需要注意什么？](https://github.com/Simin-hub/Learning-Programming/blob/main/Go/%E5%9F%BA%E7%A1%80/%E6%95%B0%E6%8D%AE%E5%BA%93.md#%E5%88%9B%E5%BB%BA%E7%B4%A2%E5%BC%95%E6%97%B6%E9%9C%80%E8%A6%81%E6%B3%A8%E6%84%8F%E4%BB%80%E4%B9%88)
 
-- 使用索引查询一定能提高查询的性能吗？为什么
+- [使用索引查询一定能提高查询的性能吗？为什么](https://github.com/Simin-hub/Learning-Programming/blob/main/Go/%E5%9F%BA%E7%A1%80/%E6%95%B0%E6%8D%AE%E5%BA%93.md#%E4%BD%BF%E7%94%A8%E7%B4%A2%E5%BC%95%E6%9F%A5%E8%AF%A2%E4%B8%80%E5%AE%9A%E8%83%BD%E6%8F%90%E9%AB%98%E6%9F%A5%E8%AF%A2%E7%9A%84%E6%80%A7%E8%83%BD%E5%90%97%E4%B8%BA%E4%BB%80%E4%B9%88)
 
-- 百万级别或以上的数据如何删除
+- [百万级别或以上的数据如何删除](https://github.com/Simin-hub/Learning-Programming/blob/main/Go/%E5%9F%BA%E7%A1%80/%E6%95%B0%E6%8D%AE%E5%BA%93.md#%E7%99%BE%E4%B8%87%E7%BA%A7%E5%88%AB%E6%88%96%E4%BB%A5%E4%B8%8A%E7%9A%84%E6%95%B0%E6%8D%AE%E5%A6%82%E4%BD%95%E5%88%A0%E9%99%A4)
 
-- 前缀索引
+- [前缀索引](https://www.jianshu.com/p/fc80445044cc)
 
-- 什么是最左前缀原则？什么是最左匹配原则
+- [什么是最左前缀原则？什么是最左匹配原则](https://github.com/Simin-hub/Learning-Programming/blob/main/Go/%E5%9F%BA%E7%A1%80/%E6%95%B0%E6%8D%AE%E5%BA%93.md#%E4%BB%80%E4%B9%88%E6%98%AF%E6%9C%80%E5%B7%A6%E5%89%8D%E7%BC%80%E5%8E%9F%E5%88%99%E4%BB%80%E4%B9%88%E6%98%AF%E6%9C%80%E5%B7%A6%E5%8C%B9%E9%85%8D%E5%8E%9F%E5%88%99)
 
-- B树和B+树的区别
+- [B树和B+树的区别](https://www.jianshu.com/p/ace3cd6526c4)
 
-- 使用B树的好处
+- [Hash索引和B+树所有有什么区别或者说优劣呢?](https://book.itheima.net/study/1258677827423715330/1277261541762146305/1290887310354763777)
 
-- 使用B+树的好处
+- [数据库为什么使用B+树而不是B树](https://blog.csdn.net/zhoucheng05_13/article/details/79825246)
 
-- Hash索引和B+树所有有什么区别或者说优劣呢?
+- [B+树在满足聚簇索引和覆盖索引的时候不需要回表查询数据，](https://six.club/question/1142)
 
-- 数据库为什么使用B+树而不是B树
+- [什么是聚簇索引？何时使用聚簇索引与非聚簇索引](https://cloud.tencent.com/developer/article/1541265)
 
-- B+树在满足聚簇索引和覆盖索引的时候不需要回表查询数据，
+- [非聚簇索引一定会回表查询吗？](https://www.cnblogs.com/xxeleanor/p/14998337.html)
 
-- 什么是聚簇索引？何时使用聚簇索引与非聚簇索引
+- [联合索引是什么？为什么需要注意联合索引中的顺序？](https://book.itheima.net/study/1258677827423715330/1277261541762146305/1290887364041854978)
 
-- 非聚簇索引一定会回表查询吗？
+- [什么是数据库事务？](https://baike.baidu.com/item/%E6%95%B0%E6%8D%AE%E5%BA%93%E4%BA%8B%E5%8A%A1/9744607)
 
-- 联合索引是什么？为什么需要注意联合索引中的顺序？
+- [事物的四大特性(ACID)介绍一下?](https://github.com/Simin-hub/Learning-Programming/blob/main/Go/%E5%9F%BA%E7%A1%80/%E6%95%B0%E6%8D%AE%E5%BA%93.md#acid)
 
-- 什么是数据库事务？
+- [什么是脏读？幻读？不可重复读？](https://github.com/Simin-hub/Learning-Programming/blob/main/Go/%E5%9F%BA%E7%A1%80/%E6%95%B0%E6%8D%AE%E5%BA%93.md#%E4%BB%80%E4%B9%88%E6%98%AF%E8%84%8F%E8%AF%BB%E5%B9%BB%E8%AF%BB%E4%B8%8D%E5%8F%AF%E9%87%8D%E5%A4%8D%E8%AF%BB)
 
-- 事物的四大特性(ACID)介绍一下?
+- [什么是事务的隔离级别？MySQL的默认隔离级别是什么？](https://github.com/Simin-hub/Learning-Programming/blob/main/Go/%E5%9F%BA%E7%A1%80/%E6%95%B0%E6%8D%AE%E5%BA%93.md#mysql-%E4%B8%AD-innodb-%E6%94%AF%E6%8C%81%E7%9A%84%E5%9B%9B%E7%A7%8D%E4%BA%8B%E5%8A%A1%E9%9A%94%E7%A6%BB%E7%BA%A7%E5%88%AB%E5%90%8D%E7%A7%B0%E4%BB%A5%E5%8F%8A%E9%80%90%E7%BA%A7%E4%B9%8B%E9%97%B4%E7%9A%84%E5%8C%BA%E5%88%AB)
 
-- 什么是脏读？幻读？不可重复读？
+- [对MySQL的锁了解吗](https://github.com/Simin-hub/Learning-Programming/blob/main/Go/%E5%9F%BA%E7%A1%80/%E6%95%B0%E6%8D%AE%E5%BA%93.md#mysql-%E4%B8%AD%E6%9C%89%E5%93%AA%E5%87%A0%E7%A7%8D%E9%94%81)
 
-- 什么是事务的隔离级别？MySQL的默认隔离级别是什么？
+- [隔离级别与锁的关系](https://github.com/Simin-hub/Learning-Programming/blob/main/Go/%E5%9F%BA%E7%A1%80/%E6%95%B0%E6%8D%AE%E5%BA%93.md#%E9%9A%94%E7%A6%BB%E7%BA%A7%E5%88%AB%E4%B8%8E%E9%94%81%E7%9A%84%E5%85%B3%E7%B3%BB)
 
-- 对MySQL的锁了解吗
+- [按照锁的粒度分数据库锁有哪些？锁机制与InnoDB锁算法](https://www.cnblogs.com/WangMengyi/p/14009018.html)
 
-- 隔离级别与锁的关系
+- [从锁的类别上分MySQL都有哪些锁呢？像上面那样子进行锁定岂不是有点阻碍并发效率了](https://github.com/Simin-hub/Learning-Programming/blob/main/Go/%E5%9F%BA%E7%A1%80/%E6%95%B0%E6%8D%AE%E5%BA%93.md#mysql-%E4%B8%AD%E6%9C%89%E5%93%AA%E5%87%A0%E7%A7%8D%E9%94%81)
 
-- 按照锁的粒度分数据库锁有哪些？锁机制与InnoDB锁算法
+- [MySQL中InnoDB引擎的行锁是怎么实现的？](https://github.com/Simin-hub/Learning-Programming/blob/main/Go/%E5%9F%BA%E7%A1%80/%E6%95%B0%E6%8D%AE%E5%BA%93.md#mysql%E4%B8%ADinnodb%E5%BC%95%E6%93%8E%E7%9A%84%E8%A1%8C%E9%94%81%E6%98%AF%E6%80%8E%E4%B9%88%E5%AE%9E%E7%8E%B0%E7%9A%84)
 
-- 从锁的类别上分MySQL都有哪些锁呢？像上面那样子进行锁定岂不是有点阻碍并发效率了
+- [InnoDB存储引擎的锁的算法有三种](https://github.com/Simin-hub/Learning-Programming/blob/main/Go/%E5%9F%BA%E7%A1%80/%E6%95%B0%E6%8D%AE%E5%BA%93.md#mysql%E4%B8%ADinnodb%E5%BC%95%E6%93%8E%E7%9A%84%E8%A1%8C%E9%94%81%E6%98%AF%E6%80%8E%E4%B9%88%E5%AE%9E%E7%8E%B0%E7%9A%84)
 
-- MySQL中InnoDB引擎的行锁是怎么实现的？
+- [什么是死锁？怎么解决？](https://github.com/Simin-hub/Learning-Programming/blob/main/Go/%E5%9F%BA%E7%A1%80/%E6%95%B0%E6%8D%AE%E5%BA%93.md#%E4%BB%80%E4%B9%88%E6%98%AF%E6%AD%BB%E9%94%81%E6%80%8E%E4%B9%88%E8%A7%A3%E5%86%B3)
 
-- InnoDB存储引擎的锁的算法有三种
+- [数据库的乐观锁和悲观锁是什么？怎么实现的？](https://github.com/Simin-hub/Learning-Programming/blob/main/Go/%E5%9F%BA%E7%A1%80/%E6%95%B0%E6%8D%AE%E5%BA%93.md#%E6%95%B0%E6%8D%AE%E5%BA%93%E7%9A%84%E4%B9%90%E8%A7%82%E9%94%81%E5%92%8C%E6%82%B2%E8%A7%82%E9%94%81%E6%98%AF%E4%BB%80%E4%B9%88%E6%80%8E%E4%B9%88%E5%AE%9E%E7%8E%B0%E7%9A%84)
 
-- 什么是死锁？怎么解决？
+- [为什么要使用视图？什么是视图？](https://github.com/Simin-hub/Learning-Programming/blob/main/Go/%E5%9F%BA%E7%A1%80/%E6%95%B0%E6%8D%AE%E5%BA%93.md#%E4%B8%BA%E4%BB%80%E4%B9%88%E8%A6%81%E4%BD%BF%E7%94%A8%E8%A7%86%E5%9B%BE%E4%BB%80%E4%B9%88%E6%98%AF%E8%A7%86%E5%9B%BE)
 
-- 数据库的乐观锁和悲观锁是什么？怎么实现的？
+- [视图有哪些特点？](https://github.com/Simin-hub/Learning-Programming/blob/main/Go/%E5%9F%BA%E7%A1%80/%E6%95%B0%E6%8D%AE%E5%BA%93.md#%E8%A7%86%E5%9B%BE%E6%9C%89%E5%93%AA%E4%BA%9B%E7%89%B9%E7%82%B9)
 
-- 为什么要使用视图？什么是视图？
+- [视图的使用场景有哪些？](https://github.com/Simin-hub/Learning-Programming/blob/main/Go/%E5%9F%BA%E7%A1%80/%E6%95%B0%E6%8D%AE%E5%BA%93.md#%E8%A7%86%E5%9B%BE%E7%9A%84%E4%BD%BF%E7%94%A8%E5%9C%BA%E6%99%AF%E6%9C%89%E5%93%AA%E4%BA%9B)
 
-- 视图有哪些特点？
+- [视图的优缺点](https://github.com/Simin-hub/Learning-Programming/blob/main/Go/%E5%9F%BA%E7%A1%80/%E6%95%B0%E6%8D%AE%E5%BA%93.md#%E8%A7%86%E5%9B%BE%E7%9A%84%E4%BC%98%E7%BC%BA%E7%82%B9)
 
-- 视图的使用场景有哪些？
-
-- 视图的优点
-
-- 视图的缺点
-
-- 什么是游标？
+- [什么是游标？](https://github.com/Simin-hub/Learning-Programming/blob/main/Go/%E5%9F%BA%E7%A1%80/%E6%95%B0%E6%8D%AE%E5%BA%93.md#%E4%BB%80%E4%B9%88%E6%98%AF%E6%B8%B8%E6%A0%87)
 
 - 存储过程与函数
 
-- 什么是存储过程？有哪些优缺点？
+- [什么是存储过程？有哪些优缺点？](https://github.com/Simin-hub/Learning-Programming/blob/main/Go/%E5%9F%BA%E7%A1%80/%E6%95%B0%E6%8D%AE%E5%BA%93.md#%E4%BB%80%E4%B9%88%E6%98%AF%E5%AD%98%E5%82%A8%E8%BF%87%E7%A8%8B%E6%9C%89%E5%93%AA%E4%BA%9B%E4%BC%98%E7%BC%BA%E7%82%B9)
 
-- 什么是触发器？触发器的使用场景有哪些？
+- [什么是触发器？触发器的使用场景有哪些？](https://github.com/Simin-hub/Learning-Programming/blob/main/Go/%E5%9F%BA%E7%A1%80/%E6%95%B0%E6%8D%AE%E5%BA%93.md#%E4%BB%80%E4%B9%88%E6%98%AF%E8%A7%A6%E5%8F%91%E5%99%A8%E8%A7%A6%E5%8F%91%E5%99%A8%E7%9A%84%E4%BD%BF%E7%94%A8%E5%9C%BA%E6%99%AF%E6%9C%89%E5%93%AA%E4%BA%9B)
 
-- MySQL中都有哪些触发器？
+- [MySQL中都有哪些触发器？](https://github.com/Simin-hub/Learning-Programming/blob/main/Go/%E5%9F%BA%E7%A1%80/%E6%95%B0%E6%8D%AE%E5%BA%93.md#mysql%E4%B8%AD%E9%83%BD%E6%9C%89%E5%93%AA%E4%BA%9B%E8%A7%A6%E5%8F%91%E5%99%A8)
 
 - 常用SQL语句
 
-- SQL语句主要分为哪几类
+- [SQL语句主要分为哪几类](https://github.com/Simin-hub/Learning-Programming/blob/main/Go/%E5%9F%BA%E7%A1%80/%E6%95%B0%E6%8D%AE%E5%BA%93.md#sql%E8%AF%AD%E5%8F%A5%E4%B8%BB%E8%A6%81%E5%88%86%E4%B8%BA%E5%93%AA%E5%87%A0%E7%B1%BB)
 
-- 超键、候选键、主键、外键分别是什么？
+- [超键、候选键、主键、外键分别是什么？](https://github.com/Simin-hub/Learning-Programming/blob/main/Go/%E5%9F%BA%E7%A1%80/%E6%95%B0%E6%8D%AE%E5%BA%93.md#%E8%B6%85%E9%94%AE%E5%80%99%E9%80%89%E9%94%AE%E4%B8%BB%E9%94%AE%E5%A4%96%E9%94%AE%E5%88%86%E5%88%AB%E6%98%AF%E4%BB%80%E4%B9%88)
 
-- SQL 约束有哪几种？
+- [SQL 约束有哪几种？](https://github.com/Simin-hub/Learning-Programming/blob/main/Go/%E5%9F%BA%E7%A1%80/%E6%95%B0%E6%8D%AE%E5%BA%93.md#sql-%E7%BA%A6%E6%9D%9F%E6%9C%89%E5%93%AA%E5%87%A0%E7%A7%8D)
 
-- 六种关联查询
+- [六种关联查询](https://github.com/Simin-hub/Learning-Programming/blob/main/Go/%E5%9F%BA%E7%A1%80/%E6%95%B0%E6%8D%AE%E5%BA%93.md#%E5%85%AD%E7%A7%8D%E5%85%B3%E8%81%94%E6%9F%A5%E8%AF%A2)
 
-- 什么是子查询
+- [什么是子查询](https://github.com/Simin-hub/Learning-Programming/blob/main/Go/%E5%9F%BA%E7%A1%80/%E6%95%B0%E6%8D%AE%E5%BA%93.md#%E4%BB%80%E4%B9%88%E6%98%AF%E5%AD%90%E6%9F%A5%E8%AF%A2)
 
-- 子查询的三种情况
+- [子查询的三种情况](https://github.com/Simin-hub/Learning-Programming/blob/main/Go/%E5%9F%BA%E7%A1%80/%E6%95%B0%E6%8D%AE%E5%BA%93.md#%E5%AD%90%E6%9F%A5%E8%AF%A2%E7%9A%84%E4%B8%89%E7%A7%8D%E6%83%85%E5%86%B5)
 
-- mysql中 in 和 exists 区别
+- [mysql中 in 和 exists 区别](https://github.com/Simin-hub/Learning-Programming/blob/main/Go/%E5%9F%BA%E7%A1%80/%E6%95%B0%E6%8D%AE%E5%BA%93.md#mysql%E4%B8%AD-in-%E5%92%8C-exists-%E5%8C%BA%E5%88%AB)
 
-- varchar与char的区别
+- [varchar与char的区别](https://github.com/Simin-hub/Learning-Programming/blob/main/Go/%E5%9F%BA%E7%A1%80/%E6%95%B0%E6%8D%AE%E5%BA%93.md#char-%E5%92%8C-varchar-%E7%9A%84%E5%8C%BA%E5%88%AB)
 
-- varchar(50)中50的涵义
+- [varchar(50)中50的涵义、int(20)中20的涵义](https://blog.csdn.net/qq_40634846/article/details/101837838)
 
-- int(20)中20的涵义
+- [FLOAT和DOUBLE的区别是什么？](https://github.com/Simin-hub/Learning-Programming/blob/main/Go/%E5%9F%BA%E7%A1%80/%E6%95%B0%E6%8D%AE%E5%BA%93.md#float%E5%92%8Cdouble%E7%9A%84%E5%8C%BA%E5%88%AB%E6%98%AF%E4%BB%80%E4%B9%88)
 
-- mysql为什么这么设计
+- [drop、delete与truncate的区别](https://github.com/Simin-hub/Learning-Programming/blob/main/Go/%E5%9F%BA%E7%A1%80/%E6%95%B0%E6%8D%AE%E5%BA%93.md#dropdelete%E4%B8%8Etruncate%E7%9A%84%E5%8C%BA%E5%88%AB)
 
-- mysql中int(10)和char(10)以及varchar(10)的区别
-
-- FLOAT和DOUBLE的区别是什么？
-
-- drop、delete与truncate的区别
-
-- UNION与UNION ALL的区别？
+- [UNION与UNION ALL的区别？](https://github.com/Simin-hub/Learning-Programming/blob/main/Go/%E5%9F%BA%E7%A1%80/%E6%95%B0%E6%8D%AE%E5%BA%93.md#%E4%BD%BF%E7%94%A8-union-%E5%92%8C-union-all-%E6%97%B6%E9%9C%80%E8%A6%81%E6%B3%A8%E6%84%8F%E4%BA%9B%E4%BB%80%E4%B9%88)
 
 - 如何定位及优化SQL语句的性能问题？创建的索引有没有被使用到?或者说怎么才可以知道这条语句运行很慢的原因？
 
-- SQL的生命周期？
+- [SQL的生命周期？](https://github.com/Simin-hub/Learning-Programming/blob/main/Go/%E5%9F%BA%E7%A1%80/%E6%95%B0%E6%8D%AE%E5%BA%93.md#sql%E7%9A%84%E7%94%9F%E5%91%BD%E5%91%A8%E6%9C%9F)
 
-- 大表数据查询，怎么优化
+- [大表数据查询，怎么优化](https://github.com/Simin-hub/Learning-Programming/blob/main/Go/%E5%9F%BA%E7%A1%80/%E6%95%B0%E6%8D%AE%E5%BA%93.md#%E5%A4%A7%E8%A1%A8%E6%95%B0%E6%8D%AE%E6%9F%A5%E8%AF%A2%E6%80%8E%E4%B9%88%E4%BC%98%E5%8C%96)
 
-- 超大分页怎么处理？
+- [超大分页怎么处理？](https://github.com/Simin-hub/Learning-Programming/blob/main/Go/%E5%9F%BA%E7%A1%80/%E6%95%B0%E6%8D%AE%E5%BA%93.md#%E8%B6%85%E5%A4%A7%E5%88%86%E9%A1%B5%E6%80%8E%E4%B9%88%E5%A4%84%E7%90%86)
 
 - mysql 分页怎么实现
 
-- 慢查询日志怎么看
+- [慢查询日志怎么看](https://github.com/Simin-hub/Learning-Programming/blob/main/Go/%E5%9F%BA%E7%A1%80/%E6%95%B0%E6%8D%AE%E5%BA%93.md#%E6%85%A2%E6%9F%A5%E8%AF%A2%E6%97%A5%E5%BF%97)
 
-- 关心过业务系统里面的sql耗时吗？统计过慢查询吗？对慢查询都怎么优化过？
+- [关心过业务系统里面的sql耗时吗？统计过慢查询吗？对慢查询都怎么优化过？](https://github.com/Simin-hub/Learning-Programming/blob/main/Go/%E5%9F%BA%E7%A1%80/%E6%95%B0%E6%8D%AE%E5%BA%93.md#%E5%85%B3%E5%BF%83%E8%BF%87%E4%B8%9A%E5%8A%A1%E7%B3%BB%E7%BB%9F%E9%87%8C%E9%9D%A2%E7%9A%84sql%E8%80%97%E6%97%B6%E5%90%97%E7%BB%9F%E8%AE%A1%E8%BF%87%E6%85%A2%E6%9F%A5%E8%AF%A2%E5%90%97%E5%AF%B9%E6%85%A2%E6%9F%A5%E8%AF%A2%E9%83%BD%E6%80%8E%E4%B9%88%E4%BC%98%E5%8C%96%E8%BF%87)
 
-- 为什么要尽量设定一个主键？
+- [为什么要尽量设定一个主键？](https://github.com/Simin-hub/Learning-Programming/blob/main/Go/%E5%9F%BA%E7%A1%80/%E6%95%B0%E6%8D%AE%E5%BA%93.md#%E4%B8%BA%E4%BB%80%E4%B9%88%E8%A6%81%E5%B0%BD%E9%87%8F%E8%AE%BE%E5%AE%9A%E4%B8%80%E4%B8%AA%E4%B8%BB%E9%94%AE)
 
-- 主键使用自增ID还是UUID？
+- [主键使用自增ID还是UUID？](https://github.com/Simin-hub/Learning-Programming/blob/main/Go/%E5%9F%BA%E7%A1%80/%E6%95%B0%E6%8D%AE%E5%BA%93.md#%E4%B8%BB%E9%94%AE%E4%BD%BF%E7%94%A8%E8%87%AA%E5%A2%9Eid%E8%BF%98%E6%98%AFuuid)
 
-- 字段为什么要求定义为not null？
+- [字段为什么要求定义为not null？](https://github.com/Simin-hub/Learning-Programming/blob/main/Go/%E5%9F%BA%E7%A1%80/%E6%95%B0%E6%8D%AE%E5%BA%93.md#%E5%AD%97%E6%AE%B5%E4%B8%BA%E4%BB%80%E4%B9%88%E8%A6%81%E6%B1%82%E5%AE%9A%E4%B9%89%E4%B8%BAnot-null)
 
-- 如果要存储用户的密码散列，应该使用什么字段进行存储？
+- [如果要存储用户的密码散列，应该使用什么字段进行存储？](https://github.com/Simin-hub/Learning-Programming/blob/main/Go/%E5%9F%BA%E7%A1%80/%E6%95%B0%E6%8D%AE%E5%BA%93.md#%E5%A6%82%E6%9E%9C%E8%A6%81%E5%AD%98%E5%82%A8%E7%94%A8%E6%88%B7%E7%9A%84%E5%AF%86%E7%A0%81%E6%95%A3%E5%88%97%E5%BA%94%E8%AF%A5%E4%BD%BF%E7%94%A8%E4%BB%80%E4%B9%88%E5%AD%97%E6%AE%B5%E8%BF%9B%E8%A1%8C%E5%AD%98%E5%82%A8)
 
-- 优化查询过程中的数据访问
+- [优化查询过程中的数据访问](https://github.com/Simin-hub/Learning-Programming/blob/main/Go/%E5%9F%BA%E7%A1%80/%E6%95%B0%E6%8D%AE%E5%BA%93.md#%E4%BC%98%E5%8C%96%E6%9F%A5%E8%AF%A2%E8%BF%87%E7%A8%8B%E4%B8%AD%E7%9A%84%E6%95%B0%E6%8D%AE%E8%AE%BF%E9%97%AE)、优化长难的查询语句、优化特定类型的查询语句、优化关联查询、优化子查询、优化LIMIT分页
 
-- 优化长难的查询语句
+  、优化UNION查询、优化WHERE子句
 
-- 优化特定类型的查询语句
+- [数据库优化](https://github.com/Simin-hub/Learning-Programming/blob/main/Go/%E5%9F%BA%E7%A1%80/%E6%95%B0%E6%8D%AE%E5%BA%93.md#%E6%95%B0%E6%8D%AE%E5%BA%93%E7%BB%93%E6%9E%84%E4%BC%98%E5%8C%96)
 
-- 优化关联查询
+- [为什么要优化](https://github.com/Simin-hub/Learning-Programming/blob/main/Go/%E5%9F%BA%E7%A1%80/%E6%95%B0%E6%8D%AE%E5%BA%93.md#%E4%B8%BA%E4%BB%80%E4%B9%88%E8%A6%81%E8%BF%9B%E8%A1%8C%E6%95%B0%E6%8D%AE%E5%BA%93%E4%BC%98%E5%8C%96)
 
-- 优化子查询
+- [MySQL数据库cpu飙升到500%的话他怎么处理？](https://github.com/Simin-hub/Learning-Programming/blob/main/Go/%E5%9F%BA%E7%A1%80/%E6%95%B0%E6%8D%AE%E5%BA%93.md#mysql%E6%95%B0%E6%8D%AE%E5%BA%93cpu%E9%A3%99%E5%8D%87%E5%88%B0500%E7%9A%84%E8%AF%9D%E4%BB%96%E6%80%8E%E4%B9%88%E5%A4%84%E7%90%86)
 
-- 优化LIMIT分页
+- [大表怎么优化？某个表有近千万数据，CRUD比较慢，如何优化？分库分表了是怎么做的？分表分库了有什么问题？有用到中间件么？他们的原理知道么？](https://github.com/Simin-hub/Learning-Programming/blob/main/Go/%E5%9F%BA%E7%A1%80/%E6%95%B0%E6%8D%AE%E5%BA%93.md#%E5%A4%A7%E8%A1%A8%E6%80%8E%E4%B9%88%E4%BC%98%E5%8C%96%E6%9F%90%E4%B8%AA%E8%A1%A8%E6%9C%89%E8%BF%91%E5%8D%83%E4%B8%87%E6%95%B0%E6%8D%AEcrud%E6%AF%94%E8%BE%83%E6%85%A2%E5%A6%82%E4%BD%95%E4%BC%98%E5%8C%96%E5%88%86%E5%BA%93%E5%88%86%E8%A1%A8%E4%BA%86%E6%98%AF%E6%80%8E%E4%B9%88%E5%81%9A%E7%9A%84%E5%88%86%E8%A1%A8%E5%88%86%E5%BA%93%E4%BA%86%E6%9C%89%E4%BB%80%E4%B9%88%E9%97%AE%E9%A2%98%E6%9C%89%E7%94%A8%E5%88%B0%E4%B8%AD%E9%97%B4%E4%BB%B6%E4%B9%88%E4%BB%96%E4%BB%AC%E7%9A%84%E5%8E%9F%E7%90%86%E7%9F%A5%E9%81%93%E4%B9%88)、垂直分表适用场景、水平分表适用场景、水平切分的缺点
 
-- 优化UNION查询
+- [MySQL的复制原理以及流程](https://github.com/Simin-hub/Learning-Programming/blob/main/Go/%E5%9F%BA%E7%A1%80/%E6%95%B0%E6%8D%AE%E5%BA%93.md#%E5%85%AD%E5%A4%8D%E5%88%B6)
 
-- 优化WHERE子句
+- [读写分离有哪些解决方案？](https://github.com/Simin-hub/Learning-Programming/blob/main/Go/%E5%9F%BA%E7%A1%80/%E6%95%B0%E6%8D%AE%E5%BA%93.md#%E8%AF%BB%E5%86%99%E5%88%86%E7%A6%BB)
 
-- 数据库优化
+- [备份计划，mysqldump以及xtranbackup的实现原理](https://github.com/Simin-hub/Learning-Programming/blob/main/Go/%E5%9F%BA%E7%A1%80/%E6%95%B0%E6%8D%AE%E5%BA%93.md#%E5%A4%87%E4%BB%BD%E8%AE%A1%E5%88%92mysqldump%E4%BB%A5%E5%8F%8Axtranbackup%E7%9A%84%E5%AE%9E%E7%8E%B0%E5%8E%9F%E7%90%86)
 
-- 为什么要优化
-
-- 数据库结构优化
-
-- MySQL数据库cpu飙升到500%的话他怎么处理？
-
-- 大表怎么优化？某个表有近千万数据，CRUD比较慢，如何优化？分库分表了是怎么做的？分表分库了有什么问题？有用到中间件么？他们的原理知道么？
-
-- 垂直分表适用场景
-
-- 水平分表适用场景
-
-- 水平切分的缺点
-
-- MySQL的复制原理以及流程
-
-- 读写分离有哪些解决方案？
-
-- 备份计划，mysqldump以及xtranbackup的实现原理
-
-- 数据表损坏的修复方式有哪些？
+- [数据表损坏的修复方式有哪些？](https://blog.csdn.net/qq_35440678/article/details/60321689)
 
 
 ## Redis
