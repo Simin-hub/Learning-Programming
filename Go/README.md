@@ -64,6 +64,10 @@ reflect
 
 time/rate
 
+pprof(性能剖析)
+
+trace（跟踪剖析）
+
 ## 实战
 
 [编程规范](https://github.com/Simin-hub/Golang-Learning-and-Interview/blob/main/Go/%E8%BF%9B%E9%98%B6/Go%E7%BC%96%E7%A8%8B%E8%A7%84%E8%8C%83.md)
