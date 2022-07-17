@@ -469,6 +469,13 @@
 
 - [数据表损坏的修复方式有哪些？](https://blog.csdn.net/qq_35440678/article/details/60321689)
 
-
 ## Redis
+
+[地址](https://github.com/Simin-hub/Learning-Programming/blob/main/Go/%E5%AE%9E%E6%88%98/Redis.md#%E9%9D%A2%E8%AF%95%E9%A2%98)
+
+## 消息队列
+
+[地址](https://github.com/Simin-hub/Learning-Programming/blob/main/Go/%E5%AE%9E%E6%88%98/Kafka.md#%E9%9D%A2%E8%AF%95%E9%A2%98)
+
+
 
