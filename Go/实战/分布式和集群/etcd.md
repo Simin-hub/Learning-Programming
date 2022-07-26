@@ -272,6 +272,333 @@ ETCD还提供了另外一种启动方式，即通过服务发现的方式启动�
 
 [本文记录了ETCD集群启动的一些注意事项，希望对你有帮助。](https://yq.aliyun.com/articles/29897?spm=5176.100239.blogcont11035.15.7bihps)
 
+## 安装使用
+
+静态就是在配置服务之前已经知道了节点的地址和集群的大小
+
+#### 源码编译安装
+
+```clean
+############################
+# Build the latest version
+############################
+
+# 1.下载项目并编译
+$ git clone https://github.com/etcd-io/etcd.git && cd etcd
+$ ./build
+To build a vendored etcd from the master branch via go get:
+
+# 2.设置GOPATH环境变量
+$ export GOPATH='/Users/example/go'
+$ go get -v go.etcd.io/etcd
+$ go get -v go.etcd.io/etcd/etcdctl
+
+# 3.启动服务
+$ ./bin/etcd
+$ $GOPATH/bin/etcd
+
+# 4.简单使用
+$ ./bin/etcdctl put foo bar
+OK
+```
+
+![图片](https://segmentfault.com/img/remote/1460000039964036)
+
+#### 部署单机单服务(静态)
+
+```clean
+##################################
+# Running etcd in standalone mode
+##################################
+
+# 1.设置启动的Node地址
+$ export NODE1='172.16.176.52'
+
+# 2.创建一个逻辑存储
+$ docker volume create --name etcd-data
+
+# 3.启动etcd服务
+# 正式的ectd端口是2379用于客户端连接，而2380用于伙伴通讯
+# --data-dir: 到数据目录的路径
+# --initial-advertise-peer-urls: 集群中节点间通讯的URL地址
+# --listen-peer-urls: 集群中节点间通讯的URL地址
+# --advertise-client-urls: 客户端监听的URL地址
+# --listen-client-urls: 客户端监听的URL地址
+# --initial-cluster: 启动初始化集群配置
+$ docker run -p 2379:2379 -p 2380:2380 --name etcd \
+    --volume=etcd-data:/etcd-data \
+    quay.io/coreos/etcd:latest \
+    /usr/local/bin/etcd \
+    --data-dir=/etcd-data --name node1 \
+    --initial-advertise-peer-urls http://${NODE1}:2380 \
+    --listen-peer-urls http://0.0.0.0:2380 \
+    --advertise-client-urls http://${NODE1}:2379 \
+    --listen-client-urls http://0.0.0.0:2379 \
+    --initial-cluster node1=http://${NODE1}:2380
+
+# 4.列出现在集群中的服务状态
+$ etcdctl --endpoints=http://${NODE1}:2379 member list
+```
+
+![图片](https://segmentfault.com/img/remote/1460000039964037)
+
+#### 部署分布式集群服务(静态)
+
+```clean
+################################
+# Running a 3 node etcd cluster
+################################
+
+# node1
+docker run -p 2379:2379 -p 2380:2380 --name etcd-node-1 \
+  --volume=/var/lib/etcd:/etcd-data \
+  quay.io/coreos/etcd:latest \
+  /usr/local/bin/etcd \
+  --data-dir=/etcd-data \
+  --initial-advertise-peer-urls "http://10.20.30.1:2380" \
+  --listen-peer-urls "http://0.0.0.0:2380" \
+  --advertise-client-urls "http://10.20.30.1:2379" \
+  --listen-client-urls "http://0.0.0.0:2379" \
+  --initial-cluster "etcd-node-1=http://10.20.30.1:2380, etcd-node-2=http://10.20.30.2:2380, etcd-node-3=http://10.20.30.3:2380" \
+  --initial-cluster-state "new" \
+  --initial-cluster-token "my-etcd-token"
+
+# node2
+docker run -p 2379:2379 -p 2380:2380 --name etcd-node-2 \
+  --volume=/var/lib/etcd:/etcd-data \
+  quay.io/coreos/etcd:latest \
+  /usr/local/bin/etcd \
+  --data-dir=/etcd-data \
+  --initial-advertise-peer-urls "http://10.20.30.2:2380" \
+  --listen-peer-urls "http://0.0.0.0:2380" \
+  --advertise-client-urls "http://10.20.30.2:2379" \
+  --listen-client-urls "http://0.0.0.0:2379" \
+  --initial-cluster "etcd-node-1=http://10.20.30.1:2380, etcd-node-2=http://10.20.30.2:2380, etcd-node-3=http://10.20.30.3:2380" \
+  --initial-cluster-state "new" \
+  --initial-cluster-token "my-etcd-token"
+
+# node3
+docker run -p 2379:2379 -p 2380:2380 --name etcd-node-3 \
+  --volume=/var/lib/etcd:/etcd-data \
+  quay.io/coreos/etcd:latest \
+  /usr/local/bin/etcd \
+  --data-dir=/etcd-data \
+  --initial-advertise-peer-urls "http://10.20.30.3:2380" \
+  --listen-peer-urls "http://0.0.0.0:2380" \
+  --advertise-client-urls "http://10.20.30.3:2379" \
+  --listen-client-urls "http://0.0.0.0:2379" \
+  --initial-cluster "etcd-node-1=http://10.20.30.1:2380, etcd-node-2=http://10.20.30.2:2380, etcd-node-3=http://10.20.30.3:2380" \
+  --initial-cluster-state "new" \
+  --initial-cluster-token "my-etcd-token"
+
+# run etcdctl using API version 3
+docker exec etcd /bin/sh -c "export ETCDCTL_API=3 && /usr/local/bin/etcdctl put foo bar"
+```
+
+#### 部署分布式集群服务
+
+```nestedtext
+# 编辑docker-compose.yml文件
+version: "3.6"
+
+services:
+  node1:
+    image: quay.io/coreos/etcd
+    volumes:
+      - node1-data:/etcd-data
+    expose:
+      - 2379
+      - 2380
+    networks:
+      cluster_net:
+        ipv4_address: 172.16.238.100
+    environment:
+      - ETCDCTL_API=3
+    command:
+      - /usr/local/bin/etcd
+      - --data-dir=/etcd-data
+      - --name
+      - node1
+      - --initial-advertise-peer-urls
+      - http://172.16.238.100:2380
+      - --listen-peer-urls
+      - http://0.0.0.0:2380
+      - --advertise-client-urls
+      - http://172.16.238.100:2379
+      - --listen-client-urls
+      - http://0.0.0.0:2379
+      - --initial-cluster
+      - node1=http://172.16.238.100:2380,node2=http://172.16.238.101:2380,node3=http://172.16.238.102:2380
+      - --initial-cluster-state
+      - new
+      - --initial-cluster-token
+      - docker-etcd
+
+  node2:
+    image: quay.io/coreos/etcd
+    volumes:
+      - node2-data:/etcd-data
+    networks:
+      cluster_net:
+        ipv4_address: 172.16.238.101
+    environment:
+      - ETCDCTL_API=3
+    expose:
+      - 2379
+      - 2380
+    command:
+      - /usr/local/bin/etcd
+      - --data-dir=/etcd-data
+      - --name
+      - node2
+      - --initial-advertise-peer-urls
+      - http://172.16.238.101:2380
+      - --listen-peer-urls
+      - http://0.0.0.0:2380
+      - --advertise-client-urls
+      - http://172.16.238.101:2379
+      - --listen-client-urls
+      - http://0.0.0.0:2379
+      - --initial-cluster
+      - node1=http://172.16.238.100:2380,node2=http://172.16.238.101:2380,node3=http://172.16.238.102:2380
+      - --initial-cluster-state
+      - new
+      - --initial-cluster-token
+      - docker-etcd
+
+  node3:
+    image: quay.io/coreos/etcd
+    volumes:
+      - node3-data:/etcd-data
+    networks:
+      cluster_net:
+        ipv4_address: 172.16.238.102
+    environment:
+      - ETCDCTL_API=3
+    expose:
+      - 2379
+      - 2380
+    command:
+      - /usr/local/bin/etcd
+      - --data-dir=/etcd-data
+      - --name
+      - node3
+      - --initial-advertise-peer-urls
+      - http://172.16.238.102:2380
+      - --listen-peer-urls
+      - http://0.0.0.0:2380
+      - --advertise-client-urls
+      - http://172.16.238.102:2379
+      - --listen-client-urls
+      - http://0.0.0.0:2379
+      - --initial-cluster
+      - node1=http://172.16.238.100:2380,node2=http://172.16.238.101:2380,node3=http://172.16.238.102:2380
+      - --initial-cluster-state
+      - new
+      - --initial-cluster-token
+      - docker-etcd
+
+volumes:
+  node1-data:
+  node2-data:
+  node3-data:
+
+networks:
+  cluster_net:
+    driver: bridge
+    ipam:
+      driver: default
+      config:
+      -
+        subnet: 172.16.238.0/24
+# 使用启动集群
+docker-compose up -d
+
+
+# 之后使用如下命令登录到任一节点测试etcd集群
+docker exec -it node1 bash
+
+# etcdctl member list
+422a74f03b622fef, started, node1, http://172.16.238.100:2380, http://172.16.238.100:2379
+ed635d2a2dbef43d, started, node2, http://172.16.238.101:2380, http://172.16.238.101:2379
+daf3fd52e3583ffe, started, node3, http://172.16.238.102:2380, http://172.16.238.102:2379
+```
+
+### etcd 常用配置参数
+
+```ldif
+--name       #指定节点名称
+--data-dir   #指定节点的数据存储目录，用于保存日志和快照
+--addr       #公布的 IP 地址和端口；默认为 127.0.0.1:2379
+--bind-addr   #用于客户端连接的监听地址；默认为–addr 配置
+--peers       #集群成员逗号分隔的列表；例如 127.0.0.1:2380,127.0.0.1:2381
+--peer-addr   #集群服务通讯的公布的 IP 地址；默认为 127.0.0.1:2380
+-peer-bind-addr  #集群服务通讯的监听地址；默认为-peer-addr 配置
+--wal-dir         #指定节点的 wal 文件的存储目录，若指定了该参数 wal 文件会和其他数据文件分开存储
+--listen-client-urls #监听 URL；用于与客户端通讯
+--listen-peer-urls   #监听 URL；用于与其他节点通讯
+--initial-advertise-peer-urls  #告知集群其他节点 URL
+--advertise-client-urls  #告知客户端 URL
+--initial-cluster-token  #集群的 ID
+--initial-cluster        #集群中所有节点
+--initial-cluster-state new  #表示从无到有搭建 etcd 集群
+--discovery-srv  #用于 DNS 动态服务发现，指定 DNS SRV 域名
+--discovery      #用于 etcd 动态发现，指定 etcd 发现服务的 URL
+```
+
+### 数据存储
+
+etcd 的数据存储有点像 PG 数据库的存储方式
+
+etcd 目前支持 V2 和 V3 两个大版本，这两个版本在实现上有比较大的不同，一方面是对外提供接口的方式，另一方面就是底层的存储引擎，V2 版本的实例是一个纯内存的实现，所有的数据都没有存储在磁盘上，而 V3 版本的实例就支持了数据的持久化。
+
+![图片](https://raw.githubusercontent.com/Simin-hub/Picture/master/img/1460000039964038)
+
+我们都知道 etcd 为我们提供了 key/value 的服务目录存储。
+
+```applescript
+# 设置键值对
+$ etcdctl set name escape
+
+# 获取方式
+$ etcdctl get name
+escape
+```
+
+使用 etcd 之后，我们会疑问数据都存储到的那里呢？数据默认会存放在 /var/lib/etcd/default/ 目录。我们会发现数据所在的目录，会被分为两个文件夹中，分别是 snap 和 wal目录。
+
+- snap
+- 存放快照数据，存储etcd的数据状态
+- etcd防止WAL文件过多而设置的快照
+- wal
+- 存放预写式日志
+- 最大的作用是记录了整个数据变化的全部历程
+- 在etcd中，所有数据的修改在提交前都要先写入到WAL中
+
+```gradle
+# 目录结构
+$ tree /var/lib/etcd/default/
+default
+└── member
+    ├── snap
+    │   ├── 0000000000000006-0000000000046ced.snap
+    │   ├── 0000000000000006-00000000000493fe.snap
+    │   ├── 0000000000000006-000000000004bb0f.snap
+    │   ├── 0000000000000006-000000000004e220.snap
+    │   └── 0000000000000006-0000000000050931.snap
+    └── wal
+        └── 0000000000000000-0000000000000000.wal
+```
+
+使用 WAL 进行数据的存储使得 etcd 拥有两个重要功能，那就是故障快速恢复和数据回滚/重做。
+
+- 故障快速恢复就是当你的数据遭到破坏时，就可以通过执行所有 WAL 中记录的修改操作，快速从最原始的数据恢复到数据损坏前的状态。
+- 数据回滚重做就是因为所有的修改操作都被记录在 WAL 中，需要回滚或重做，只需要方向或正向执行日志中的操作即可。
+
+既然有了 WAL 实时存储了所有的变更，为什么还需要 snapshot 呢？随着使用量的增加，WAL 存储的数据会暴增。为了防止磁盘很快就爆满，etcd 默认每 10000 条记录做一次 snapshot 操作，经过 snapshot 以后的 WAL 文件就可以删除。而通过 API 可以查询的历史 etcd 操作默认为 1000 条。
+
+首次启动时，etcd 会把启动的配置信息存储到 data-dir 参数指定的数据目录中。配置信息包括本地节点的ID、集群ID和初始时集群信息。用户需要避免 etcd 从一个过期的数据目录中重新启动，因为使用过期的数据目录启动的节点会与集群中的其他节点产生不一致。所以，为了最大化集群的安全性，一旦有任何数据损坏或丢失的可能性，你就应该把这个节点从集群中移除，然后加入一个不带数据目录的新节点。
+
 ## ETCD系列之三：网络层实现
 
 ### 1. 概述
