@@ -20,15 +20,15 @@
 
 ### 树
 
-- #### 二叉树
+- #### [二叉树](https://github.com/Simin-hub/Learning-Programming/blob/main/Go/%E7%AE%97%E6%B3%95/%E4%BA%8C%E5%8F%89%E6%A0%91.md)
 
-- #### 二叉搜索树
+- #### [二叉搜索树](https://github.com/Simin-hub/Learning-Programming/blob/main/Go/%E7%AE%97%E6%B3%95/%E4%BA%8C%E5%8F%89%E6%A0%91.md)
 
-- #### 线段树
+- #### [线段树](https://github.com/Simin-hub/Learning-Programming/blob/main/Go/%E7%AE%97%E6%B3%95/%E7%BA%BF%E6%AE%B5%E6%A0%91.md)
 
 - #### 树状数组
 
-- #### 并查集
+- #### [并查集](https://github.com/Simin-hub/Learning-Programming/blob/main/Go/%E7%AE%97%E6%B3%95/%E5%B9%B6%E6%9F%A5%E9%9B%86.md)
 
 ### 图
 
@@ -78,8 +78,6 @@
 - 对撞指针：两个指针方向相反**。适合解决查找有序数组中满足某些约束条件的一组元素问题、字符串反转问题**。
 - 快慢指针：两个指针方向相同。**适合解决数组中的移动、删除元素问题，或者链表中的判断是否有环、长度问题**。
 - 分离双指针：两个指针分别属于不同的数组 / 链表。**适合解决有序数组合并，求交集、并集问题**。
-
-#### 
 
 ### 滑动窗口
 
