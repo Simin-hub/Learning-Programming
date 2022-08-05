@@ -70,7 +70,7 @@ ETCD是**用于共享配置和服务发现的分布式，一致性的KV存储系
 
 [参考](https://blog.51cto.com/u_15301988/3085390)
 
-Raft：etcd 所采用的保证分布式系统数据强一致性的算法。
+Raft：etcd 所采用的**保证分布式系统数据强一致性的算法**。
 
 Node：一个 Raft 状态机实例。
 
@@ -122,7 +122,7 @@ Raft协议正如论文所述，确实方便理解。主要分为三个部分：�
 
 #### etcd 的 K/V 存储
 
-etcd Server 采用树形的结构来组织储存数据，类似 Linux 的文件系统，也有目录和文件的分层结构，不过一般被称为 nodes。
+etcd Server **采用树形的结构来组织储存数据**，类似 Linux 的文件系统，也有目录和文件的分层结构，不过一般被称为 nodes。
 
 例如：用户指定的 key 可以为单独的名字，如：testkey，此时 key testkey 实际上存放在根目录 “/” 下面。也可以为指定目录结构，如：/testdir/testkey，则将创建相应的目录结构。
 
@@ -133,9 +133,9 @@ etcdctl set /testdir/testkey "Hello world"
 #### etcd 的软件架构
 
 - 
-  HTTP Server：接受客户端发出的 API 请求以及其它 etcd 节点的同步与心跳信息请求。
+  HTTP Server：**接受客户端发出的 API 请求以及其它 etcd 节点的同步与心跳信息请求**。
 
-- Store：用于处理 etcd 支持的各类功能的事务，包括数据索引、节点状态变更、监控与反馈、事件处理与执行等等，**是 etcd 对用户提供的大多数 API 功能的具体实现**。
+- Store：用**于处理 etcd 支持的各类功能的事务**，包括数据索引、节点状态变更、监控与反馈、事件处理与执行等等，**是 etcd 对用户提供的大多数 API 功能的具体实现**。
 
 - Raft：强一致性算法的具体实现，是 etcd 的核心算法。
 
@@ -275,6 +275,8 @@ ETCD还提供了另外一种启动方式，即通过服务发现的方式启动�
 ## 安装使用
 
 静态就是在配置服务之前已经知道了节点的地址和集群的大小
+
+### etcd 部署
 
 #### 源码编译安装
 
@@ -524,7 +526,7 @@ ed635d2a2dbef43d, started, node2, http://172.16.238.101:2380, http://172.16.238.
 daf3fd52e3583ffe, started, node3, http://172.16.238.102:2380, http://172.16.238.102:2379
 ```
 
-### etcd 常用配置参数
+#### etcd 常用配置参数
 
 ```ldif
 --name       #指定节点名称
@@ -598,6 +600,450 @@ default
 既然有了 WAL 实时存储了所有的变更，为什么还需要 snapshot 呢？随着使用量的增加，WAL 存储的数据会暴增。为了防止磁盘很快就爆满，etcd 默认每 10000 条记录做一次 snapshot 操作，经过 snapshot 以后的 WAL 文件就可以删除。而通过 API 可以查询的历史 etcd 操作默认为 1000 条。
 
 首次启动时，etcd 会把启动的配置信息存储到 data-dir 参数指定的数据目录中。配置信息包括本地节点的ID、集群ID和初始时集群信息。用户需要避免 etcd 从一个过期的数据目录中重新启动，因为使用过期的数据目录启动的节点会与集群中的其他节点产生不一致。所以，为了最大化集群的安全性，一旦有任何数据损坏或丢失的可能性，你就应该把这个节点从集群中移除，然后加入一个不带数据目录的新节点。
+
+### Go 使用
+
+[参考](https://learnku.com/articles/46311#4929ee)
+
+#### 安装
+
+```
+go get go.etcd.io/etcd/clientv3	
+```
+
+#### 创建 ETCD 连接
+
+```
+func mian(){
+  var (
+        client *clientv3.Client
+        config clientv3.Config
+    err error
+    )
+
+    config = clientv3.Config{
+        // 这里的 Endpoints 是一个字符串数组切片，支持配合多个节点
+        Endpoints:   []string{"127.0.0.1:2379"},
+        // DialTimeout 连接超时设置
+        DialTimeout: time.Duration(5) * time.Millisecond,
+    }
+    if client, err = clientv3.New(config); err != nil {
+        return
+    }
+}
+```
+
+#### 数据操作
+
+**KV 的 PUT 操作**
+
+我们先尝试往 etcd 中 put 一个数据
+
+```
+// 第一个参数为上下文，第二个为 KEY， 第三个为 VALUE。也可以传第四个参数 option，比如：给这个KEY 加一个过期时间， 在KEY过期机制里面会有详细记录
+putResponse, err := kv.Put(context.TODO(),"/testDir/User/user1","user info")
+```
+
+在 etcd 的各种操作中都会有对应的 Response， put 操作也不例外，同样返回 putResponse，这是一个对象，里面包含 Header, PrevKv。 PrevKv 提供了 Put 之前的这个 key 的 KV 值。Header 提供了 etcd 的 Revision 和其他 etcd 的信息和方法。
+
+**KV 的 GET 操作**
+
+我们依然使用刚刚拿到的 KV 实例进行操作
+
+```
+// 用法一: 第一个参数为上下文，第二个为 KEY，即可获取对应 Key 的 Value
+getResponse, err := kv.Get(context.TODO(),"/testDir/User/user1")
+// 用法二:  第一个参数为上下文，第二个为 KEY，第三个为可选参数  option，这个操作会返回前缀为"/testDir/User/" 下所有 Key 的 Value， 相当于获取一个列表
+gutResponse, err := kv.Get(context.TODO(),"/testDir/User/", clientv3.WithPrefix())
+```
+
+同样，getResponse 也返回了很多信息，但最主要的是我们获取的 Key 的 Value，如果是使用第二种用法，会返回一个 KVs，是一个 KV 的数组切片。也包含了 Header, Count, More, More 是一个 bool 值，指示是否有更多键可以返回要求的范围。 Count 返回返回数据的数量
+
+**KV 的 DELETE 操作**
+
+```
+// 用法一: 第一个参数为上下文，第二个为 KEY，即可获取对应 Key 的 Value
+deleteResponse, err := kv.Delete(context.TODO(),"/testDir/User/user1")
+// delete 也可以删除 "/testDir/User/" 下所有的key，类似get的操作，但第三个参数要传 WithPrefix（）
+```
+
+deleteResponse 返回 Header, Deleted,PrevKvs, Header 中包含信息与之前差不多，后面的 Deleted 是一个 int64 值，代表删除数量。PrevKvs 返回删除之前的 KV 值
+
+#### ETCD 的租约机制
+
+[参考](https://www.topgoer.com/%E6%95%B0%E6%8D%AE%E5%BA%93%E6%93%8D%E4%BD%9C/go%E6%93%8D%E4%BD%9Cetcd/%E6%93%8D%E4%BD%9Cetcd.html)
+
+Etcd 中支持类似 Redis 中的 key 过期机制，使用这一功能配合其他 etcd 功能可以实现非常多的强大的功能，例如：分布式锁，服务发现等。
+
+**获取租约实例**
+
+> 要使用 etcd 的租约需要获得租约的 Lease 实例，我们先创建一个：
+
+```
+// 使用clientv3 创建一个lease的实例，传入 etcd 的 client 实例
+lease := clientv3.New(client)
+```
+
+**申请租约**
+
+获得实例申请一个租约，然后拿到租约 ID
+
+```
+// 申请租约使用lease实例的Grant方法，第一个参数还是上下文，第二个是TTL，过期时间
+grant, err := lease.Grant(context.TODO(), 5)
+// 拿到租约 ID， 拿到这个租约 ID 之后，就可以使用 kv 实例进行 put 操作，加上option参数的 WithLease， 就可以给一个 key 设置过期时间
+leaseID := grant.ID
+```
+
+**续租**
+
+既然是租约，当然是可以续约的，续租有两种方式，一种是**自动续租**，一种是手动续租。
+
+自动续租
+
+```
+// 自动续租时需要传入要续租的租约 ID,lease的 KeepAlive 会启动一个协程执行自动续约，每次续约事件是我们第一次申请租约时设置的时间。
+aliveChan, err := lease.KeepAlive(context.TODO(), leaseID)
+```
+
+> 自动续租返回一个续租的结果，是一个 channel，里面放着续租应答。下面是一个完整的续租代码
+
+```
+package main
+
+import (
+    "context"
+    "fmt"
+    "go.etcd.io/etcd/clientv3"
+    "time"
+)
+
+func main() {
+    cli, err := clientv3.New(clientv3.Config{
+        Endpoints:   []string{"localhost:2379"},
+        DialTimeout: 5 * time.Second,
+    })
+    if err != nil {
+        fmt.Println(err.Error())
+    }
+    // Get a lease instance
+    lease := clientv3.NewLease(cli)
+    grant, err := lease.Grant(context.TODO(), 10)
+    if err != nil {
+        fmt.Println(err.Error())
+        return
+    }
+    // lease id
+    leaseID := grant.ID
+    // 自动续租
+    alive, err := lease.KeepAlive(context.TODO(), leaseID)
+    if err != nil {
+        fmt.Println(err)
+        return
+    }
+    // 处理续租应答的协程
+    go func() {
+        for {
+            select {
+            case res := &lt;-alive:
+                if res == nil {
+                    fmt.Println("租约已经失效")
+                    goto END
+                } else {
+                    fmt.Println("自动续租应答：", res.ID)
+                }
+            }
+        }
+    END:
+    }()
+    // Get KV of client
+    kv := clientv3.NewKV(cli)
+    put, err := kv.Put(context.TODO(), "/testDir/User/user1", "11", clientv3.WithLease(leaseID))
+    if err != nil {
+        fmt.Println(err)
+        return
+    }
+    fmt.Println("写入成功：", put.Header.Revision)
+
+    for {
+        get, err := kv.Get(context.TODO(),"/testDir/User/user1)
+        if err != nil {
+            fmt.Println(err)
+            return
+        }
+        if get.Count == 0 {
+            fmt.Println("租约过期了")
+            break
+        }
+        fmt.Println("还没过期", get.Kvs)
+        time.Sleep(time.Second * 2)
+    }
+}
+```
+
+
+手动续租就不去记录了。
+
+#### ETCD 的 WATCHER
+
+etcd 的 Watcher 可以监听指定的 key 的各种操作，我们先获取 watcher 实例
+
+```
+// 获取 watcher 实例的方法跟之前的 lease 和 kv 一样
+watcher := clientv3.NewWatcher(cli)
+```
+
+拿到 watcher 实例之后，还需要指定从哪个 Revision 开始监听哪个 Key，所以还需要拿一个 Key 的 Revision。比如我们还是想监听 “/testDir/User/” 下面所有 Key 的变化，我们可以这样。
+
+```
+// 先 Get 我们需要监听的 "/testDir/User/" 的getResponse，
+get, err = jm.Kv.Get(context.TODO(), "/testDir/User/", clientv3.WithPrefix())
+// 从get操作的下一个Revision开始监听，这就是下一个Revision
+watchStartRevision = get.Header.Revision + 1
+// 然后使用watcher对象对这个目录进行监听
+watchChan := watcher.Watch(context.TODO(), "/testDir/User/", clientv3.WithRev(watchStartRevision), clientv3.WithPrefix())
+// 监听后返回一个 Channel 里面传回监听到的 "/testDir/User/" 下面的 key 的事件变化，下面是对事件变化的处理
+for w := range watchChan {
+        for _, event := range w.Events {
+            switch event.Type {
+            case mvccpb.PUT:
+                fmt.Println("修改为:", string(event.Kv.Value), "revision:", event.Kv.CreateRevision)
+            case mvccpb.DELETE:
+                fmt.Println("删除:", event.Kv.ModRevision)
+            }
+        }
+    }
+```
+
+### 分布式锁
+
+#### 机制
+
+etcd 支持以下功能，正是依赖这些功能来实现分布式锁的：
+
+- Lease 机制：即租约机制（TTL，Time To Live），Etcd 可以为存储的 KV 对设置租约，当租约到期，KV 将失效删除；同时也支持续约，即 KeepAlive。
+- Revision 机制：每个 key 带有一个 Revision 属性值，**etcd 每进行一次事务对应的全局 Revision 值都会加一，因此每个 key 对应的 Revision 属性值都是全局唯一的**。通过比较 Revision 的大小就可以知道进行写操作的顺序。
+- 在实现分布式锁时，多个程序同时抢锁，根据 Revision 值大小依次获得锁，可以避免 “羊群效应” （也称 “惊群效应”），实现公平锁。
+- Prefix 机制：即前缀机制，也称目录机制。可以**根据前缀（目录）获取该目录下所有的 key 及对应的属性**（包括 key, value 以及 revision 等）。
+- Watch 机制：即监听机制，**Watch 机制支持 Watch 某个固定的 key，也支持 Watch 一个目录（前缀机制）**，当被 Watch 的 key 或目录发生变化，客户端将收到通知。
+
+#### 过程
+
+实现过程：
+
+- 步骤 1: 准备
+
+客户端连接 Etcd，以 /lock/mylock 为前缀创建全局唯一的 key，假设第一个客户端对应的 key="/lock/mylock/UUID1"，第二个为 key="/lock/mylock/UUID2"；客户端分别为自己的 key 创建租约 - Lease，租约的长度根据业务耗时确定，假设为 15s；
+
+- 步骤 2: 创建定时任务作为租约的“心跳”
+
+当一个客户端持有锁期间，其它客户端只能等待，为了避免等待期间租约失效，客户端需创建一个定时任务作为“心跳”进行续约。此外，如果持有锁期间客户端崩溃，心跳停止，key 将因租约到期而被删除，从而锁释放，避免死锁。
+
+- 步骤 3: 客户端将自己全局唯一的 key 写入 Etcd
+
+进行 put 操作，将步骤 1 中创建的 key 绑定租约写入 Etcd，根据 Etcd 的 Revision 机制，假设两个客户端 put 操作返回的 Revision 分别为 1、2，客户端需记录 Revision 用以接下来判断自己是否获得锁。
+
+- 步骤 4: 客户端判断是否获得锁
+
+**客户端以前缀 /lock/mylock 读取 keyValue 列表（keyValue 中带有 key 对应的 Revision），判断自己 key 的 Revision 是否为当前列表中最小的，如果是则认为获得锁**；否则监听列表中前一个 Revision 比自己小的 key 的删除事件，一旦监听到删除事件或者因租约失效而删除的事件，则自己获得锁。
+
+- 步骤 5: 执行业务
+
+获得锁后，操作共享资源，执行业务代码。
+
+- 步骤 6: 释放锁
+
+完成业务流程后，删除对应的key释放锁。
+
+#### 实现
+
+自带的 etcdctl 可以模拟锁的使用：
+
+```bash
+// 第一个终端
+$ ./etcdctl lock mutex1
+mutex1/326963a02758b52d
+
+// 第二终端
+$ ./etcdctl lock mutex1
+
+// 当第一个终端结束了，第二个终端会显示
+mutex1/326963a02758b531
+```
+
+在etcd的clientv3包中，实现了分布式锁。使用起来和mutex是类似的，为了了解其中的工作机制，这里简要的做一下总结。
+
+etcd分布式锁的实现在go.etcd.io/etcd/clientv3/concurrency包中，主要提供了以下几个方法：
+
+```go
+* func NewMutex(s *Session, pfx string) *Mutex， 用来新建一个mutex
+* func (m *Mutex) Lock(ctx context.Context) error，它会阻塞直到拿到了锁，并且支持通过context来取消获取锁。
+* func (m *Mutex) Unlock(ctx context.Context) error，解锁
+```
+
+因此在使用etcd提供的分布式锁式非常简单，通常就是实例化一个mutex，然后尝试抢占锁，之后进行业务处理，最后解锁即可。
+
+demo：
+
+```go
+package main
+
+import (  
+    "context"
+    "fmt"
+    "github.com/coreos/etcd/clientv3"
+    "github.com/coreos/etcd/clientv3/concurrency"
+    "log"
+    "os"
+    "os/signal"
+    "time"
+)
+
+func main() {  
+    c := make(chan os.Signal)
+    signal.Notify(c)
+
+    cli, err := clientv3.New(clientv3.Config{
+        Endpoints:   []string{"localhost:2379"},
+        DialTimeout: 5 * time.Second,
+    })
+    if err != nil {
+        log.Fatal(err)
+    }
+    defer cli.Close()
+
+    lockKey := "/lock"
+
+    go func () {
+        session, err := concurrency.NewSession(cli)
+        if err != nil {
+            log.Fatal(err)
+        }
+        m := concurrency.NewMutex(session, lockKey)
+        if err := m.Lock(context.TODO()); err != nil {
+            log.Fatal("go1 get mutex failed " + err.Error())
+        }
+        fmt.Printf("go1 get mutex sucess\n")
+        fmt.Println(m)
+        time.Sleep(time.Duration(10) * time.Second)
+        m.Unlock(context.TODO())
+        fmt.Printf("go1 release lock\n")
+    }()
+
+    go func() {
+        time.Sleep(time.Duration(2) * time.Second)
+        session, err := concurrency.NewSession(cli)
+        if err != nil {
+            log.Fatal(err)
+        }
+        m := concurrency.NewMutex(session, lockKey)
+        if err := m.Lock(context.TODO()); err != nil {
+            log.Fatal("go2 get mutex failed " + err.Error())
+        }
+        fmt.Printf("go2 get mutex sucess\n")
+        fmt.Println(m)
+        time.Sleep(time.Duration(2) * time.Second)
+        m.Unlock(context.TODO())
+        fmt.Printf("go2 release lock\n")
+    }()
+
+    <-c
+}
+```
+
+#### 原理
+
+Lock()函数的实现很简单：
+
+```go
+// Lock locks the mutex with a cancelable context. If the context is canceled
+// while trying to acquire the lock, the mutex tries to clean its stale lock entry.
+func (m *Mutex) Lock(ctx context.Context) error {
+    s := m.s
+    client := m.s.Client()
+
+    m.myKey = fmt.Sprintf("%s%x", m.pfx, s.Lease())
+    cmp := v3.Compare(v3.CreateRevision(m.myKey), "=", 0)
+    // put self in lock waiters via myKey; oldest waiter holds lock
+    put := v3.OpPut(m.myKey, "", v3.WithLease(s.Lease()))
+    // reuse key in case this session already holds the lock
+    get := v3.OpGet(m.myKey)
+    // fetch current holder to complete uncontended path with only one RPC
+    getOwner := v3.OpGet(m.pfx, v3.WithFirstCreate()...)
+    resp, err := client.Txn(ctx).If(cmp).Then(put, getOwner).Else(get, getOwner).Commit()
+    if err != nil {
+        return err
+    }
+    m.myRev = resp.Header.Revision
+    if !resp.Succeeded {
+        m.myRev = resp.Responses[0].GetResponseRange().Kvs[0].CreateRevision
+    }
+    // if no key on prefix / the minimum rev is key, already hold the lock
+    ownerKey := resp.Responses[1].GetResponseRange().Kvs
+    if len(ownerKey) == 0 || ownerKey[0].CreateRevision == m.myRev {
+        m.hdr = resp.Header
+        return nil
+    }
+
+    // wait for deletion revisions prior to myKey
+    hdr, werr := waitDeletes(ctx, client, m.pfx, m.myRev-1)
+    // release lock key if wait failed
+    if werr != nil {
+        m.Unlock(client.Ctx())
+    } else {
+        m.hdr = hdr
+    }
+    return werr
+}
+```
+
+首先通过一个事务来尝试加锁，这个事务主要包含了4个操作: cmp、put、get、getOwner。需要注意的是，key是由pfx和Lease()组成的。
+
+- cmp: 比较加锁的key的修订版本是否是0。如果是0就代表这个锁不存在。
+- put: 向加锁的key中存储一个空值，这个操作就是一个加锁的操作，但是这把锁是有超时时间的，超时的时间是session的默认时长。超时是为了防止锁没有被正常释放导致死锁。
+- get: get就是通过key来查询
+- getOwner: 注意这里是用m.pfx来查询的，并且带了查询参数WithFirstCreate()。使用pfx来查询是因为其他的session也会用同样的pfx来尝试加锁，并且因为每个LeaseID都不同，所以第一次肯定会put成功。但是只有最早使用这个pfx的session才是持有锁的，所以这个getOwner的含义就是这样的。
+
+接下来才是通过判断来检查是否持有锁
+
+```go
+m.myRev = resp.Header.Revision
+if !resp.Succeeded {
+    m.myRev = resp.Responses[0].GetResponseRange().Kvs[0].CreateRevision
+}
+// if no key on prefix / the minimum rev is key, already hold the lock
+ownerKey := resp.Responses[1].GetResponseRange().Kvs
+if len(ownerKey) == 0 || ownerKey[0].CreateRevision == m.myRev {
+    m.hdr = resp.Header
+    return nil
+}
+```
+
+m.myRev是当前的版本号，resp.Succeeded是cmp为true时值为true，否则是false。这里的判断表明当同一个session非第一次尝试加锁，当前的版本号应该取这个key的最新的版本号。
+
+下面是取得锁的持有者的key。如果当前没有人持有这把锁，那么默认当前会话获得了锁。或者锁持有者的版本号和当前的版本号一致， 那么当前的会话就是锁的持有者。
+
+```go
+// wait for deletion revisions prior to myKey
+hdr, werr := waitDeletes(ctx, client, m.pfx, m.myRev-1)
+// release lock key if wait failed
+if werr != nil {
+    m.Unlock(client.Ctx())
+} else {
+    m.hdr = hdr
+}
+```
+
+上面这段代码就很好理解了，因为走到这里说明没有获取到锁，那么这里等待锁的删除。
+
+waitDeletes方法的实现也很简单，但是需要注意的是，这里的getOpts只会获取比当前会话版本号更低的key，然后去监控最新的key的删除。等这个key删除了，自己也就拿到锁了。
+
+这种分布式锁的实现和我一开始的预想是不同的。它不存在锁的竞争，不存在重复的尝试加锁的操作。而是通过使用统一的前缀pfx来put，然后根据各自的版本号来排队获取锁。效率非常的高。避免了惊群效应
+
+![img](https://raw.githubusercontent.com/Simin-hub/Picture/master/img/1460000021603220)
+如图所示，共有4个session来加锁，那么根据revision来排队，获取锁的顺序为session2 -> session3 -> session1 -> session4。
+
+这里面需要注意一个惊群效应，每一个client在锁住/lock这个path的时候，实际都已经插入了自己的数据，类似/lock/LEASE_ID，并且返回了各自的index（就是raft算法里面的日志索引），而只有最小的才算是拿到了锁，其他的client需要watch等待。例如client1拿到了锁，client2和client3在等待，而client2拿到的index比client3的更小，那么对于client1删除锁之后，client3其实并不关心，并不需要去watch。所以综上，等待的节点只需要watch比自己index小并且差距最小的节点删除事件即可。
 
 ## ETCD系列之三：网络层实现
 

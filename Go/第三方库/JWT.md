@@ -83,9 +83,7 @@ JWT的头部用于描述关于该JWT的最基本的信息，例如其类型以�
 }
 ```
 
-在这里，我们说明了这是一个JWT，并且我们所用的签名算法是HS256算法。对它进行Base64编码，之后的字符串就成了JWT的Header（头部）。
-
-
+在这里，我们说明了这是一个JWT，并且我们所用的签名算法是HS256算法。对它**进行Base64编码**，之后的字符串就成了JWT的Header（头部）。
 
 ```undefined
 eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9
@@ -95,8 +93,6 @@ eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9
 
 在载荷(playload)中定义了以下属性
 
-
-
 ```cpp
 iss: 该JWT的签发者 
 sub: 该JWT所面向的用户 
@@ -105,10 +101,7 @@ exp(expires): 什么时候过期，这里是一个Unix时间戳
 iat(issued at): 在什么时候签发的
 ```
 
-也可以用一个JSON对象来描述
-将上面的JSON对象进行[base64编码]可以得到下面的字符串。这个字符串我们将它称作JWT的Payload（载荷）。
-
-
+也可以用一个JSON对象来描述，将上面的JSON对象**进行[base64编码]**可以得到下面的字符串。这个字符串我们将它称作JWT的Payload（载荷）。
 
 ```undefined
 eyJpc3MiOiIyOWZmMDE5OGJlOGM0YzNlYTZlZTA4YjE1MGRhNTU0NC1XRUIiLCJleHAiOjE1MjI0OTE5MTV9
