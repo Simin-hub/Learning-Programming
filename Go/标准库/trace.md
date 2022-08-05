@@ -1,6 +1,28 @@
 # trace
 
+[参考](https://golang2.eddycjy.com/posts/ch6/03-trace/)、[参考](https://studygolang.com/articles/12639?fr=sidebar)、[参考](https://burxtx.github.io/2018/05/11/%E6%B7%B1%E5%85%A5%E6%B5%85%E5%87%BAGo%E8%AF%AD%E8%A8%80%E6%89%A7%E8%A1%8C%E8%B7%9F%E8%B8%AA/)
+
+## 介绍
+
+原理是：**监听 Go 运行时的一些特定的事件**，如：
+
+1. goroutine的创建、开始和结束。
+2. 阻塞/解锁goroutine的一些事件（系统调用，channel，锁）
+3. 网络I/O相关事件
+4. 系统调用
+5. 垃圾回收
+
+追踪器会原原本本地收集这些信息，不做任何聚合或者抽样操作。对于负载高的应用来说，就可能会生成一个比较大的文件，该文件后面可以通过 `go tool trace` 命令来进行解析。
+
+在引入执行trace程序之前，已经有了pprof内存和CPU分析器，那么为什么它还会被添加到官方的工具链中呢？虽然CPU分析器做了一件很好的工作，告诉你什么函数占用了最多的CPU时间，但它**并不能帮助你确定是什么阻止了goroutine运行，或者在可用的OS线程上如何调度goroutines**。这正是跟踪器真正起作用的地方。trace[设计文档](https://docs.google.com/document/u/1/d/1FP5apqzBgr7ahCCgFO-yoVhk4YZrNIDNf9RybngBc14/pub)很好地解释了跟踪程序背后的动机以及它是如何被设计和工作的。
+
 有时候单单使用 pprof 还不一定足够完整观查并解决问题，因为在真实的程序中还包含许多的隐藏动作，例如 Goroutine 在执行时会做哪些操作？执行/阻塞了多长时间？在什么时候阻止？在哪里被阻止的？谁又锁/解锁了它们？GC 是怎么影响到 Goroutine 的执行的？这些东西用 pprof 是很难分析出来的，但如果你又想知道上述的答案的话，你可以用本章节的主角 `go tool trace` 来打开新世界的大门。
+
+### trace 和 pprof 的区别
+
+**trace 和 pprof 的区别在于两者关注的维度不同，后者更关注代码栈层面，而 trace 更关注于 latency（延迟）**。
+
+比如说一个请求在客户端观察从发送到完成经过了 5s，做 profile 可能发现这个请求的 CPU 时间只有 2s，那剩下的 3s 就不是很清楚了， profile 更侧重的是我们代码执行了多久，至于其他的，例如：网络 IO，系统调用，Goroutine 调度，GC 时间等，很难反映出来。这是就应该使用 trace 了。
 
 ## 1 初步了解
 
