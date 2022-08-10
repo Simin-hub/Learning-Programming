@@ -58,7 +58,7 @@ B+ Tree 是基于 B Tree 和叶子节点顺序访问指针进行实现，它具�
 
 #### 索引的分类
 
-按**数据结构分类**可分为：**B+tree索引、Hash索引、Full-text索引**。
+按**数据结构分类**可分为：**B+tree 索引、Hash 索引、Full-text 索引**。
 
 按**物理存储分类**可分为：**聚簇索引、二级索引（辅助索引）**。
 
@@ -1254,7 +1254,7 @@ MySQL 服务器通过权限表来控制用户对数据库的访问，权限表�
 
 **数据查询语言**（Data Query Language, DQL）SELECT， 查
 
-这个较为好理解即查询操作，**以select关键字。各种简单查询，连接查询**等 都属于DQL。
+这个较为好理解即查询操作，**以select关键字。各种简单查询，连接查询**等都属于DQL。
 
 **数据操纵语言**（Data Manipulation Language, DML）INSERT，UPDATE，DELETE
 
@@ -1424,11 +1424,11 @@ EXPLAIN SELECT * from innodb1 where sex='男';
 
 - 可以通过 ALTER TABLE table_name ADD INDEX index_name(column1,  column2, column3);创建组合索引。 
 
-**全文索引**：  是目前搜索引擎使用的一种关键技术。 
+**全文索引**：是目前搜索引擎使用的一种关键技术。 
 
-- 可以通过 ALTER TABLE table_name ADD FULLTEXT (column);创建全文索 引。
+- 可以通过 ALTER TABLE table_name ADD FULLTEXT (column);创建全文索引。
 
-### 索引的数据结构（b树，hash）
+### 索引的数据结构（B树，hash）
 
 [参考](https://developer.aliyun.com/ask/281188)
 
