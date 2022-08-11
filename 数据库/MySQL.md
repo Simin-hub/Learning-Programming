@@ -664,11 +664,11 @@ SQL 标准定义了四个隔离级别：
 
 #### 乐观锁和悲观锁
 
-数据库管理系统（DBMS）中的并发控制的任务是确保在多个事务同时存取数据库中同一数据时不破坏事务的隔离性和统一性以及数据库的统一性。**乐观并发控制（乐观锁）**和**悲观并发控制（悲观锁）**是并发控制主要采用的技术手段。
+数据库管理系统（DBMS）中的并发控制的任务是确保在多个事务同时存取数据库中同一数据时不破坏事务的隔离性和统一性以及数据库的统一性。**乐观并发控制（乐观锁）**和**悲观并发控制（悲观锁）**是并发控制主要采用的技术手段，**悲观锁和乐观锁是一种思想**，一种处理方式。
 
-悲观锁：**假定会发生并发冲突，屏蔽一切可能违反数据完整性的操作**。在**查询完数据**的时候就把事务锁起来，直到提交事务。**实现方式：使用数据库中的锁机制**
+悲观锁：**假定会发生并发冲突，屏蔽一切可能违反数据完整性的操作**。在**查询完数据**的时候就把事务锁起来，直到提交事务。**共享锁和排它锁是悲观锁的不同的实现**，它俩都属于悲观锁的范畴。
 
-乐观锁：**假设不会发生并发冲突，只在提交操作时检查是否违反数据完整性。**在**修改数据**的时候把事务锁起来，通过version的方式来进行锁定。**实现方式：乐观锁一般会使用版本号机制或CAS算法实现。**
+乐观锁：**假设不会发生并发冲突，只在提交操作时检查是否违反数据完整性。**在**修改数据**的时候把事务锁起来，通过version的方式来进行锁定。InnoDB **以乐观锁为理论基础的MVCC**（多版本并发控制）来避免不可重复读和幻读。
 
 ##### 两种锁的使用场景
 
@@ -1079,6 +1079,20 @@ Relay log：从服务器的中继日志
 
 缺点：类内部方法通过this.xx()方式相互调用时，aop不会进行拦截，需进行特殊处理。
 
+### 主从同步的延迟的原因
+
+一个服务器开放Ｎ个链接给客户端来连接的，这样有会有大并发的更新操作, 但是**从服务器的里面读取binlog 的线程仅有一个**， 当某个SQL在从服务器上执行的时间稍长或者由于某个SQL要进行锁表就会导致，**主服务器的SQL大量积压**，未被同步到从服务器里。这就导致了主从不一致， 也就是主从延迟。
+
+#### 主从同步延迟的解决办法
+
+ 实际上主从同步延迟根本没有什么一招制敌的办法， 因为所有的SQL必须都要在从服务器里面执行一遍，但是主服务器如果不断的有更新操作源源不断的写入， 那么一旦有延迟产生， 那么延迟加重的可能性就会原来越大。 当然我们可以做一些缓解的措施。
+
+  a. 我们知道因为主服务器要负责更新操作， 他对安全性的要求比从服务器高， 所有有些设置可以修改，比如sync_binlog=1，innodb_flush_log_at_trx_commit = 1 之类的设置，而slave则不需要这么高的数据安全，完全可以将sync_binlog设置为0或者关闭binlog，innodb_flushlog， innodb_flush_log_at_trx_commit **也 可以设置为0来提高sql的执行效率 这个能很大程度上提高效率**。另外就是使用比主库更好的硬件设备作为slave。
+
+  b. 就是把，一台从服务器当度作为备份使用， 而不提供查询， 那边他的负载下来了， 执行relay log 里面的SQL效率自然就高了。
+
+  c. **增加从服务器**喽，这个目的还是分散读的压力， 从而降低服务器负载。
+
 ## 备份
 
 ### 备份计划，mysqldump以及xtranbackup的实现原理
@@ -1357,7 +1371,7 @@ MySQL 服务器通过权限表来控制用户对数据库的访问，权限表�
 - InnoDB 索引是聚簇索引，MyISAM 索引是非聚簇索引。 
 -  InnoDB 的主键索引的叶子节点存储着行数据，因此主键索引非常高效。
 -  **MyISAM 索引的叶子节点存储的是行数据地址**，需要再寻址一次才能得到数据。 
-- InnoDB **非主键索引的叶子节点存储的是主键和其他带索引的列数据**，因此 查询时做到覆盖索引会非常高效。
+- InnoDB **非主键索引的叶子节点存储的是主键和其他带索引的列数据**，因此查询时做到覆盖索引会非常高效。
 
 ### 什么是索引？ 
 
@@ -1374,6 +1388,178 @@ MySQL 服务器通过权限表来控制用户对数据库的访问，权限表�
 
 - 时间方面：**创建索引和维护索引要耗费时间**，具体地，当对表中的数据进行增加、删除和修改的时候，索引也要动态的维护，会降低增/改/删的执行效率； 
 - 空间方面：**索引需要占物理空间**。
+
+### 索引失效的情况有哪些？索引何时会失效？
+
+#### 列与列对比
+
+某个表中，有两列（id和c_id）都建了单独索引，下面这种查询条件不会走索引
+
+```javascript
+select * from test where id=c_id;
+```
+
+#### [存在NULL值条件](http://mp.weixin.qq.com/s?__biz=MzI3ODcxMzQzMw==&mid=2247524678&idx=3&sn=a153fd4fae16c357d55414e067d7bf25&chksm=eb50e470dc276d6676c923b597cbd28cf29e7a31393f1f03afedaf22f6aaf9e0e5517b9bdb32&scene=21#wechat_redirect)
+
+[我们在设计数据库表时，应该尽力避免NULL值出现，如果非要不可避免的要出现NULL值，也要给一个DEFAULT值，数值型可以给0、-1之类的， 字符串有时候给空串有问题，就给一个空格或其他。如果索引列是可空的，是不会给其建索引的，索引值是少于表的count(*)值的，所以这种情况下，执行计划自然就去扫描全表了](http://mp.weixin.qq.com/s?__biz=MzI3ODcxMzQzMw==&mid=2247524678&idx=3&sn=a153fd4fae16c357d55414e067d7bf25&chksm=eb50e470dc276d6676c923b597cbd28cf29e7a31393f1f03afedaf22f6aaf9e0e5517b9bdb32&scene=21#wechat_redirect)
+
+```
+select * from test where id is not null;
+```
+
+#### **NOT条件**
+
+我们知道建立索引时，给每一个索引列建立一个条目，如果查询条件为等值或范围查询时，索引可以根据查询条件去找对应的条目。反过来当查询条件为非时，索引定位就困难了，执行计划此时可能更倾向于全表扫描，这类的查询条件有：<>、NOT、in、not exists
+
+```javascript
+select * from test where id<>500;
+select * from test where id in (1,2,3,4,5);
+select * from test where not in (6,7,8,9,0);
+select * from test where not exists (select 1 from test_02 where test_02.id=test.id);
+```
+
+#### LIKE通配符
+
+当使用模糊搜索时，尽量采用后置的通配符，例如：name||’%’，因为走索引时，其会从前去匹配索引列，这时候是可以找到的，如果采用前匹配，那么查索引就会很麻烦，比如查询所有姓张的人，就可以去搜索’张%’。
+
+相反如果你查询所有叫‘明’的人，那么只能是%明。这时候索引如何定位呢？前匹配的情况下，执行计划会更倾向于选择全表扫描。后匹配可以走INDEX RANGE SCAN。
+
+所以业务设计的时候，尽量考虑到模糊搜索的问题，要更多的使用后置通配符。
+
+```javascript
+select * from test where name like 张||'%';
+```
+
+#### 条件上包括函数
+
+查询条件上尽量不要对索引列使用函数，比如下面这个SQL
+
+```javascript
+select * from test where upper(name)='SUNYANG';
+```
+
+这样是不会走索引的，因为索引在建立时会和计算后可能不同，无法定位到索引。但如果查询条件不是对索引列进行计算，那么依然可以走索引。比如
+
+```javascript
+select * from test where name=upper('sunyang');
+--INDEX RANGE SCAN
+```
+
+这样的函数还有：to_char、to_date、to_number、trunc等
+
+#### 复合索引前导列区分大
+
+当复合索引前导列区分小的时候，我们有INDEX SKIP SCAN，当前导列区分度大，且查后导列的时候，前导列的分裂会非常耗资源，执行计划想，还不如全表扫描来的快，然后就索引失效了。
+
+```javascript
+select * from test where owner='sunyang';
+```
+
+#### 数据类型的转换
+
+当查询条件存在隐式转换时，索引会失效。[一条垃圾SQL，把 64 核 CPU 快跑崩了](http://mp.weixin.qq.com/s?__biz=MzI3ODcxMzQzMw==&mid=2247493425&idx=1&sn=93e802fc6a74dc27538e6e0b200bad7b&chksm=eb506207dc27eb1103613907dbb512ba65201014be639ab3fdc5e3f9bc53207ef019aac608b8&scene=21#wechat_redirect)，这篇可以看下。
+
+比如在[数据库](https://cloud.tencent.com/solution/database?from=10680)里id存的number类型，但是在查询时，却用了下面的形式：
+
+```javascript
+select * from sunyang where id='123';
+```
+
+#### Connect By Level
+
+使用connect by level时，不会走索引。
+
+#### 谓词运算
+
+我们在上面说，不能对索引列进行函数运算，这也包括加减乘除的谓词运算，这也会使索引失效。
+
+建立一个sunyang表，索引为id，看这个SQL：
+
+```javascript
+select * from sunyang where id/2=:type_id;
+```
+
+这里很明显对索引列id进行了’/2’除二运算，这时候就会索引失效，这种情况应该改写为：
+
+```javascript
+select * from sunyang where id=:type_id*2;
+```
+
+就可以使用索引了。另外，关注公众号Java技术栈，在后台回复：面试，可以获取我整理的 Java/ 数据库系列面试题和答案，非常齐全。
+
+#### Vistual Index
+
+先说明一下，虚拟索引的建立是否有用，需要看具体的执行计划，如果起作用就可以建一个，如果不起作用就算了。普通索引这么建：
+
+```javascript
+create index idx_test_id on test(id);
+```
+
+虚拟索引Vistual Index这么建：
+
+```javascript
+create index idx_test_id on test(id) nosegment;
+```
+
+做了一个实验，首先创建一个表：
+
+```javascript
+CREATE TABLE test_1116( 
+id number, 
+a number 
+); 
+
+CREATE INDEX idx_test_1116_id on test_1116(id); 
+CREATE INDEX idx_test_1116_a on test_1116(a)nosegment; 
+```
+
+其中id为普通索引，a为虚拟索引。
+
+在表中插入十万条数据
+
+```javascript
+begin 
+for i in 1 .. 100000 loop 
+        insert into test_1116 values (i,i); 
+end loop; 
+commit; 
+end; 
+```
+
+接着分别去执行下面的SQL看时间，由于在内网机做实验，图贴不出来，数据保证真实性。
+
+```javascript
+select count(id) from test_1116;
+--第一次耗时：0.061秒
+--第二次耗时：0.016秒
+
+select count(a) from test_1116; 
+--第一次耗时：0.031秒
+--第二次耗时：0.016秒
+```
+
+因为在执行过一次后，oracle对结果集缓存了，所以第二次执行耗时不走索引，走内存就都一样了。
+
+可以看到在这种情况下，虚拟索引比普通索引快了一倍。
+
+具体虚拟索引的使用细节，这里不再展开讨论。更多 Java 技术教程可以看这个：https://github.com/javastacks/javastack
+
+#### Invisible Index
+
+Invisible Index是oracle 11g提供的新功能，对优化器（还接到前面博客里讲到的CBO吗）不可见，[MySQL](https://cloud.tencent.com/product/cdb?from=10680) 也有，[MySQL 8.0 中的索引可以隐藏了](http://mp.weixin.qq.com/s?__biz=MzI3ODcxMzQzMw==&mid=2247521326&idx=1&sn=6b88035c6bfb4a62086a57022b49b8d6&chksm=eb501118dc27980e55ad2df5f0cd5c96731b59afc760452d7bbc09bcef16afb90671b7aa3f11&scene=21#wechat_redirect)。我感觉这个功能更主要的是测试用，假如一个表上有那么多索引，一个一个去看执行计划调试就很慢了，这时候不如建一个对表和查询都没有影响的Invisible Index来进行调试，就显得很好了。
+
+通过下面的语句来操作索引
+
+```javascript
+alter index idx_test_id invisible;
+alter index idx_test_id visible;
+```
+
+如果想让CBO看到Invisible Index，需要加入这句：
+
+```javascript
+alter session set optimizer_use_invisible_indexes = true;
+```
 
 ### 索引的使用场景
 
@@ -1460,7 +1646,7 @@ B+tree性质：
 
 2）哈希索引
 
-简要说下，类似于数据结构中简单实现的HASH表（散列表）一样，当我们在mysql中用哈希索引时，主要就是通过Hash算法（常见的Hash算法有直接定址法、平方取中法、折叠法、除数取余法、随机数法），将数据库字段数据转换成定长的Hash值，与这条数据的行指针一并存入Hash表的对应位置；如果发生Hash碰撞（两个不同关键字的Hash值相同），则在对应Hash键下以链表形式存储。当然这只是简略模拟图。
+简要说下，类似于数据结构中简单实现的HASH表（散列表）一样，当我们在mysql中用哈希索引时，主要就是通过Hash算法（常见的Hash算法有直接定址法、平方取中法、折叠法、除数取余法、随机数法），将数据库字段数据转换成定长的Hash值，**与这条数据的行指针一并存入Hash表的对应位置**；如果发生Hash碰撞（两个不同关键字的Hash值相同），则在对应Hash键下以链表形式存储。当然这只是简略模拟图。
 
 ![2.jpg](https://raw.githubusercontent.com/Simin-hub/Picture/master/img/a61549a9eaab450aa1751808f925d9ce.jpg)
 
@@ -1534,6 +1720,12 @@ B树和B+树的区别主要有两点：
 
 - **加锁阶段**：在该阶段可以进行加锁操作。在对任何数据进行读操作之前要申请并获得S锁（共享锁，其它事务可以继续加共享锁，但不能加排它锁），在进行写操作之前要申请并获得X锁（排它锁，其它事务不能再获得任何锁）。加锁不成功，则事务进入等待状态，直到加锁成功才继续执行。
 - **解锁阶段**：当事务释放了一个封锁以后，事务进入解锁阶段，在该阶段只能进行解锁操作不能再进行加锁操作。
+
+### InnoDB存储引擎中的锁
+
+- Record lock：**单个行记录**上的锁 
+- Gap lock：间隙锁，锁定一个范围，**不包括记录本身**
+- Next-key lock：record+gap **锁定一个范围**，**包含记录本身**
 
 ### MySQL中InnoDB引擎的行锁是怎么实现的？
 
@@ -1708,7 +1900,27 @@ char的存储方式是：对英文字符（ASCII）占用1个字节，对一个�
 
 **nchar和nvarchar是存储的unicode字符串数据**
 
-### 主键和候选键有什么区别？、
+### varchar(10)和varchar(100)有什么区别
+
+先举个例子：如果要存储`'hello12345'`这个字符串，使用`varchar(10)`和`varchar(100)`存储，占用磁盘空间是一样的么？
+
+答案是：**占用磁盘的存储空间是一样的**。
+
+**既然存储时磁盘占用空间一样，还有什么其他的区别吗？**
+
+虽然使用`varchar(100)`和`varchar(10)`存储`'hello12345'`字符串占用的磁盘空间一样，但是**消耗的内存不一样，更长的列消耗的内存会更多**。因为MySQL通常会**分配固定大小的内存块来保存内部值**。尤其是使用临时表进行排序会操作时，会消耗更多的内存。在使用磁盘进行排序时，也是一样。
+
+所以此时`varchar(100)` ***会消耗更多的内存。***
+
+#### varchar(10)和varchar(100)的优劣势是什么？
+
+因为**涉及到文件排序或者基于磁盘的临时表时，更长的列会消耗更多的内存**，所以在使用使用时，我们不能太过浪费内存空间，还是需要评估实际使用的长度来设置字符的长度。***推荐冗余10%的长度***（因业务而异）。
+
+所使用varchar(10)会更加***节约内存空间***，但是实际业务中字符长度一旦超过10就需要更改表结构，在表数据量特别大时，***不易拓展***。
+
+而这时使用更长的列：varchar(100)无需更改表结构，***业务拓展性更好***。
+
+### 主键和候选键有什么区别？
 
 [参考](https://zhuanlan.zhihu.com/p/33394962)
 
@@ -1771,14 +1983,12 @@ CREATE TABLE user_index2 (
 	FULLTEXT KEY (information),
 	UNIQUE KEY (id_card)
 );
-复制代码
 ```
 
 #### 更新表时创建索引
 
 ```sql
 ALTER TABLE table_name ADD INDEX index_name (column_list);
-复制代码
 ```
 
 这种方式可以用来创建普通索引，唯一索引，主键索引；=
@@ -1791,7 +2001,6 @@ ALTER TABLE table_name ADD INDEX index_name (column_list);
 
 ```arduino
 CREATE INDEX index_name ON table_name (column_list);
-复制代码
 ```
 
 CREATE INDEX可对表增加普通索引或UNIQUE索引。（但是，不能创建PRIMARY KEY索引）
@@ -1804,7 +2013,6 @@ CREATE INDEX可对表增加普通索引或UNIQUE索引。（但是，不能创�
 alter table user_index drop KEY name;
 alter table user_index drop KEY id_card;
 alter table user_index drop KEY information;
-复制代码
 ```
 
 删除主键索引：`alter table 表名 drop primary key`（因为主键只有一个）。这里值得注意的是，如果主键自增长，那么不能直接执行此操作（自增长依赖于主键索引）：
@@ -1816,12 +2024,9 @@ alter table user_index
 -- 重新定义字段
 MODIFY id int,
 drop PRIMARY KEY
-复制代码
 ```
 
 但通常不会删除主键，因为设计主键一定与业务逻辑无关。
-
-
 
 ### 索引设计原则
 
@@ -1836,8 +2041,6 @@ drop PRIMARY KEY
 > 选择索引的最终目的是为了使查询的速度变快。下面给出的原则是最基本的准则，但不能拘泥于这些准则，应该根据应用的实际情况进行分析和判断，选择最合适的索引方式。
 
 #### 1.索引最左匹配原则
-
-
 
 - 索引可以简单如一个列(a)，也可以复杂如多个列(a, b, c, d)，即联合索引。
 - 如果是联合索引，那么key也由多个列组成，同时，索引只能用于查找key是否存在（相等），遇到范围查询(>、<、between、like左匹配)等就不能进一步匹配了，后续退化为线性查找。因此，列的排列顺序决定了可命中索引的列数。
@@ -1894,7 +2097,7 @@ like 模糊查询中，右模糊查询(abc%)会使用索引，而(%abc)和(%abc%
 
 表中的数据被大量更新，或者数据的使用方式被改变后，原有的一些索引可能不再需要。数据库管理员应当定期找出这些索引，将它们删除，从而减少索引对更新操作的影响。
 
-#### 12.=和in可以乱序。
+#### 12. =和in可以乱序。
 
 比如a = 1 and b = 2 and c = 3 建立(a,b,c)索引可以任意顺序，mysql的查询优化器会帮你优化成索引可以识别的形式
 
@@ -1968,8 +2171,8 @@ MyISM使用的是非聚簇索引，**非聚簇索引的两棵B+树看上去没�
 看上去聚簇索引的效率明显要低于非聚簇索引，因为**每次使用辅助索引检索都要经过两次B+树查找**，这不是多此一举吗？聚簇索引的优势在哪？
 
 1. 由于**行数据和叶子节点存储在一起，同一页中会有多条行数据，访问同一数据页不同行记录时，已经把页加载到了Buffer中，再次访问的时候，会在内存中完成访问**，不必访问磁盘。这样**主键和行数据是一起被载入内存的，找到叶子节点就可以立刻将行数据返回**了，**如果按照主键Id来组织数据，获得数据更快**。
-2. **辅助索引使用主键作为"指针"而不是使用地址值作为指针的好处**是，**减少了当出现行移动或者数据页分裂时辅助索引的维护工作**，**使用主键值当作指针会让辅助索引占用更多的空间，换来的好处是InnoDB在移动行时无须更新辅助索引中的这个"指针"**。**也就是说行的位置（实现中通过16K的Page来定位）会随着**[**数据库**](https://cloud.tencent.com/solution/database?from=10680)**里数据的修改而发生变化（前面的B+树节点分裂以及Page的分裂），使用聚簇索引就可以保证不管这个主键B+树的节点如何变化，辅助索引树都不受影响**。
-3. 聚簇索引适合用在排序的场合，非聚簇索引不适合
+2. 辅助索引使用主键作为"指针"而不是使用地址值作为指针的好处是，**减少了当出现行移动或者数据页分裂时辅助索引的维护工作，使用主键值当作指针会让辅助索引占用更多的空间**，换来的好处是InnoDB**在移动行时无须更新辅助索引中的这个"指针"**。也就是说行的位置（实现中通过16K的Page来定位）会随着[数据库](https://cloud.tencent.com/solution/database?from=10680)里数据的修改而发生变化（前面的B+树节点分裂以及Page的分裂），使用聚簇索引就可以保证不管这个主键B+树的节点如何变化，辅助索引树都不受影响。
+3. 聚簇索引适合用在**排序的场合**，非聚簇索引不适合
 4. 取出一定范围数据的时候，使用用聚簇索引
 5. 二级索引需要两次索引查找，而不是一次才能取到数据，因为存储引擎第一次需要通过二级索引找到索引的叶子节点，从而找到数据的主键，然后在聚簇索引中用主键再次查找索引，再找到数据
 6. 可以把**相关数据保存在一起**。例如实现电子邮箱时，可以根据用户 ID 来聚集数据，这样只需要从磁盘读取少数的数据页就能获取某个用户的全部邮件。如果没有使用聚簇索引，则每封邮件都可能导致一次磁盘 I/O。
@@ -1981,7 +2184,7 @@ MyISM使用的是非聚簇索引，**非聚簇索引的两棵B+树看上去没�
 
 ![img](https://raw.githubusercontent.com/Simin-hub/Picture/master/img/iywj5q0imm.jpeg)
 
-所以建议使用int的auto_increment作为主键
+所以建议使用int的 auto_increment 作为主键
 
 ![img](https://ask.qcloudimg.com/http-save/yehe-2823867/td2fso5cth.jpeg)
 
@@ -2398,7 +2601,7 @@ mysql中的**in语句是把外表和内表作hash 连接**，而**exists语句�
 
 超大的分页一般从两个方向上来解决.
 
-- **数据库层面**,这也是我们主要集中关注的(虽然收效没那么大),类似于`select * from table where age > 20 limit 1000000,10`这种查询其实也是有可以优化的余地的. 这条语句需要load1000000数据然后基本上全部丢弃,只取10条当然比较慢. 当时我们可以修改为`select * from table where id in (select id from table where age > 20 limit 1000000,10).`这样虽然也load了一百万的数据,但是由于索引覆盖,要查询的所有字段都在索引中,所以速度会很快. 同时如果ID连续的好,我们还可以`select * from table where id > 1000000 limit 10,`效率也是不错的,优化的可能性有许多种,但是核心思想都一样,就是**减少load的数据**.
+- **数据库层面**,这也是我们主要集中关注的(虽然收效没那么大),类似于`select * from table where age > 20 limit 1000000,10`这种查询其实也是有可以优化的余地的. 这条语句需要load1000000数据然后基本上全部丢弃,只取10条当然比较慢. 当时我们可以修改为`select * from table where id in (select id from table where age > 20 limit 1000000,10).`这样虽然也load了一百万的数据,但是由于**索引覆盖**, 要查询的所有字段都在索引中,所以速度会很快. 同时如果ID连续的好,我们还可以`select * from table where id > 1000000 limit 10,`效率也是不错的,优化的可能性有许多种,但是核心思想都一样,就是**减少load的数据**.
 - 从需求的角度减少这种请求…**主要是不做类似的需求(**直接跳转到几百万页之后的具体某一页.只允许逐页查看或者按照给定的路线走,这样可预测,可缓存)以及防止ID泄漏且连续被人恶意攻击.
 
 解决超大分页,其实**主要是靠缓存,可预测性的提前查到内容,缓存至redis等k-V数据库中**,直接返回即可.
@@ -2967,3 +3170,193 @@ InnoDB是带有事务的存储引擎，并且其内部机制会自动修复大�
 
 当需要在`--innodb_force_recovery`选项是正数的情况下修复数据库时，错误日志通常会有明确的提示信息。
 
+### MySQL问题排查都有哪些手段
+
+#### MySQL排查问题常用思路 
+
+- 使用 show processlist 命令**查看当前所有连接信息**。
+- 使用 explain 命令查询 SQL 语句执行计划。
+- 开启慢查询日志，查看慢查询的 SQL。
+
+#### 定制化 MySQL Show Processlist 输出结果 
+
+在 MySQL 中使用 Show Processlist 等指令时常常会出现一些无用信息，比如：Sleep 状态的。此时，如果我们想要过滤掉不需要的内容，应该怎么做呢？
+
+**方法一**
+
+在 MySQL 的命令提示符下，可以使用 \P 的命令设定要过滤的内容，步骤如下：
+
+```
+$ mysql -u root -p
+$ mysql> \P grep -v Sleep
+# 此时输出结果就没有 Sleep 相关的信息了
+$ mysql> Show Full Processlist;
+```
+
+**方法二**
+
+在使用 SQL 命令时想要过滤指定的内容，可以使用下面的命令。
+
+```
+SELECT * FROM information_schema.processlist WHERE STATE != '';
+SELECT * FROM information_schema.processlist WHERE COMMAND != 'Sleep';
+SELECT * FROM information_schema.processlist WHERE db = 'dbname' AND COMMAND != 'Sleep';
+```
+
+#### MySQL EXPLAIN 详解
+
+MySQL EXPLAIN命令是查询性能优化不可缺少的一部分，本文主要讲解explain命令的使用及相关参数说明。
+
+EXPLAIN Output Columns
+
+![mysql.jpg](https://raw.githubusercontent.com/Simin-hub/Picture/master/img/291609249864148090076.jpg)
+
+**id**
+
+id是用来顺序标识整个查询中SELELCT 语句的，在嵌套查询中id越大的语句越先执行。该值可能为NULL，如果这一行用来说明的是其他行的联合结果。
+
+**select_type**
+
+表示查询的类型
+
+![mysql.jpg](https://raw.githubusercontent.com/Simin-hub/Picture/master/img/291609249922493057539.jpg)
+
+**table**
+
+对应行正在访问哪一个表，表名或者别名
+
+关联优化器会为查询选择关联顺序，左侧深度优先
+
+当from中有子查询的时候，表名是derivedN的形式，N指向子查询，也就是explain结果中的下一列
+
+当有union result的时候，表名是union 1,2等的形式，1,2表示参与union的query id
+
+注意：MySQL对待这些表和普通表一样，但是这些“临时表”是没有任何索引的。
+
+**type**
+
+type显示的是访问类型，是较为重要的一个指标，结果值从好到坏依次是：
+
+system > const > eq_ref > ref > fulltext > ref_or_null > index_merge > unique_subquery > index_subquery > range > index > ALL ，一般来说，得保证查询至少达到range级别，最好能达到ref。
+
+**possible_keys**
+
+显示查询使用了哪些索引，表示该索引可以进行高效地查找，但是列出来的索引对于后续优化过程可能是没有用的
+
+**key**
+
+key列显示MySQL实际决定使用的键（索引）。如果没有选择索引，键是NULL。要想强制MySQL使用或忽视possible_keys列中的索引，在查询中使用FORCE INDEX、USE INDEX或者IGNORE INDEX。
+
+**key_len**
+
+key_len列显示MySQL决定使用的键长度。如果键是NULL，则长度为NULL。使用的索引的长度。在不损失精确性的情况下，长度越短越好 。
+
+**ref**
+
+ref列显示使用哪个列或常数与key一起从表中选择行。
+
+**rows**
+
+rows列显示MySQL认为它执行查询时必须检查的行数。注意这是一个预估值。
+
+**Extra**
+
+Extra是EXPLAIN输出中另外一个很重要的列，该列显示MySQL在查询过程中的一些详细信息，MySQL查询优化器执行查询的过程中对查询计划的重要补充信息。
+
+#### 如何开启MySQL慢查询日志
+
+##### 参数说明：
+
+slow_query_log 慢查询开启状态
+
+slow_query_log_file 慢查询日志存放的位置（这个目录需要MySQL的运行帐号的可写权限，一般设置为MySQL的数据存放目录）
+
+long_query_time 查询超过多少秒才记录
+
+log_output #输出方式，可以是file和table，当为file时会输出到slow_query_log_file文件，当为table时则会输出到mysql数据库中的slow_log表
+
+##### 操作步骤 
+
+正常情况下，只需要在配置文件中增加slow_query_log = 1配置，即打开慢查询日志，未指定slow_query_log_file的情况下，会自动生成一个以主机名+‘slow'.log 的文件。　
+
+在 MySQL中，提供了慢查询查询日志，基于性能方面的考虑，该配置默认为OFF(关闭) 状态。那么如何开启慢日志查询呢？其步骤如下：
+
+在 MySQL 中，慢查询日志默认为OFF状态，通过如下命令进行查看：
+
+```
+mysql> show variables like "slow_query_log";
++---------------------+----------------------------------------------+
+| Variable_name       | Value                                        |
++---------------------+----------------------------------------------+
+| slow_query_log      | OFF                                          |
++---------------------+----------------------------------------------+
+2 rows in set (0.01 sec)
+```
+
+通过如下命令进行设置为 ON 状态：
+
+```
+set global slow_query_log = "ON";
+```
+
+其中slow_query_log_file属性，表示慢查询日志存储位置，其日志默认名称为 host 名称。
+
+如下所示：
+
+```
+mysql> show variables like "slow_query_log_file";
++---------------------+----------------------------------------------+
+| Variable_name       | Value                                        |
++---------------------+----------------------------------------------+                                     |
+| slow_query_log_file | /usr/local/mysql/data/hostname.log |
++---------------------+----------------------------------------------+
+2 rows in set (0.01 sec)
+```
+
+也可使用 以下命令进行修改：
+
+```
+set global slow_query_log_file = ${path}/${filename}.log;
+```
+
+其中: path 表示路径， filename 表示文件名，如果不指定，其默认filename 为hostname。
+
+慢查询 查询时间，当SQL执行时间超过该值时，则会记录在slow_query_log_file 文件中，其默认为 10 ，最小值为 0，(单位：秒)。
+
+```
+mysql> show variables like "long_query_time";
++-----------------+-----------+
+| Variable_name   | Value     |
++-----------------+-----------+
+| long_query_time | 10.000000 |
++-----------------+-----------+
+1 row in set (0.00 sec)
+```
+
+可通过以下命令进行修改：
+
+```
+mysql> set global long_query_time = 5;
+```
+
+当设置值小于0时，默认为 0。
+
+通过上述设置后，退出当前会话或者开启一个新的会话，执行如下命令：
+
+```
+select sleep(11);
+```
+
+备注: 这里的 11 并不是固定值，仅仅为了展示，其值只需要符合以下条件即可：
+
+该值大于等于long_query_time 值即可。
+
+该 SQL 则会进入慢查询日志中。通过cat 命令查看后如下所示：
+
+```
+# Time: 200310 13:30:57
+# User@Host: root[root] @ localhost []  Id: 21528
+# Query_time: 6.000164  Lock_time: 0.000000 Rows_sent: 1  Rows_examined: 0
+SET timestamp=1583818257;
+select sleep(6);
+```
