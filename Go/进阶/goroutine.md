@@ -2478,3 +2478,13 @@ http.ListenAndServe("localhost:6060", nil))
 
 
 
+### [多协程并发环境下的异常处理](https://segmentfault.com/a/1190000023691221)
+
+在Go语言中，我们通常会用到panic和recover来抛出错误和捕获错误，这一对操作在单协程环境下我们正常用就好了，并不会踩到什么坑。但是在多协程并发环境下，我们常常会碰到以下两个问题。假设我们现在有2个协程，我们叫它们协程A和B好了：
+
+- 如果协程A发生了panic，协程B是否会因为协程A的panic而挂掉？
+- 如果协程A发生了panic，协程B是否能用recover捕获到协程A的panic？
+
+答案分别是：会、不能。
+
+协程A发生panic，协程B无法recover到协程A的panic，只有协程自己内部的recover才能捕获自己抛出的panic。
