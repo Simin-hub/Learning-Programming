@@ -146,7 +146,8 @@ etcdctl set /testdir/testkey "Hello world"
   - Entry 表示存储的具体日志内容。
 
 通常，一个用户的请求发送过来，会经由 HTTP Server 转发给 Store 进行具体的事务处理，如果涉及到节点数据的修改，则交给 Raft 模块进行状态的变更、日志的记录，然后再同步给别的 etcd 节点以确认数据提交，最后进行数据的提交，再次同步。
-![etcd — 架构原理_Kubernetes 云原生_02](https://raw.githubusercontent.com/Simin-hub/Picture/master/img/7ada539096fd8452708910c8fafafe3e.png)
+
+<img src="https://raw.githubusercontent.com/Simin-hub/Picture/master/img/7ada539096fd8452708910c8fafafe3e.png" alt="etcd — 架构原理_Kubernetes 云原生_02" style="zoom:50%;" />
 
 #### 5.1 选主
 
