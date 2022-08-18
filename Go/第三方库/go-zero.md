@@ -405,3 +405,81 @@ func main() {
 ```
 
 更多示例：https://github.com/zeromicro/zero-examples/tree/main/mapreduce
+
+# 源码解析
+
+[参考](https://learnku.com/articles/66596)、[参考](https://segmentfault.com/a/1190000041623963)
+
+## 代码结构
+
+### rest
+
+rest 用于构建API服务
+
+```
+rest
+├── handler // 自带中间件
+│   ├── authhandler.go // 权限
+│   ├── breakerhandler.go // 断路器
+│   ├── contentsecurityhandler.go // 安全验证
+│   ├── cryptionhandler.go // 加密解密
+│   ├── gunziphandler.go // zip 压缩
+│   ├── loghandler.go // 日志
+│   ├── maxbyteshandler.go // 最大请求数据限制
+│   ├── maxconnshandler.go // 最大请求连接数限制
+│   ├── metrichandler.go // 请求指标统计
+│   ├── prometheushandler.go // prometheus 上报
+│   ├── recoverhandler.go // 错误捕获
+│   ├── sheddinghandler.go // 过载保护
+│   ├── timeouthandler.go // 超时控制
+│   └── tracinghandler.go // 链路追踪
+├── httpx
+│   ├── requests.go
+│   ├── responses.go
+│   ├── router.go
+│   ├── util.go
+│   └── vars.go
+├── internal
+│   ├── cors // 跨域处理
+│   │   └── handlers.go
+│   ├── response
+│   │   ├── headeronceresponsewriter.go
+│   │   └── withcoderesponsewriter.go
+│   ├── security // 加密处理
+│   │   └── contentsecurity.go
+│   ├── log.go
+│   └── starter.go
+├── pathvar // path 参数解析
+│   └── params.go
+├── router
+│   └── patrouter.go
+├── token
+│   └── tokenparser.go
+├── config.go // 配置
+├── engine.go // 引擎
+├── server.go
+└── types.go
+```
+
+#### 服务启动流程
+
+我们以 go-zero-example 项目 http/demo/main.go 代码来分析
+
+![rest启动流程](https://segmentfault.com/img/remote/1460000041623966)
+
+go-zero 给我们提供了如下组件与服务，我们来逐一阅读分析
+
+- http框架常规组件（路由、调度器、中间件、跨域）
+- 权限控制
+- 断路器
+- 限流器
+- 过载保护
+- prometheus
+- trace
+- cache
+
+#### http框架常规组件
+
+##### 路由
+
+路由使用的是二叉查找树，高效的路由都会使用树形结构来构建

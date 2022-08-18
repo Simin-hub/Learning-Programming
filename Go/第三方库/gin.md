@@ -1858,7 +1858,7 @@ gin源码阅读系列就是要弄明白以下几个问题:
 - gin框架到底扮演了什么角色
 - 请求从gin流入net/http, 最后又是如何回到gin中
 - gin的context为何能承担起来复杂的需求
-- gin的路由算法
+- [gin的路由算法](https://www.topgoer.com/gin%E6%A1%86%E6%9E%B6/gin%E6%BA%90%E7%A0%81%E8%A7%A3%E8%AF%BB/gin%E7%9A%84%E8%B7%AF%E7%94%B1%E7%AE%97%E6%B3%95.html)
 - gin的中间件是什么
 - gin的Engine具体是个什么东西
 - net/http的requeset, response都提供了哪些有用的东西
