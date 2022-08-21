@@ -880,6 +880,379 @@ InnoDB为插入一行新记录，保存当前系统版本号作为行版本号�
 - 崩溃恢复：MyISAM 崩溃后发生损坏的概率比 InnoDB 高很多，而且恢复的速度也更慢。
 - 其它特性：MyISAM 支持压缩表和空间数据索引。
 
+## MySQL 锁
+
+[参考](https://blog.csdn.net/zcl_love_wx/article/details/81977447?spm=1001.2014.3001.5502)
+
+### 一、mysql的锁类型
+
+**(1) 共享/排它锁(Shared and Exclusive Locks)**
+
+共享锁和排他锁是**InnoDB**引擎实现的标准**行级别锁**。
+
+拿共享锁是为了让当前事务去读一行数据。
+
+拿排他锁是为了让当前事务去修改或删除某一行数据。。
+
+设置共享锁：select * from user where id = 1 LOCK IN SHARE MODE;
+
+设置排他锁：select * from user where id = 1 FOR UPDATE;
+
+**(2) 意向锁(Intention Locks)**
+
+意向锁存在的意义在于，**使得行锁和表锁能够共存**。
+
+**意向锁是表级别的锁**，用来说明事务**稍后**会对表中的**数据行加哪种类型的锁**(共享锁或独占锁)。
+
+当一个事务对表加了意向排他锁时，另外一个事务在加锁前就会通过该表的意向排他锁知道前面已经有事务在对该表进行独占操作，从而等待。
+
+**(3) 记录锁(Record Locks)**
+
+记录锁是**索引记录上的锁，**例如：SELECT c1 FROM t WHERE c1 = 10 FOR UPDATE;会阻止其他事务对c1=10的数据行进行插入、更新、删除等操作。
+
+记录锁总是锁定索引记录。如果一个表没有定义索引，那么就会去锁定隐式的“聚集索引”。
+
+**(4) 间隙锁(Gap Locks)**
+
+**间隙锁是一个在索引记录之间的间隙上的锁**。
+
+一个**间隙**可能跨越单个索引值、多个索引值，甚至为空。
+
+对于使用唯一索引 来搜索唯一行的语句，只加记录锁不加间隙锁(这并不包括组合唯一索引）。
+
+**(5) 临键锁(Next-key Locks)**
+
+**Next-Key Locks是行锁与间隙锁的组合**。当InnoDB扫描索引记录的时候，会首先对选中的索引记录加上记录锁（Record Lock），然后再对索引记录两边的间隙加上间隙锁（Gap Lock）。
+
+**(6) 插入意向锁(Insert Intention Locks)**
+
+插入意向锁是**在数据行插入之前**通过插入操作设置的**间隙锁定类型**。
+
+如果多个事务插入到相同的索引间隙中，如果它们不在间隙中的相同位置插入，则无需等待其他事务。例如：在4和7的索引间隙之间两个事务分别插入5和6，则两个事务不会发冲突阻塞。 
+
+**(7) 自增锁(Auto-inc Locks)**
+
+自增锁是事务**插入到有自增列的表**中而获得的一种特殊的**表级锁**。如果一个事务正在向表中插入值，那么任何其他事务都必须等待，保证第一个事务插入的行是连续的自增值。
+
+### 二、锁的实现方式
+
+#### 行锁
+
+**InnoDB行锁是通过给索引加锁来实现的**，如果没有索引，InnoDB会通过隐藏的聚簇索引来对记录进行加锁（全表扫描，也就是表锁）。
+
+但是，为了效率考量，MySQL做了优化，对于不满足条件的记录，会**放锁**，最终持有的，是满足条件的记录上的锁。但是不满足条件的记录上的加锁/放锁动作是不会省略的。所以在没有索引时，不满足条件的数据行会有加锁又放锁的耗时过程。
+
+索引分为主键索引和非主键索引两种。如果一条sql语句操作了主键索引，MySQL就会锁定对应主键索引；如果一条语句操作了非主键索引，MySQL会先锁定非主键索引，再锁定对应的主键索引。
+
+
+
+### 三、mysql锁在4种事务隔离级别里的应用
+
+事务的四种隔离级别有：
+
+-  **读未提交**(Read Uncommitted)
+
+  此时select语句不加任何锁。此时并发最高，但会产生脏读。
+
+-  **读提交**(Read Committed, RC)
+
+  普通select语句是**快照读**
+
+  update语句、delete语句、显示加锁的select语句（select … in share mode 或者 select … for update） 等，除了在**外键约束检查**和**重复键检查**时会**封锁区间**，其他情况都只使用**记录锁**；
+
+-  **可重复读**(Repeated Read, RR)
+
+  普通select语句也是**快照读**
+
+  update语句、delete语句、显示加锁的select语句（select … in share mode 或者 select … for update）则要分情况：
+
+  - 在**唯一索引**上使用**唯一的查询条件**，则使用**记录锁**。如: select * from user where id = 1;其中id建立了唯一索引。
+  - 在**唯一索引**上使用 **范围查询**条件，则使用**间隙锁与临键锁**。如: select * from user where id >20;
+
+-  **串行化**(Serializable)
+
+  此时所有select语句都会被**隐式加锁**：select … in share mode.
+
+### 四、快照读、当前读
+
+**要理解前面四种隔离级别的加锁方式，对于MVCC、快照读、当前读 都是必须要理解的。**
+
+MVCC并发控制中，读操作可以分成两类：**快照读** (snapshot read)与**当前读** (current read)。
+
+快照读，读取的是记录的可见版本 (有可能是历史版本)，**不用加锁**。
+
+当前读，读取的是记录的最新版本，并且，当前读返回的记录，**都会加上锁**，保证其他事务不会再并发修改这条记录。
+
+#### **什么是多版本并发控制（MVCC：multi-version concurrency control ）**
+
+1. MVCC定义：多版并发控制系统。可认为是行级锁的一个变种，它能够避免更多情况下的加锁操作。
+
+2. **作用**：**避免一些加锁操作，提升并发性能**。
+
+3. **实现**：通过在每行记录的后面保存行的**创建时间和过期时间或删除时间**（它们是隐藏的），这两个时间实际都是系统的版本号。**每开始一个新的事务，版本号都会自动增加**。
+
+4. **具体原理**
+   4.1） select：innoBD查询时会检查以下**两个条件**：一个是数据行的版本号早于当前事务的版本号；另一个是行的删除版本号，要么没有，要么大于当前事务的版本号。
+
+   4.2）insert/delete：innoDB将当前的系统版本号作为新插入(删除)的数据行的版本号。
+
+   4.3）update：先新插入一行数据，并将当前系统版本号作为行的版本号，同时将当前系统版本号作为原来行的删除版本号。更新主键时，聚集索引和普通索引都会产生两个版本；而更新非主键时，只要普通索引会产生两个版本。
+
+5. **注意**：MVCC只在read committed和repeatable read两个隔离级别下工作。
+   [参考：《高性能mysql》]
+
+#### **快 照 读 是 哪 些**
+
+一个正常的select…语句就是快照读。
+
+快照读，使得在RR（repeatable read）级别下一个普通select...语句也能做到可重复读。即前面MVCC里提到的利用可见版本来保证数据的一致性。
+
+#### **当 前 读 是 哪 些**
+
+insert语句、update语句、delete语句、显示加锁的select语句（select… LOCK IN SHARE MODE、select… FOR UPDATE）是当前读。
+
+**为什么insert、update、delete语句都属于当前读？**
+
+这是因为这些语句在执行时，都会执行一个读取当前数据最新版本的过程。
+
+当前读的SQL语句，InnoDB是逐条与MySQL Server交互的。即先对一条满足条件的记录加锁后，再返回给MySQL Server，当MySQL Server做完DML操作后，再对下一条数据加锁并处理。
+
+### 五、查看行级锁争用情况
+
+
+执行SQL:mysql> show status like 'InnoDB_row_lock%';
+
+```sql
+mysql> show status like 'InnoDB_row_lock%';
+
+
+
++-------------------------------+-------+
+
+
+
+| Variable_name                 | Value |
+
+
+
++-------------------------------+-------+
+
+
+
+| InnoDB_row_lock_current_waits | 0     |
+
+
+
+| InnoDB_row_lock_time          | 0     |
+
+
+
+| InnoDB_row_lock_time_avg      | 0     |
+
+
+
+| InnoDB_row_lock_time_max      | 0     |
+
+
+
+| InnoDB_row_lock_waits         | 0     |
+
+
+
++-------------------------------+-------+
+```
+
+
+如果发现锁争用比较严重，还可以通过设置InnoDB Monitors 来进一步观察发生锁冲突的表、数据行等，并分析锁争用的原因。如：
+
+设置监视器：mysql> create table InnoDB_monitor(a INT) engine=InnoDB;
+
+查看：mysql> show engine InnoDB status;
+
+停止查看：mysql> drop table InnoDB_monitor;
+
+具体参考：[InnoDB Monitor](https://blog.csdn.net/zyz511919766/article/details/50147283)
+
+### 六、死锁
+
+什么是死锁：一般是由于两个事务同时操作两个表，但加锁的顺序是不一致出现的。比如A事务先锁a表，B事务先锁b表；当A去锁b表的时候发现b表被B事务锁住了，要等待；当B事务去锁a表的时候发现a表被A锁住了。于是出现了死锁
+
+如何发现死锁： 在InnoDB的事务管理和锁定机制中，有专门检测死锁的机制，会在系统中产生死锁之后的很短时间内就检测到该死锁的存在，一般像一些运维系统是能发现的
+
+解决办法：**回滚较小的那个事务**
+
+在REPEATABLE-READ隔离级别下，如果两个线程同时对相同条件记录用SELECT…FOR UPDATE加排他锁，在没有符合该条件记录情况下，两个线程都会加锁成功。程序发现记录尚不存在，就试图插入一条新记录，如果两个线程都这么做，就会出现死锁。这种情况下，将隔离级别改成READ COMMITTED，就可避免问题。
+
+如何判断事务大小：**事务各自插入、更新或者删除的数据量**
+
+注意：
+
+当产生死锁的场景中涉及到不止InnoDB存储引擎的时候，InnoDB是没办法检测到该死锁的，这时候就只能通过锁定超时限制参数InnoDB_lock_wait_timeout来解决。
+
+###  七、优化行级锁定
+
+（1）要想合理利用InnoDB的行级锁定，做到扬长避短，我们必须做好以下工作： 
+
+a)尽可能**让所有的数据检索都通过索引来完成**，从而避免InnoDB因为无法通过索引键加锁而升级为表级锁定； 
+
+b)合**理设计索引**，让InnoDB在索引键上面加锁的时候尽可能准确，尽可能的缩小锁定范围，避免造成不必要的锁定而影响其他Query的执行； 
+
+c)**尽可能减少基于范围的数据检索过滤条件**，避免因为间隙锁带来的负面影响而锁定了不该锁定的记录； 
+
+d)尽量**控制事务的大小**，减少锁定的资源量和锁定时间长度； 
+
+e)在业务环境允许的情况下，尽量使用较低级别的事务隔离，以减少MySQL因为实现事务隔离级别所带来的附加成本。
+
+（2）由于InnoDB的行级锁定和事务性，所以肯定会产生死锁，下面是一些比较常用的减少死锁产生概率的小建议：
+
+a)类似业务模块中，尽可能按照相同的访问顺序来访问，防止产生死锁； 
+
+b)在同一个事务中，尽可能做到一次锁定所需要的所有资源，减少死锁产生概率； 
+
+c)对于非常容易产生死锁的业务部分，可以尝试使用升级锁定颗粒度，通过表级锁定来减少死锁产生的概率。
+
+
+
+### **查看SQL语句的锁信息**
+
+**查看sql句的锁信息前，需要做如下几件事**：
+
+查看事务的隔离级别：
+
+- 通过show global variables like “tx_isolation”; 命令查看。
+  可通过执行set session transaction isolation level repeatable read;更改成我们想要隔离级别，隔离级别取值如下：
+  read uncommitted、read committed、repeatable read、serializable
+
+保证事务为手动提交：
+
+- 通过show global variables like “autocommit”;查看。
+  如果为ON，则通过执行set session autocommit=0;改为手动提交。
+
+保证间隙锁开启：
+
+- 通过show global variables like “innodb_locks%”;查看
+  OFF时表示开启。默认是OFF
+
+# 五、查看行级锁争用情况
+
+
+执行SQL:mysql> show status like 'InnoDB_row_lock%';
+
+```sql
+mysql> show status like 'InnoDB_row_lock%';
+
+
+
++-------------------------------+-------+
+
+
+
+| Variable_name                 | Value |
+
+
+
++-------------------------------+-------+
+
+
+
+| InnoDB_row_lock_current_waits | 0     |
+
+
+
+| InnoDB_row_lock_time          | 0     |
+
+
+
+| InnoDB_row_lock_time_avg      | 0     |
+
+
+
+| InnoDB_row_lock_time_max      | 0     |
+
+
+
+| InnoDB_row_lock_waits         | 0     |
+
+
+
++-------------------------------+-------+
+```
+
+
+如果发现锁争用比较严重，还可以通过设置InnoDB Monitors 来进一步观察发生锁冲突的表、数据行等，并分析锁争用的原因。如：
+
+设置监视器：mysql> create table InnoDB_monitor(a INT) engine=InnoDB;
+
+查看：mysql> show engine InnoDB status;
+
+停止查看：mysql> drop table InnoDB_monitor;
+
+具体参考：[InnoDB Monitor](https://blog.csdn.net/zyz511919766/article/details/50147283)
+
+# 六、死锁
+
+
+什么是死锁：一般是由于两个事务同时操作两个表，但加锁的顺序是不一致出现的。比如A事务先锁a表，B事务先锁b表；当A去锁b表的时候发现b表被B事务锁住了，要等待；当B事务去锁a表的时候发现a表被A锁住了。于是出现了死锁
+
+如何发现死锁： 在InnoDB的事务管理和锁定机制中，有专门检测死锁的机制，会在系统中产生死锁之后的很短时间内就检测到该死锁的存在，一般像一些运维系统是能发现的
+
+解决办法：回滚较小的那个事务
+
+
+在REPEATABLE-READ隔离级别下，如果两个线程同时对相同条件记录用SELECT…FOR UPDATE加排他锁，在没有符合该条件记录情况下，两个线程都会加锁成功。程序发现记录尚不存在，就试图插入一条新记录，如果两个线程都这么做，就会出现死锁。这种情况下，将隔离级别改成READ COMMITTED，就可避免问题。
+
+
+如何判断事务大小：事务各自插入、更新或者删除的数据量
+
+注意：
+
+当产生死锁的场景中涉及到不止InnoDB存储引擎的时候，InnoDB是没办法检测到该死锁的，这时候就只能通过锁定超时限制参数InnoDB_lock_wait_timeout来解决。
+
+#  七、优化行级锁定
+
+
+（1）要想合理利用InnoDB的行级锁定，做到扬长避短，我们必须做好以下工作： 
+
+a)尽可能让所有的数据检索都通过索引来完成，从而避免InnoDB因为无法通过索引键加锁而升级为表级锁定； 
+
+b)合理设计索引，让InnoDB在索引键上面加锁的时候尽可能准确，尽可能的缩小锁定范围，避免造成不必要的锁定而影响其他Query的执行； 
+
+c)尽可能减少基于范围的数据检索过滤条件，避免因为间隙锁带来的负面影响而锁定了不该锁定的记录； 
+
+d)尽量控制事务的大小，减少锁定的资源量和锁定时间长度； 
+
+e)在业务环境允许的情况下，尽量使用较低级别的事务隔离，以减少MySQL因为实现事务隔离级别所带来的附加成本。
+
+（2）由于InnoDB的行级锁定和事务性，所以肯定会产生死锁，下面是一些比较常用的减少死锁产生概率的小建议：
+
+a)类似业务模块中，尽可能按照相同的访问顺序来访问，防止产生死锁； 
+
+b)在同一个事务中，尽可能做到一次锁定所需要的所有资源，减少死锁产生概率； 
+
+c)对于非常容易产生死锁的业务部分，可以尝试使用升级锁定颗粒度，通过表级锁定来减少死锁产生的概率。
+
+
+
+# **查看SQL语句的锁信息**
+
+**查看sql句的锁信息前，需要做如下几件事**：
+
+查看事务的隔离级别：
+
+- 通过show global variables like “tx_isolation”; 命令查看。
+  可通过执行set session transaction isolation level repeatable read;更改成我们想要隔离级别，隔离级别取值如下：
+  read uncommitted、read committed、repeatable read、serializable
+
+保证事务为手动提交：
+
+- 通过show global variables like “autocommit”;查看。
+  如果为ON，则通过执行set session autocommit=0;改为手动提交。
+
+保证间隙锁开启：
+
+- 通过show global variables like “innodb_locks%”;查看
+  OFF时表示开启。默认是OFF
+
 ## 四、数据类型
 
 ### 整型
