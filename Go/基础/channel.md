@@ -315,6 +315,8 @@ channel常见的异常总结，如下图：
 
 注意:关闭已经关闭的channel也会引发panic。
 
+![image-20220825164549552](https://raw.githubusercontent.com/Simin-hub/Picture/master/img/image-20220825164549552.png)
+
 ### channel的遍历
 
 [地址](https://www.jianshu.com/p/fe5dd2efed5d)
