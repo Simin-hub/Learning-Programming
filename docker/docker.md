@@ -70,6 +70,8 @@ RUN make -C /usr/src/redis
 RUN make -C /usr/src/redis install
 ```
 
+> apt-get update 和 apt-get install 被放在一个 RUN 指令中执行，这样能够保证每次安装的是最新的包。如果 apt-get install 在单独的 RUN 中执行，则会使用 apt-get update 创建的镜像层，而这一层可能是很久以前缓存的。
+
 之前说过，**Dockerfile 中每一个指令都会建立一层**，`RUN` 也不例外。每一个 `RUN` 的行为，就和刚才我们手工建立镜像的过程一样：新建立一层，在其上执行这些命令，执行结束后，`commit` 这一层的修改，构成新的镜像。
 
 而上面的这种写法，创建了 7 层镜像。这是完全没有意义的，而且很多运行时不需要的东西，都被装进了镜像里，比如编译环境、更新的软件包等等。结果就是产生非常臃肿、非常多层的镜像，不仅仅增加了构建部署的时间，也很容易出错。 这是很多初学 Docker 的人常犯的一个错误。
@@ -283,7 +285,7 @@ ADD --chown=1 files* /mydir/
 ADD --chown=10:11 files* /mydir/
 ```
 
-### CMD 容器启动命令
+#### CMD 容器启动命令
 
 **`CMD` 指令的格式和 `RUN` 相似，也是两种格式**：
 
@@ -333,7 +335,7 @@ CMD service nginx start
 CMD ["nginx", "-g", "daemon off;"]
 ```
 
-### ENTRYPOINT 入口点
+#### ENTRYPOINT 入口点
 
 **`ENTRYPOINT` 的格式和 `RUN` 指令格式一样，分为 `exec` 格式和 `shell` 格式**。
 
@@ -347,7 +349,7 @@ CMD ["nginx", "-g", "daemon off;"]
 
 那么有了 `CMD` 后，为什么还要有 `ENTRYPOINT` 呢？这种 `<ENTRYPOINT> "<CMD>"` 有什么好处么？让我们来看几个场景。
 
-#### 场景一：让镜像变成像命令一样使用
+##### 场景一：让镜像变成像命令一样使用
 
 假设我们需要一个得知自己当前公网 IP 的镜像，那么可以先用 `CMD` 来实现：
 
@@ -384,35 +386,67 @@ $ docker run myip curl -s http://myip.ipip.net -i
 这显然不是很好的解决方案，而使用 `ENTRYPOINT` 就可以解决这个问题。现在我们重新用 `ENTRYPOINT` 来实现这个镜像：
 
 ```
-FROM ubuntu:18.04RUN apt-get update \    && apt-get install -y curl \    && rm -rf /var/lib/apt/lists/*ENTRYPOINT [ "curl", "-s", "http://myip.ipip.net" ]
+FROM ubuntu:18.04
+RUN apt-get update \
+    && apt-get install -y curl \
+    && rm -rf /var/lib/apt/lists/*
+ENTRYPOINT [ "curl", "-s", "http://myip.ipip.net" ]
 ```
 
 这次我们再来尝试直接使用 `docker run myip -i`：
 
 ```
-$ docker run myip当前 IP：61.148.226.66 来自：北京市 联通$ docker run myip -iHTTP/1.1 200 OKServer: nginx/1.8.0Date: Tue, 22 Nov 2016 05:12:40 GMTContent-Type: text/html; charset=UTF-8Vary: Accept-EncodingX-Powered-By: PHP/5.6.24-1~dotdeb+7.1X-Cache: MISS from cache-2X-Cache-Lookup: MISS from cache-2:80X-Cache: MISS from proxy-2_6Transfer-Encoding: chunkedVia: 1.1 cache-2:80, 1.1 proxy-2_6:8006Connection: keep-alive当前 IP：61.148.226.66 来自：北京市 联通
+$ docker run myip
+当前 IP：61.148.226.66 来自：北京市 联通
+$ docker run myip -i
+HTTP/1.1 200 OK
+Server: nginx/1.8.0
+Date: Tue, 22 Nov 2016 05:12:40 GMT
+Content-Type: text/html; charset=UTF-8
+Vary: Accept-Encoding
+X-Powered-By: PHP/5.6.24-1~dotdeb+7.1
+X-Cache: MISS from cache-2
+X-Cache-Lookup: MISS from cache-2:80
+X-Cache: MISS from proxy-2_6
+Transfer-Encoding: chunked
+Via: 1.1 cache-2:80, 1.1 proxy-2_6:8006
+Connection: keep-alive
+当前 IP：61.148.226.66 来自：北京市 联通
 ```
 
-可以看到，这次成功了。这是因为当存在 `ENTRYPOINT` 后，`CMD` 的内容将会作为参数传给 `ENTRYPOINT`，而这里 `-i` 就是新的 `CMD`，因此会作为参数传给 `curl`，从而达到了我们预期的效果。
+可以看到，这次成功了。这是因为**当存在 `ENTRYPOINT` 后，`CMD` 的内容将会作为参数传给 `ENTRYPOINT`**，而这里 `-i` 就是新的 `CMD`，因此会作为参数传给 `curl`，从而达到了我们预期的效果。
 
-#### 场景二：应用运行前的准备工作
+##### 场景二：应用运行前的准备工作
 
-启动容器就是启动主进程，但有些时候，启动主进程前，需要一些准备工作。
+**启动容器就是启动主进程**，但有些时候，启动主进程前，需要一些准备工作。
 
-比如 `mysql` 类的数据库，可能需要一些数据库配置、初始化的工作，这些工作要在最终的 mysql 服务器运行之前解决。
+比如 `mysql` 类的数据库，**可能需要一些数据库配置、初始化的工作，这些工作要在最终的 mysql 服务器运行之前解决**。
 
 此外，可能希望避免使用 `root` 用户去启动服务，从而提高安全性，而在启动服务前还需要以 `root` 身份执行一些必要的准备工作，最后切换到服务用户身份启动服务。或者除了服务外，其它命令依旧可以使用 `root` 身份执行，方便调试等。
 
 这些准备工作是和容器 `CMD` 无关的，无论 `CMD` 为什么，都需要事先进行一个预处理的工作。这种情况下，可以写一个脚本，然后放入 `ENTRYPOINT` 中去执行，而这个脚本会将接到的参数（也就是 `<CMD>`）作为命令，在脚本最后执行。比如官方镜像 `redis` 中就是这么做的：
 
 ```
-FROM alpine:3.4...RUN addgroup -S redis && adduser -S -G redis redis...ENTRYPOINT ["docker-entrypoint.sh"]EXPOSE 6379CMD [ "redis-server" ]
+FROM alpine:3.4
+...
+RUN addgroup -S redis && adduser -S -G redis redis
+...
+ENTRYPOINT ["docker-entrypoint.sh"]
+EXPOSE 6379
+CMD [ "redis-server" ]
 ```
 
 可以看到其中为了 redis 服务创建了 redis 用户，并在最后指定了 `ENTRYPOINT` 为 `docker-entrypoint.sh` 脚本。
 
 ```
-#!/bin/sh...# allow the container to be started with `--user`if [ "$1" = 'redis-server' -a "$(id -u)" = '0' ]; then    find . \! -user redis -exec chown redis '{}' +    exec gosu redis "$0" "$@"fiexec "$@"
+#!/bin/sh
+...
+# allow the container to be started with `--user`
+if [ "$1" = 'redis-server' -a "$(id -u)" = '0' ]; then
+    find . \! -user redis -exec chown redis '{}' +
+    exec gosu redis "$0" "$@"
+fi
+exec "$@"
 ```
 
 该脚本的内容就是根据 `CMD` 的内容来判断，如果是 `redis-server` 的话，则切换到 `redis` 用户身份启动服务器，否则依旧使用 `root` 身份执行。比如：
@@ -421,11 +455,1156 @@ FROM alpine:3.4...RUN addgroup -S redis && adduser -S -G redis redis...ENTRYPOIN
 $ docker run -it redis iduid=0(root) gid=0(root) groups=0(root)
 ```
 
+##### Dockerfile RUN，CMD，ENTRYPOINT命令区别
+
+Dockerfile中RUN，CMD和ENTRYPOINT**都能够用于执行命令**，下面是三者的主要用途：
+
+- RUN命令**执行命令并创建新的镜像层，通常用于安装软件包**
+- CMD命令**设置容器启动后默认执行的命令及其参数**，但CMD设置的命令能够被`docker run`命令后面的命令行参数替换
+- ENTRYPOINT**配置容器启动时的执行命令**（不会被忽略，一定会被执行，即使运行 `docker run`时指定了其他命令）
+
+- 使用 RUN 指令安装应用和软件包，构建镜像。
+- 如果 Docker 镜像的用途是运行应用程序或服务，比如运行一个 MySQL，应该优先使用 Exec 格式的 ENTRYPOINT 指令。CMD 可为 ENTRYPOINT 提供额外的默认参数，同时可利用 docker run 命令行替换默认参数。
+- 如果想为容器设置默认的启动命令，可使用 CMD 指令。用户可在 docker run 命令行中替换此默认命令。
+
+#### ENV 设置环境变量
+
+格式有两种：
+
+- `ENV <key> <value>`
+- `ENV <key1>=<value1> <key2>=<value2>...`
+
+**这个指令很简单，就是设置环境变量而已，无论是后面的其它指令**，如 `RUN`，还是运行时的应用，都可以直接使用这里定义的环境变量。
+
+```
+ENV VERSION=1.0 DEBUG=on \
+    NAME="Happy Feet"
+```
+
+这个例子中演示了如何换行，以及对含有空格的值用双引号括起来的办法，这和 Shell 下的行为是一致的。
+
+定义了环境变量，那么在后续的指令中，就可以使用这个环境变量。比如在官方 `node` 镜像 `Dockerfile` 中，就有类似这样的代码：
+
+```
+ENV NODE_VERSION 7.2.0
+RUN curl -SLO "https://nodejs.org/dist/v$NODE_VERSION/node-v$NODE_VERSION-linux-x64.tar.xz" \
+  && curl -SLO "https://nodejs.org/dist/v$NODE_VERSION/SHASUMS256.txt.asc" \
+  && gpg --batch --decrypt --output SHASUMS256.txt SHASUMS256.txt.asc \
+  && grep " node-v$NODE_VERSION-linux-x64.tar.xz\$" SHASUMS256.txt | sha256sum -c - \
+  && tar -xJf "node-v$NODE_VERSION-linux-x64.tar.xz" -C /usr/local --strip-components=1 \
+  && rm "node-v$NODE_VERSION-linux-x64.tar.xz" SHASUMS256.txt.asc SHASUMS256.txt \
+  && ln -s /usr/local/bin/node /usr/local/bin/nodejs
+```
+
+在这里先定义了环境变量 `NODE_VERSION`，其后的 `RUN` 这层里，多次使用 `$NODE_VERSION` 来进行操作定制。可以看到，将来升级镜像构建版本的时候，只需要更新 `7.2.0` 即可，`Dockerfile` 构建维护变得更轻松了。
+
+下列指令可以支持环境变量展开： `ADD`、`COPY`、`ENV`、`EXPOSE`、`FROM`、`LABEL`、`USER`、`WORKDIR`、`VOLUME`、`STOPSIGNAL`、`ONBUILD`、`RUN`。
+
+可以从这个指令列表里感觉到，**环境变量可以使用的地方很多**，很强大。通过环境变量，我们可以让一份 `Dockerfile` 制作更多的镜像，只需使用不同的环境变量即可。
+
+#### ARG 构建参数
+
+格式：`ARG <参数名>[=<默认值>]`
+
+构建参数和 `ENV` 的效果一样，都是设置环境变量。所不同的是，**`ARG` 所设置的构建环境的环境变量，在将来容器运行时是不会存在这些环境变量的**。但是不要因此就使用 `ARG` 保存密码之类的信息，因为 `docker history` 还是可以看到所有值的。
+
+`Dockerfile` 中的 `ARG` 指令是定义参数名称，以及定义其默认值。该默认值可以在构建命令 `docker build` 中用 `--build-arg <参数名>=<值>` 来覆盖。
+
+灵活的使用 `ARG` 指令，能够在不修改 Dockerfile 的情况下，构建出不同的镜像。
+
+ARG 指令有生效范围，如果在 `FROM` 指令之前指定，那么只能用于 `FROM` 指令中。
+
+```
+ARG DOCKER_USERNAME=library
+FROM ${DOCKER_USERNAME}/alpine
+RUN set -x ; echo ${DOCKER_USERNAME}
+```
+
+使用上述 Dockerfile 会发现无法输出 `${DOCKER_USERNAME}` 变量的值，要想正常输出，你必须在 `FROM` 之后再次指定 `ARG`
+
+```
+# 只在 FROM 中生效
+ARG DOCKER_USERNAME=library
+FROM ${DOCKER_USERNAME}/alpine
+# 要想在 FROM 之后使用，必须再次指定
+ARG DOCKER_USERNAME=library
+RUN set -x ; echo ${DOCKER_USERNAME}
+```
+
+对于多阶段构建，尤其要注意这个问题
+
+```
+# 这个变量在每个 FROM 中都生效
+ARG DOCKER_USERNAME=library
+FROM ${DOCKER_USERNAME}/alpine
+RUN set -x ; echo 1
+FROM ${DOCKER_USERNAME}/alpine
+RUN set -x ; echo 2
+```
+
+对于上述 Dockerfile 两个 `FROM` 指令都可以使用 `${DOCKER_USERNAME}`，对于在各个阶段中使用的变量都必须在每个阶段分别指定：
+
+```
+ARG DOCKER_USERNAME=library
+FROM ${DOCKER_USERNAME}/alpine
+# 在FROM 之后使用变量，必须在每个阶段分别指定
+ARG DOCKER_USERNAME=library
+RUN set -x ; echo ${DOCKER_USERNAME}
+FROM ${DOCKER_USERNAME}/alpine
+# 在FROM 之后使用变量，必须在每个阶段分别指定
+ARG DOCKER_USERNAME=library
+RUN set -x ; echo ${DOCKER_USERNAME}
+```
+
+#### VOLUME 定义匿名卷
+
+格式为：
+
+- `VOLUME ["<路径1>", "<路径2>"...]`
+- `VOLUME <路径>`
+
+之前我们说过，**容器运行时应该尽量保持容器存储层不发生写操作，对于数据库类需要保存动态数据的应用，其数据库文件应该保存于卷(volume)中**。为了防止运行时用户忘记将动态文件所保存目录挂载为卷，在 `Dockerfile` 中，我们可以事先指定某些目录挂载为匿名卷，这样在运行时如果用户不指定挂载，其应用也可以正常运行，**不会向容器存储层写入大量数据**。
+
+```
+VOLUME /data
+```
+
+这里的 `/data` 目录就会在容器运行时自动挂载为匿名卷，任何向 `/data` 中写入的信息都不会记录进容器存储层，从而保证了容器存储层的无状态化。当然，运行容器时可以覆盖这个挂载设置。比如：
+
+```
+$ docker run -d -v mydata:/data xxxx
+```
+
+在这行命令中，就使用了 `mydata` 这个命名卷挂载到了 `/data` 这个位置，替代了 `Dockerfile` 中定义的匿名卷的挂载配置。
+
+#### EXPOSE 声明端口
+
+格式为 `EXPOSE <端口1> [<端口2>...]`。
+
+**`EXPOSE` 指令是声明容器运行时提供服务的端口，这只是一个声明，在容器运行时并不会因为这个声明应用就会开启这个端口的服务**。在 Dockerfile 中写入这样的声明有两个好处，一个是帮助镜像使用者理解这个镜像服务的守护端口，以方便配置映射；另一个用处则是在运行时使用随机端口映射时，也就是 `docker run -P` 时，会自动随机映射 `EXPOSE` 的端口。
+
+要将 `EXPOSE` 和在运行时使用 `-p <宿主端口>:<容器端口>` 区分开来。**`-p`，是映射宿主端口和容器端口，换句话说，就是将容器的对应端口服务公开给外界访问，而 `EXPOSE` 仅仅是声明容器打算使用什么端口而已，并不会自动在宿主进行端口映射**。
+
+#### WORKDIR 指定工作目录
+
+格式为 `WORKDIR <工作目录路径>`。
+
+**使用 `WORKDIR` 指令可以来指定工作目录（或者称为当前目录），以后各层的当前目录就被改为指定的目录**，如该目录不存在，`WORKDIR` 会帮你建立目录。
+
+之前提到一些初学者常犯的错误是把 `Dockerfile` 等同于 Shell 脚本来书写，这种错误的理解还可能会导致出现下面这样的错误：
+
+```
+RUN cd /appRUN echo "hello" > world.txt
+```
+
+如果将这个 `Dockerfile` 进行构建镜像运行后，会发现找不到 `/app/world.txt` 文件，或者其内容不是 `hello`。原因其实很简单，在 Shell 中，连续两行是同一个进程执行环境，因此前一个命令修改的内存状态，会直接影响后一个命令；而**在 `Dockerfile` 中，这两行 `RUN` 命令的执行环境根本不同，是两个完全不同的容器**。这就是对 `Dockerfile` 构建分层存储的概念不了解所导致的错误。
+
+之前说过**每一个 `RUN` 都是启动一个容器、执行命令、然后提交存储层文件变更**。第一层 `RUN cd /app` 的执行仅仅是当前进程的工作目录变更，一个内存上的变化而已，其结果不会造成任何文件变更。而到第二层的时候，启动的是一个全新的容器，跟第一层的容器更完全没关系，自然不可能继承前一层构建过程中的内存变化。
+
+因此**如果需要改变以后各层的工作目录的位置**，那么应该使用 `WORKDIR` 指令。
+
+```
+WORKDIR /appRUN echo "hello" > world.txt
+```
+
+如果你的 `WORKDIR` 指令使用的相对路径，那么所切换的路径与之前的 `WORKDIR` 有关：
+
+```
+WORKDIR /aWORKDIR bWORKDIR cRUN pwd
+```
+
+`RUN pwd` 的工作目录为 `/a/b/c`。
+
+#### USER 指定当前用户
+
+格式：`USER <用户名>[:<用户组>]`
+
+`USER` 指令和 `WORKDIR` 相似，都是**改变环境状态并影响以后的层**。`WORKDIR` 是改变工作目录，`USER` 则是改变之后层的执行 `RUN`, `CMD` 以及 `ENTRYPOINT` 这类命令的身份。
+
+注意，`USER` 只是帮助你**切换到指定用户而已，这个用户必须是事先建立好的**，否则无法切换。
+
+```
+RUN groupadd -r redis && useradd -r -g redis redis
+USER redis
+RUN [ "redis-server" ]
+```
+
+如果以 `root` 执行的脚本，在执行期间希望改变身份，比如希望以某个已经建立好的用户来运行某个服务进程，不要使用 `su` 或者 `sudo`，这些都需要比较麻烦的配置，而且在 TTY 缺失的环境下经常出错。建议使用 [`gosu`](https://github.com/tianon/gosu)。
+
+```
+# 建立 redis 用户，并使用 gosu 换另一个用户执行命令
+RUN groupadd -r redis && useradd -r -g redis redis
+# 下载 gosu
+RUN wget -O /usr/local/bin/gosu "https://github.com/tianon/gosu/releases/download/1.12/gosu-amd64" \
+    && chmod +x /usr/local/bin/gosu \
+    && gosu nobody true
+# 设置 CMD，并以另外的用户执行
+CMD [ "exec", "gosu", "redis", "redis-server" ]
+```
+
+#### HEALTHCHECK 健康检查
+
+格式：
+
+- `HEALTHCHECK [选项] CMD <命令>`：**设置检查容器健康状况的命令**
+- `HEALTHCHECK NONE`：如果基础镜像有健康检查指令，使用这行可以屏蔽掉其健康检查指令
+
+`HEALTHCHECK` 指令是**告诉 Docker 应该如何进行判断容器的状态是否正常**，这是 Docker 1.12 引入的新指令。
+
+在没有 `HEALTHCHECK` 指令前，Docker 引擎只可以通过容器内主进程是否退出来判断容器是否状态异常。很多情况下这没问题，但是如果程序进入死锁状态，或者死循环状态，应用进程并不退出，但是该容器已经无法提供服务了。在 1.12 以前，Docker 不会检测到容器的这种状态，从而不会重新调度，导致可能会有部分容器已经无法提供服务了却还在接受用户请求。
+
+而自 1.12 之后，Docker 提供了 `HEALTHCHECK` 指令，通过该指令指定一行命令，用这行命令来判断容器主进程的服务状态是否还正常，从而比较真实的反应容器实际状态。
+
+当在一个镜像指定了 `HEALTHCHECK` 指令后，用其启动容器，初始状态会为 `starting`，在 `HEALTHCHECK` 指令检查成功后变为 `healthy`，如果连续一定次数失败，则会变为 `unhealthy`。
+
+`HEALTHCHECK` 支持下列选项：
+
+- `--interval=<间隔>`：两次健康检查的间隔，默认为 30 秒；
+- `--timeout=<时长>`：健康检查命令运行超时时间，如果超过这个时间，本次健康检查就被视为失败，默认 30 秒；
+- `--retries=<次数>`：当连续失败指定次数后，则将容器状态视为 `unhealthy`，默认 3 次。
+
+和 `CMD`, `ENTRYPOINT` 一样，`HEALTHCHECK` 只可以出现一次，如果写了多个，只有最后一个生效。
+
+在 `HEALTHCHECK [选项] CMD` 后面的命令，格式和 `ENTRYPOINT` 一样，分为 `shell` 格式，和 `exec` 格式。命令的返回值决定了该次健康检查的成功与否：`0`：成功；`1`：失败；`2`：保留，不要使用这个值。
+
+假设我们有个镜像是个最简单的 Web 服务，我们希望增加健康检查来判断其 Web 服务是否在正常工作，我们可以用 `curl` 来帮助判断，其 `Dockerfile` 的 `HEALTHCHECK` 可以这么写：
+
+```
+FROM nginx
+RUN apt-get update && apt-get install -y curl && rm -rf /var/lib/apt/lists/*
+HEALTHCHECK --interval=5s --timeout=3s \
+  CMD curl -fs http://localhost/ || exit 1
+```
+
+这里我们设置了每 5 秒检查一次（这里为了试验所以间隔非常短，实际应该相对较长），如果健康检查命令超过 3 秒没响应就视为失败，并且使用 `curl -fs http://localhost/ || exit 1` 作为健康检查命令。
+
+使用 `docker build` 来构建这个镜像：
+
+```
+$ docker build -t myweb:v1 .
+```
+
+构建好了后，我们启动一个容器：
+
+```
+$ docker run -d --name web -p 80:80 myweb:v1
+```
+
+当运行该镜像后，可以通过 `docker container ls` 看到最初的状态为 `(health: starting)`：
+
+```
+$ docker container ls
+CONTAINER ID        IMAGE               COMMAND                  CREATED             STATUS                            PORTS               NAMES
+03e28eb00bd0        myweb:v1            "nginx -g 'daemon off"   3 seconds ago       Up 2 seconds (health: starting)   80/tcp, 443/tcp     web
+```
+
+在等待几秒钟后，再次 `docker container ls`，就会看到健康状态变化为了 `(healthy)`：
+
+```
+$ docker container ls
+CONTAINER ID        IMAGE               COMMAND                  CREATED             STATUS                    PORTS               NAMES
+03e28eb00bd0        myweb:v1            "nginx -g 'daemon off"   18 seconds ago      Up 16 seconds (healthy)   80/tcp, 443/tcp     web
+```
+
+如果健康检查连续失败超过了重试次数，状态就会变为 `(unhealthy)`。
+
+为了帮助排障，健康检查命令的输出（包括 `stdout` 以及 `stderr`）都会被存储于健康状态里，可以用 `docker inspect` 来查看。
+
+```
+$ docker inspect --format '{{json .State.Health}}' web | python -m json.tool
+{
+    "FailingStreak": 0,
+    "Log": [
+        {
+            "End": "2016-11-25T14:35:37.940957051Z",
+            "ExitCode": 0,
+            "Output": "<!DOCTYPE html>\n<html>\n<head>\n<title>Welcome to nginx!</title>\n<style>\n    body {\n        width: 35em;\n        margin: 0 auto;\n        font-family: Tahoma, Verdana, Arial, sans-serif;\n    }\n</style>\n</head>\n<body>\n<h1>Welcome to nginx!</h1>\n<p>If you see this page, the nginx web server is successfully installed and\nworking. Further configuration is required.</p>\n\n<p>For online documentation and support please refer to\n<a href=\"http://nginx.org/\">nginx.org</a>.<br/>\nCommercial support is available at\n<a href=\"http://nginx.com/\">nginx.com</a>.</p>\n\n<p><em>Thank you for using nginx.</em></p>\n</body>\n</html>\n",
+            "Start": "2016-11-25T14:35:37.780192565Z"
+        }
+    ],
+    "Status": "healthy"
+}
+```
+
+#### ONBUILD 为他人做嫁衣裳
+
+格式：`ONBUILD <其它指令>`。
+
+**`ONBUILD` 是一个特殊的指令，它后面跟的是其它指令**，比如 `RUN`, `COPY` 等，而这些指令，**在当前镜像构建时并不会被执行。只有当以当前镜像为基础镜像，去构建下一级镜像的时候才会被执行**。
+
+`Dockerfile` 中的其它指令都是为了定制当前镜像而准备的，唯有 `ONBUILD` 是为了帮助别人定制自己而准备的。
+
+假设我们要制作 Node.js 所写的应用的镜像。我们都知道 Node.js 使用 `npm` 进行包管理，所有依赖、配置、启动信息等会放到 `package.json` 文件里。在拿到程序代码后，需要先进行 `npm install` 才可以获得所有需要的依赖。然后就可以通过 `npm start` 来启动应用。因此，一般来说会这样写 `Dockerfile`：
+
+```
+FROM node:slim
+RUN mkdir /app
+WORKDIR /app
+COPY ./package.json /app
+RUN [ "npm", "install" ]
+COPY . /app/
+CMD [ "npm", "start" ]
+```
+
+把这个 `Dockerfile` 放到 Node.js 项目的根目录，构建好镜像后，就可以直接拿来启动容器运行。但是如果我们还有第二个 Node.js 项目也差不多呢？好吧，那就再把这个 `Dockerfile` 复制到第二个项目里。那如果有第三个项目呢？再复制么？文件的副本越多，版本控制就越困难，让我们继续看这样的场景维护的问题。
+
+如果第一个 Node.js 项目在开发过程中，发现这个 `Dockerfile` 里存在问题，比如敲错字了、或者需要安装额外的包，然后开发人员修复了这个 `Dockerfile`，再次构建，问题解决。第一个项目没问题了，但是第二个项目呢？虽然最初 `Dockerfile` 是复制、粘贴自第一个项目的，但是并不会因为第一个项目修复了他们的 `Dockerfile`，而第二个项目的 `Dockerfile` 就会被自动修复。
+
+那么我们可不可以做一个基础镜像，然后各个项目使用这个基础镜像呢？这样基础镜像更新，各个项目不用同步 `Dockerfile` 的变化，重新构建后就继承了基础镜像的更新？好吧，可以，让我们看看这样的结果。那么上面的这个 `Dockerfile` 就会变为：
+
+```
+FROM node:slim
+RUN mkdir /app
+WORKDIR /app
+CMD [ "npm", "start" ]
+```
+
+这里我们把项目相关的构建指令拿出来，放到子项目里去。假设这个基础镜像的名字为 `my-node` 的话，各个项目内的自己的 `Dockerfile` 就变为：
+
+```
+FROM my-node
+COPY ./package.json /app
+RUN [ "npm", "install" ]
+COPY . /app/
+```
+
+基础镜像变化后，各个项目都用这个 `Dockerfile` 重新构建镜像，会继承基础镜像的更新。
+
+那么，问题解决了么？没有。准确说，只解决了一半。如果这个 `Dockerfile` 里面有些东西需要调整呢？比如 `npm install` 都需要加一些参数，那怎么办？这一行 `RUN` 是不可能放入基础镜像的，因为涉及到了当前项目的 `./package.json`，难道又要一个个修改么？所以说，这样制作基础镜像，只解决了原来的 `Dockerfile` 的前4条指令的变化问题，而后面三条指令的变化则完全没办法处理。
+
+`ONBUILD` 可以解决这个问题。让我们用 `ONBUILD` 重新写一下基础镜像的 `Dockerfile`:
+
+```
+FROM node:slim
+RUN mkdir /app
+WORKDIR /app
+ONBUILD COPY ./package.json /app
+ONBUILD RUN [ "npm", "install" ]
+ONBUILD COPY . /app/
+CMD [ "npm", "start" ]
+```
+
+这次我们回到原始的 `Dockerfile`，但是这次将项目相关的指令加上 `ONBUILD`，这样在构建基础镜像的时候，这三行并不会被执行。然后各个项目的 `Dockerfile` 就变成了简单地：
+
+```
+FROM my-node
+```
+
+是的，只有这么一行。当在各个项目目录中，用这个只有一行的 `Dockerfile` 构建镜像时，之前基础镜像的那三行 `ONBUILD` 就会开始执行，成功的将当前项目的代码复制进镜像、并且针对本项目执行 `npm install`，生成应用镜像。
+
+#### LABEL 指令
+
+`LABEL` 指令用来给镜像以键值对的形式添加一些元数据（metadata）。
+
+```
+LABEL <key>=<value> <key>=<value> <key>=<value> ...
+```
+
+我们还可以用一些标签来申明镜像的作者、文档地址等：
+
+```
+LABEL org.opencontainers.image.authors="yeasy"
+LABEL org.opencontainers.image.documentation="https://yeasy.gitbooks.io"
+```
+
+具体可以参考 https://github.com/opencontainers/image-spec/blob/master/annotations.md
+
+#### SHELL 指令
+
+格式：`SHELL ["executable", "parameters"]`
+
+```
+SHELL ["/bin/sh", "-c"]
+RUN lll ; ls
+SHELL ["/bin/sh", "-cex"]
+RUN lll ; ls
+```
+
+两个 `RUN` 运行同一命令，第二个 `RUN` 运行的命令会打印出每条命令并当遇到错误时退出。
+
+当 `ENTRYPOINT` `CMD` 以 shell 格式指定时，`SHELL` 指令所指定的 shell 也会成为这两个指令的 shell
+
+```
+SHELL ["/bin/sh", "-cSHELL ["/bin/sh", "-cex"]
+# /bin/sh -cex "nginx"
+SHELL ["/bin/sh", "-cex"]
+# /bin/sh -cex "nginx"
+CMD nginx
+```
+
+### 多阶段构建
+
+#### 全部放入一个 Dockerfile
+
+一种方式是将所有的构建过程编包含在一个 `Dockerfile` 中，包括项目及其依赖库的编译、测试、打包等流程，这里可能会带来的一些问题：
+
+- 镜像层次多，镜像体积较大，部署时间变长
+- 源代码存在泄露的风险
+
+例如，编写 `app.go` 文件，该程序输出 `Hello World!`
+
+```
+package main
+
+import "fmt"
+
+func main(){
+	fmt.Printf("Hello World!");
+}
+```
+
+编写 `Dockerfile.one` 文件
+```
+FROM golang:alpine
+
+RUN apk --no-cache add git ca-certificates
+
+WORKDIR /go/src/github.com/go/helloworld/
+
+COPY app.go .
+
+RUN go get -d -v github.com/go-sql-driver/mysql \
+  && CGO_ENABLED=0 GOOS=linux go build -a -installsuffix cgo -o app . \
+  && cp /go/src/github.com/go/helloworld/app /root
+
+WORKDIR /root/
+
+CMD ["./app"]
+```
+
+构建镜像
+
+```
+$ docker build -t go/helloworld:1 -f Dockerfile.one .
+```
+
+#### 分散到多个 Dockerfile
+
+另一种方式，就是我们事先**在一个 `Dockerfile` 将项目及其依赖库编译测试打包好后，再将其拷贝到运行环境中，这种方式需要我们编写两个 `Dockerfile` 和一些编译脚本才能将其两个阶段自动整合起来**，这种方式虽然可以很好地规避第一种方式存在的风险，但明显部署过程较复杂。
+
+例如，编写 `Dockerfile.build` 文件
+```
+FROM golang:alpine
+
+RUN apk --no-cache add git
+
+WORKDIR /go/src/github.com/go/helloworld
+
+COPY app.go .
+
+RUN go get -d -v github.com/go-sql-driver/mysql \
+  && CGO_ENABLED=0 GOOS=linux go build -a -installsuffix cgo -o app .
+```
+
+
+编写 `Dockerfile.copy` 文件
+```
+FROM alpine:latest
+
+RUN apk --no-cache add ca-certificates
+
+WORKDIR /root/
+
+COPY app .
+
+CMD ["./app"]
+```
+
+
+新建 `build.sh`
+```
+\#!/bin/sh
+echo Building go/helloworld:build
+
+docker build -t go/helloworld:build . -f Dockerfile.build
+
+docker create --name extract go/helloworld:build
+
+docker cp extract:/go/src/github.com/go/helloworld/app ./app
+
+docker rm -f extract
+
+echo Building go/helloworld:2
+
+docker build --no-cache -t go/helloworld:2 . -f Dockerfile.copy
+
+rm ./app
+```
+
+
+现在运行脚本即可构建镜像
+```
+$ chmod +x build.sh
+
+$ ./build.sh
+```
+
+
+对比两种方式生成的镜像大小
+```
+$ docker image ls
+
+REPOSITORY      TAG    IMAGE ID        CREATED         SIZE
+go/helloworld   2      f7cf3465432c    22 seconds ago  6.47MB
+go/helloworld   1      f55d3e16affc    2 minutes ago   295MB
+```
+
+
+#### 使用多阶段构建
+
+为解决以上问题，Docker v17.05 开始支持多阶段构建 (`multistage builds`)。使用多阶段构建我们就可以很容易解决前面提到的问题，并且只需要编写一个 `Dockerfile`：
+
+例如，编写 `Dockerfile` 文件
+```
+FROM golang:alpine as builder
+
+RUN apk --no-cache add git
+
+WORKDIR /go/src/github.com/go/helloworld/
+
+RUN go get -d -v github.com/go-sql-driver/mysql
+
+COPY app.go .
+
+RUN CGO_ENABLED=0 GOOS=linux go build -a -installsuffix cgo -o app .
+
+
+FROM alpine:latest as prod
+
+RUN apk --no-cache add ca-certificates
+
+WORKDIR /root/
+# 从编译阶段的中拷贝编译结果到当前镜像中
+COPY --from=0 /go/src/github.com/go/helloworld/app .
+
+CMD ["./app"]
+```
+
+
+构建镜像
+```
+$ docker build -t go/helloworld:3 .
+```
+
+
+对比三个镜像大小
+```
+$ docker image ls
+
+REPOSITORY        TAG   IMAGE ID         CREATED            SIZE
+go/helloworld     3     d6911ed9c846     7 seconds ago      6.47MB
+go/helloworld     2     f7cf3465432c     22 seconds ago     6.47MB
+go/helloworld     1     f55d3e16affc     2 minutes ago      295MB
+```
+
+
+很明显使用多阶段构建的镜像体积小，同时也完美解决了上边提到的问题。
+
+#### 只构建某一阶段的镜像
+
+我们可以使用 `as` 来为某一阶段命名，例如
+```
+FROM golang:alpine as builder
+```
+
+
+例如当我们只想构建 `builder` 阶段的镜像时，增加 `--target=builder` 参数即可
+
+```
+$ docker build --target builder -t username/imagename:tag .
+```
+
+#### 构建时从其他镜像复制文件
+
+上面例子中我们使用 `COPY --from=0 /go/src/github.com/go/helloworld/app .` 从上一阶段的镜像中复制文件，我们也可以复制任意镜像中的文件。
+
+```
+$ COPY --from=nginx:latest /etc/nginx/nginx.conf /nginx.conf
+```
+
+
+
 ## docker compose
 
-https://www.bookstack.cn/read/docker_practice-1.3.0/compose-README.md
+[参考](https://www.bookstack.cn/read/docker_practice-1.3.0/compose-README.md)、[参考](https://www.cnblogs.com/liaokui/p/11380590.html)
 
-https://www.cnblogs.com/liaokui/p/11380590.html
+`Docker Compose` 是 Docker 官方编排（Orchestration）项目之一，负责快速的部署分布式应用
+
+`Compose` 定位是 「**定义和运行多个 Docker 容器的应用**（Defining and running multi-container Docker applications）」，其前身是开源项目 Fig。
+
+我们知道使用一个 `Dockerfile` 模板文件，可以让用户很方便的定义一个单独的应用容器。然而，在日常工作中，经常会碰到需要多个容器相互配合来完成某项任务的情况。例如要实现一个 Web 项目，除了 Web 服务容器本身，往往还需要再加上后端的数据库服务容器，甚至还包括负载均衡容器等。
+
+`Compose` 恰好满足了这样的需求。**它允许用户通过一个单独的 `docker-compose.yml` 模板文件（YAML 格式）来定义一组相关联的应用容器为一个项目（project）**。
+
+`Compose` 中有两个重要的概念：
+
+- 服务 (`service`)：一个应用的容器，实际上可以包括若干运行相同镜像的容器实例。
+- 项目 (`project`)：由一组关联的应用容器组成的一个完整业务单元，在 `docker-compose.yml` 文件中定义。
+
+`Compose` 的默认管理对象是项目，通过子命令对项目中的一组容器进行便捷地生命周期管理。
+
+`Compose` 项目由 Python 编写，实现上调用了 Docker 服务提供的 API 来对容器进行管理。因此，只要所操作的平台支持 Docker API，就可以在其上利用 `Compose` 来进行编排管理。
+
+### Compose 命令
+
+
+
+### Compose 模板文件
+
+模板文件是使用 `Compose` 的核心，涉及到的指令关键字也比较多。但大家不用担心，这里面大部分指令跟 `docker run` 相关参数的含义都是类似的。
+
+默认的模板文件名称为 `docker-compose.yml`，格式为 YAML 格式。
+
+```
+version: "3"
+services:
+  webapp:
+    image: examples/web
+    ports:
+      - "80:80"
+    volumes:
+      - "/data"
+```
+
+注意每个服务都必须通过 `image` 指令指定镜像或 `build` 指令（需要 Dockerfile）等来自动构建生成镜像。
+
+如果使用 `build` 指令，在 `Dockerfile` 中设置的选项(例如：`CMD`, `EXPOSE`, `VOLUME`, `ENV` 等) 将会自动被获取，无需在 `docker-compose.yml` 中重复设置。
+
+下面分别介绍各个指令的用法。
+
+#### compose 指令
+
+##### `build`
+
+指定 `Dockerfile` 所在文件夹的路径（可以是绝对路径，或者相对 docker-compose.yml 文件的路径）。 `Compose` 将会利用它自动构建这个镜像，然后使用这个镜像。
+
+```
+version: '3'
+services:
+  webapp:
+    build: ./dir
+```
+
+你也可以使用 `context` 指令指定 `Dockerfile` 所在文件夹的路径。
+
+使用 `dockerfile` 指令指定 `Dockerfile` 文件名。
+
+##### `arg`
+
+使用 `arg` 指令指定构建镜像时的变量。
+
+```
+version: '3'
+services:
+  webapp:
+    build:
+      context: ./dir
+      dockerfile: Dockerfile-alternate
+      args:
+        buildno: 1
+```
+
+使用 `cache_from` 指定构建镜像的缓存
+
+```
+build:
+  context: .
+  cache_from:
+    - alpine:latest
+    - corp/web_app:3.14
+```
+
+##### `cap_add, cap_drop`
+
+指定容器的内核能力（capacity）分配。
+
+例如，让容器拥有所有能力可以指定为：
+
+```
+cap_add:
+  - ALL
+```
+
+去掉 NET_ADMIN 能力可以指定为：
+
+```
+cap_drop:
+  - NET_ADMIN
+```
+
+##### `command`
+
+覆盖容器启动后默认执行的命令。
+
+```
+command: echo "hello world"
+```
+
+##### `configs`
+
+仅用于 `Swarm mode`，详细内容请查看 [`Swarm mode`](https://www.bookstack.cn/read/docker_practice-1.3.0/$swarm_mode) 一节。
+
+##### `cgroup_parent`
+
+指定父 `cgroup` 组，意味着将继承该组的资源限制。
+
+例如，创建了一个 cgroup 组名称为 `cgroups_1`。
+
+```
+cgroup_parent: cgroups_1
+```
+
+##### `container_name`
+
+指定容器名称。默认将会使用 `项目名称_服务名称_序号` 这样的格式。
+
+```
+container_name: docker-web-container
+```
+
+> 注意: 指定容器名称后，该服务将无法进行扩展（scale），因为 Docker 不允许多个容器具有相同的名称。
+
+##### `deploy`
+
+仅用于 `Swarm mode`，详细内容请查看 [`Swarm mode`](https://www.bookstack.cn/read/docker_practice-1.3.0/$swarm_mode) 一节
+
+##### `devices`
+
+指定设备映射关系。
+
+```
+devices:
+  - "/dev/ttyUSB1:/dev/ttyUSB0"
+```
+
+##### `depends_on`
+
+解决容器的依赖、启动先后的问题。以下例子中会先启动 `redis` `db` 再启动 `web`
+
+```
+version: '3'
+services:
+  web:
+    build: .
+    depends_on:
+      - db
+      - redis
+  redis:
+    image: redis
+  db:
+    image: postgres
+```
+
+> 注意：`web` 服务不会等待 `redis` `db` 「完全启动」之后才启动。
+
+##### `dns`
+
+自定义 `DNS` 服务器。可以是一个值，也可以是一个列表。
+
+```
+dns: 8.8.8.8
+dns:
+  - 8.8.8.8
+  - 114.114.114.114
+```
+
+##### `dns_search`
+
+配置 `DNS` 搜索域。可以是一个值，也可以是一个列表。
+
+```
+dns_search: example.comdns_search:  - domain1.example.com  - domain2.example.com
+```
+
+##### `tmpfs`
+
+挂载一个 tmpfs 文件系统到容器。
+
+```
+tmpfs: /runtmpfs:  - /run  - /tmp
+```
+
+##### `env_file`
+
+从文件中获取环境变量，可以为单独的文件路径或列表。
+
+如果通过 `docker-compose -f FILE` 方式来指定 Compose 模板文件，则 `env_file` 中变量的路径会基于模板文件路径。
+
+如果有变量名称与 `environment` 指令冲突，则按照惯例，以后者为准。
+
+```
+dns_search: example.com
+dns_search:
+  - domain1.example.com
+  - domain2.example.com
+```
+
+环境变量文件中每一行必须符合格式，支持 `#` 开头的注释行。
+
+```
+# common.env: Set development environment
+PROG_ENV=development
+```
+
+##### `environment`
+
+设置环境变量。你可以使用数组或字典两种格式。
+
+只给定名称的变量会自动获取运行 Compose 主机上对应变量的值，可以用来防止泄露不必要的数据。
+
+```
+environment:
+  RACK_ENV: development
+  SESSION_SECRET:
+environment:
+  - RACK_ENV=development
+  - SESSION_SECRET
+```
+
+如果变量名称或者值中用到 `true|false，yes|no` 等表达 [布尔](https://yaml.org/type/bool.html) 含义的词汇，最好放到引号里，避免 YAML 自动解析某些内容为对应的布尔语义。这些特定词汇，包括
+
+```
+y|Y|yes|Yes|YES|n|N|no|No|NO|true|True|TRUE|false|False|FALSE|on|On|ON|off|Off|OFF
+```
+
+##### `expose`
+
+暴露端口，但不映射到宿主机，只被连接的服务访问。
+
+仅可以指定内部端口为参数
+
+```
+expose:
+ - "3000"
+ - "8000"
+```
+
+##### `external_links`
+
+> 注意：不建议使用该指令。
+
+链接到 `docker-compose.yml` 外部的容器，甚至并非 `Compose` 管理的外部容器。
+
+```
+extra_hosts:
+ - "googledns:8.8.8.8"
+ - "dockerhub:52.1.157.61"
+```
+
+##### `extra_hosts`
+
+类似 Docker 中的 `--add-host` 参数，指定额外的 host 名称映射信息。
+
+```
+8.8.8.8 googledns
+52.1.157.61 dockerhub
+```
+
+会在启动后的服务容器中 `/etc/hosts` 文件中添加如下两条条目。
+
+```
+8.8.8.8 googledns52.1.157.61 dockerhub
+```
+
+##### `healthcheck`
+
+通过命令检查容器是否健康运行。
+
+```
+healthcheck:
+  test: ["CMD", "curl", "-f", "http://localhost"]
+  interval: 1m30s
+  timeout: 10s
+  retries: 3
+```
+
+##### `image`
+
+指定为镜像名称或镜像 ID。如果镜像在本地不存在，`Compose` 将会尝试拉取这个镜像。
+
+```
+image: ubuntu
+image: orchardup/postgresql
+image: a4bc65fd
+```
+
+##### `labels`
+
+为容器添加 Docker 元数据（metadata）信息。例如可以为容器添加辅助说明信息。
+
+```
+labels:
+  com.startupteam.description: "webapp for a startup team"
+  com.startupteam.department: "devops department"
+  com.startupteam.release: "rc3 for v1.0"
+```
+
+##### `links`
+
+> 注意：不推荐使用该指令。
+
+##### `logging`
+
+配置日志选项。
+
+```
+logging:
+  driver: syslog
+  options:
+    syslog-address: "tcp://192.168.0.42:123"
+```
+
+目前支持三种日志驱动类型。
+
+```
+driver: "json-file"
+driver: "syslog"
+driver: "none"
+```
+
+`options` 配置日志驱动的相关参数。
+
+```
+options:
+  max-size: "200k"
+  max-file: "10"
+```
+
+##### `network_mode`
+
+设置网络模式。使用和 `docker run` 的 `--network` 参数一样的值。
+
+```
+network_mode: "bridge"
+network_mode: "host"
+network_mode: "none"
+network_mode: "service:[service name]"
+network_mode: "container:[container name/id]"
+```
+
+##### `networks`
+
+配置容器连接的网络。
+
+```
+version: "3"
+services:
+  some-service:
+    networks:
+     - some-network
+     - other-network
+networks:
+  some-network:
+  other-network:
+```
+
+##### `pid`
+
+跟主机系统共享进程命名空间。打开该选项的容器之间，以及容器和宿主机系统之间可以通过进程 ID 来相互访问和操作。
+
+```
+pid: "host"
+```
+
+##### `ports`
+
+暴露端口信息。
+
+使用宿主端口：容器端口 `(HOST:CONTAINER)` 格式，或者仅仅指定容器的端口（宿主将会随机选择端口）都可以。
+
+```
+ports:
+ - "3000"
+ - "8000:8000"
+ - "49100:22"
+ - "127.0.0.1:8001:8001"
+```
+
+*注意：当使用 `HOST:CONTAINER` 格式来映射端口时，如果你使用的容器端口小于 60 并且没放到引号里，可能会得到错误结果，因为 `YAML` 会自动解析 `xx:yy` 这种数字格式为 60 进制。为避免出现这种问题，建议数字串都采用引号包括起来的字符串格式。*
+
+##### `secrets`
+
+存储敏感数据，例如 `mysql` 服务密码。
+
+```
+version: "3.1"
+services:
+mysql:
+  image: mysql
+  environment:
+    MYSQL_ROOT_PASSWORD_FILE: /run/secrets/db_root_password
+  secrets:
+    - db_root_password
+    - my_other_secret
+secrets:
+  my_secret:
+    file: ./my_secret.txt
+  my_other_secret:
+    external: true
+```
+
+##### `security_opt`
+
+指定容器模板标签（label）机制的默认属性（用户、角色、类型、级别等）。例如配置标签的用户名和角色名。
+
+```
+security_opt:
+    - label:user:USER
+    - label:role:ROLE
+```
+
+##### `stop_signal`
+
+设置另一个信号来停止容器。在默认情况下使用的是 SIGTERM 停止容器。
+
+```
+stop_signal: SIGUSR1
+```
+
+##### `sysctls`
+
+配置容器内核参数。
+
+```
+sysctls:
+  net.core.somaxconn: 1024
+  net.ipv4.tcp_syncookies: 0
+sysctls:
+  - net.core.somaxconn=1024
+  - net.ipv4.tcp_syncookies=0
+```
+
+##### `ulimits`
+
+指定容器的 ulimits 限制值。
+
+例如，指定最大进程数为 65535，指定文件句柄数为 20000（软限制，应用可以随时修改，不能超过硬限制） 和 40000（系统硬限制，只能 root 用户提高）。
+
+```
+  ulimits:
+    nproc: 65535
+    nofile:
+      soft: 20000
+      hard: 40000
+```
+
+##### `volumes`
+
+数据卷所挂载路径设置。可以设置为宿主机路径(`HOST:CONTAINER`)或者数据卷名称(`VOLUME:CONTAINER`)，并且可以设置访问模式 （`HOST:CONTAINER:ro`）。
+
+该指令中路径支持相对路径。
+
+```
+volumes:
+ - /var/lib/mysql
+ - cache/:/tmp/cache
+ - ~/configs:/etc/configs/:ro
+```
+
+如果路径为数据卷名称，必须在文件中配置数据卷。
+
+```
+version: "3"
+services:
+  my_src:
+    image: mysql:8.0
+    volumes:
+      - mysql_data:/var/lib/mysql
+volumes:
+  mysql_data:
+```
+
+##### 其它指令
+
+此外，还有包括 `domainname, entrypoint, hostname, ipc, mac_address, privileged, read_only, shm_size, restart, stdin_open, tty, user, working_dir` 等指令，基本跟 `docker run` 中对应参数的功能一致。
+
+指定服务容器启动后执行的入口文件。
+
+```
+entrypoint: /code/entrypoint.sh
+```
+
+指定容器中运行应用的用户名。
+
+```
+user: nginx
+```
+
+指定容器中工作目录。
+
+```
+working_dir: /code
+```
+
+指定容器中搜索域名、主机名、mac 地址等。
+
+```
+domainname: your_website.com
+hostname: test
+mac_address: 08-00-27-00-0C-0A
+```
+
+允许容器中运行一些特权命令。
+
+```
+privileged: true
+```
+
+指定容器退出后的重启策略为始终重启。该命令对保持服务始终运行十分有效，在生产环境中推荐配置为 `always` 或者 `unless-stopped`。
+
+```
+restart: always
+```
+
+以只读模式挂载容器的 root 文件系统，意味着不能对容器内容进行修改。
+
+```
+read_only: true
+```
+
+打开标准输入，可以接受外部输入。
+
+```
+stdin_open: true
+```
+
+模拟一个伪终端。
+
+```
+tty: true
+```
+
+###### 读取变量
+
+Compose 模板文件支持动态读取主机的系统环境变量和当前目录下的 `.env` 文件中的变量。
+
+例如，下面的 Compose 文件将从运行它的环境中读取变量 `${MONGO_VERSION}` 的值，并写入执行的指令中。
+
+```
+version: "3"
+services:
+db:
+  image: "mongo:${MONGO_VERSION}"
+```
+
+如果执行 `MONGO_VERSION=3.2 docker-compose up` 则会启动一个 `mongo:3.2` 镜像的容器；如果执行 `MONGO_VERSION=2.8 docker-compose up` 则会启动一个 `mongo:2.8` 镜像的容器。
+
+若当前目录存在 `.env` 文件，执行 `docker-compose` 命令时将从该文件中读取变量。
+
+在当前目录新建 `.env` 文件并写入以下内容。
+
+```
+# 支持 # 号注释
+MONGO_VERSION=3.6
+```
+
+执行 `docker-compose up` 则会启动一个 `mongo:3.6` 镜像的容器。
+
+### 实战
+
+[参考](https://www.bookstack.cn/read/docker_practice-1.3.0/compose-django.md)
+
+
 
 ## docker命令
 
@@ -1185,6 +2364,239 @@ docker run -v /path-to-folder/non-existent-config.js:/path-to-folder/config.js t
 1. 从上面的分析可知，文件夹挂载以整个文件夹为单位进行文件覆盖，故可在需要将大量文件挂载进container时使用，另外，如果挂载一个空文件夹或者不存在的文件夹，一般是做逆向使用： 即容器启动后，可能会在容器内挂载点的文件夹下生成一些文件（如日志），此时，在对应的host上的文件夹内就能直接看到。
 2. 文件挂载由于只会覆盖单个文件而不会影响container中同一文件夹下的其他文件，常常被用来挂载配置文件，以在运行时，动态的修改默认配置。
 
+## 安全
+
+### 内核命名空间
+
+Docker 容器和 LXC 容器很相似，所提供的安全特性也差不多。当用 `docker run` 启动一个容器时，**在后台 Docker 为容器创建了一个独立的命名空间和控制组集合**。
+
+命名空间提供了最基础也是最直接的隔离，在容器中运行的进程不会被运行在主机上的进程和其它容器发现和作用。
+
+**每个容器都有自己独有的网络栈**，意味着它们不能访问其他容器的 sockets 或接口。不过，如果主机系统上做了相应的设置，容器可以像跟主机交互一样的和其他容器交互。当指定公共端口或使用 links 来连接 2 个容器时，容器就可以相互通信了（可以根据配置来限制通信的策略）。
+
+从网络架构的角度来看，所有的容器通过本地主机的网桥接口相互通信，就像物理机器通过物理交换机通信一样。
+
+那么，内核中实现命名空间和私有网络的代码是否足够成熟？
+
+内核命名空间从 2.6.15 版本（2008 年 7 月发布）之后被引入，数年间，这些机制的可靠性在诸多大型生产系统中被实践验证。
+
+实际上，命名空间的想法和设计提出的时间要更早，最初是为了在内核中引入一种机制来实现 [OpenVZ](https://en.wikipedia.org/wiki/OpenVZ) 的特性。 而 OpenVZ 项目早在 2005 年就发布了，其设计和实现都已经十分成熟。
+
+### 控制组
+
+控制组是 Linux 容器机制的另外一个关键组件，**负责实现资源的审计和限制**。
+
+它提供了很多有用的特性；以及**确保各个容器可以公平地分享主机的内存、CPU、磁盘 IO 等资源；当然，更重要的是，控制组确保了当容器内的资源使用产生压力时不会连累主机系统**。
+
+尽管控制组不负责隔离容器之间相互访问、处理数据和进程，它在防止拒绝服务（DDOS）攻击方面是必不可少的。尤其是在多用户的平台（比如公有或私有的 PaaS）上，控制组十分重要。例如，当某些应用程序表现异常的时候，可以保证一致地正常运行和性能。
+
+控制组机制始于 2006 年，内核从 2.6.24 版本开始被引入。
+
+### Docker服务端的防护
+
+运行一个容器或应用程序的核心是通过 Docker 服务端。**Docker 服务的运行目前需要 root 权限，因此其安全性十分关键**。
+
+首先，确保只有可信的用户才可以访问 Docker 服务。Docker 允许用户在主机和容器间共享文件夹，同时不需要限制容器的访问权限，这就容易让容器突破资源限制。例如，恶意用户启动容器的时候将主机的根目录`/`映射到容器的 `/host` 目录中，那么容器理论上就可以对主机的文件系统进行任意修改了。这听起来很疯狂？但是事实上几乎所有虚拟化系统都允许类似的资源共享，而没法禁止用户共享主机根文件系统到虚拟机系统。
+
+这将会造成很严重的安全后果。因此，当提供容器创建服务时（例如通过一个 web 服务器），要更加注意进行参数的安全检查，防止恶意的用户用特定参数来创建一些破坏性的容器。
+
+为了加强对服务端的保护，Docker 的 REST API（客户端用来跟服务端通信）在 0.5.2 之后使用本地的 Unix 套接字机制替代了原先绑定在 127.0.0.1 上的 TCP 套接字，因为后者容易遭受跨站脚本攻击。现在用户使用 Unix 权限检查来加强套接字的访问安全。
+
+用户仍可以利用 HTTP 提供 REST API 访问。建议使用安全机制，确保只有可信的网络或 VPN，或证书保护机制（例如受保护的 stunnel 和 ssl 认证）下的访问可以进行。此外，还可以使用 [HTTPS 和证书](https://docs.docker.com/engine/security/https/) 来加强保护。
+
+最近改进的 Linux 命名空间机制将可以实现使用非 root 用户来运行全功能的容器。这将从根本上解决了容器和主机之间共享文件系统而引起的安全问题。
+
+终极目标是改进 2 个重要的安全特性：
+
+- 将容器的 root 用户 [映射到本地主机上的非 root 用户](https://docs.docker.com/engine/security/userns-remap/)，减轻容器和主机之间因权限提升而引起的安全问题；
+- 允许 Docker 服务端在 [非 root 权限(rootless 模式)](https://docs.docker.com/engine/security/rootless/) 下运行，利用安全可靠的子进程来代理执行需要特权权限的操作。这些子进程将只允许在限定范围内进行操作，例如仅仅负责虚拟网络设定或文件系统管理、配置操作等。
+
+最后，建议采用专用的服务器来运行 Docker 和相关的管理服务（例如管理服务比如 ssh 监控和进程监控、管理工具 nrpe、collectd 等）。其它的业务服务都放到容器中去运行。
+
+### 内核能力机制
+
+[能力机制（Capability）](https://man7.org/linux/man-pages/man7/capabilities.7.html) 是 Linux 内核一个强大的特性，可以提供细粒度的权限访问控制。 Linux 内核自 2.2 版本起就支持能力机制，它将权限划分为更加细粒度的操作能力，既可以作用在进程上，也可以作用在文件上。
+
+例如，一个 Web 服务进程只需要绑定一个低于 1024 的端口的权限，并不需要 root 权限。那么它只需要被授权 `net_bind_service` 能力即可。此外，还有很多其他的类似能力来避免进程获取 root 权限。
+
+默认情况下，Docker 启动的容器被严格限制只允许使用内核的一部分能力。
+
+使用能力机制对加强 Docker 容器的安全有很多好处。通常，在服务器上会运行一堆需要特权权限的进程，包括有 ssh、cron、syslogd、硬件管理工具模块（例如负载模块）、网络配置工具等等。容器跟这些进程是不同的，因为几乎所有的特权进程都由容器以外的支持系统来进行管理。
+
+- ssh 访问被主机上ssh服务来管理；
+- cron 通常应该作为用户进程执行，权限交给使用它服务的应用来处理；
+- 日志系统可由 Docker 或第三方服务管理；
+- 硬件管理无关紧要，容器中也就无需执行 udevd 以及类似服务；
+- 网络管理也都在主机上设置，除非特殊需求，容器不需要对网络进行配置。
+
+从上面的例子可以看出，大部分情况下，容器并不需要“真正的” root 权限，容器只需要少数的能力即可。为了加强安全，容器可以禁用一些没必要的权限。
+
+- 完全禁止任何 mount 操作；
+- 禁止直接访问本地主机的套接字；
+- 禁止访问一些文件系统的操作，比如创建新的设备、修改文件属性等；
+- 禁止模块加载。
+
+这样，就算攻击者在容器中取得了 root 权限，也不能获得本地主机的较高权限，能进行的破坏也有限。
+
+默认情况下，Docker采用 [白名单](https://github.com/moby/moby/blob/master/oci/caps/defaults.go) 机制，禁用必需功能之外的其它权限。 当然，用户也可以根据自身需求来为 Docker 容器启用额外的权限。
+
+## 底层实现
+
+Docker 底层的核心技术包括 Linux 上的**命名空间**（Namespaces）、**控制组**（Control groups）、**Union 文件系统**（Union file systems）和**容器格式**（Container format）。
+
+我们知道，传统的虚拟机通过在宿主主机中运行 hypervisor 来模拟一整套完整的硬件环境提供给虚拟机的操作系统。虚拟机系统看到的环境是可限制的，也是彼此隔离的。 这种直接的做法实现了对资源最完整的封装，但很多时候往往意味着系统资源的浪费。 例如，以宿主机和虚拟机系统都为 Linux 系统为例，虚拟机中运行的应用其实可以利用宿主机系统中的运行环境。
+
+我们知道，在操作系统中，包括内核、文件系统、网络、PID、UID、IPC、内存、硬盘、CPU 等等，所有的资源都是应用进程直接共享的。 要想实现虚拟化，除了要实现对内存、CPU、网络IO、硬盘IO、存储空间等的限制外，还要实现文件系统、网络、PID、UID、IPC等等的相互隔离。 前者相对容易实现一些，后者则需要宿主机系统的深入支持。
+
+随着 Linux 系统对于命名空间功能的完善实现，程序员已经可以实现上面的所有需求，让某些进程在彼此隔离的命名空间中运行。大家虽然都共用一个内核和某些运行时环境（例如一些系统命令和系统库），但是彼此却看不到，都以为系统中只有自己的存在。这种机制就是容器（Container），利用命名空间来做权限的隔离控制，利用 cgroups 来做资源分配。
+
+### 基本架构
+
+Docker 采用了 `C/S` 架构，包括客户端和服务端。**Docker 守护进程 （`Daemon`）作为服务端接受来自客户端的请求，并处理这些请求（创建、运行、分发容器）**。
+
+客户端和服务端既可以运行在一个机器上，也可通过 `socket` 或者 `RESTful API` 来进行通信。
+
+![Docker 基本架构](https://static.sitestack.cn/projects/docker_practice-1.3.0/underly/_images/docker_arch.png)
+
+Docker 守护进程一般在宿主主机后台运行，等待接收来自客户端的消息。
+
+Docker 客户端则为用户提供一系列可执行命令，用户用这些命令实现跟 Docker 守护进程交互。
+
+### 命名空间
+
+命名空间是 Linux 内核一个强大的特性。**每个容器都有自己单独的命名空间，运行在其中的应用都像是在独立的操作系统中运行一样。命名空间保证了容器之间彼此互不影响**。
+
+#### pid 命名空间
+
+不同用户的进程就是通过 pid 命名空间隔离开的，且不同命名空间中可以有相同 pid。所有的 LXC 进程在 Docker 中的父进程为 Docker 进程，每个 LXC 进程具有不同的命名空间。同时由于允许嵌套，因此可以很方便的实现嵌套的 Docker 容器。
+
+#### net 命名空间
+
+有了 pid 命名空间，每个命名空间中的 pid 能够相互隔离，但是网络端口还是共享 host 的端口。网络隔离是通过 net 命名空间实现的， 每个 net 命名空间有独立的 网络设备，IP 地址，路由表，/proc/net 目录。这样每个容器的网络就能隔离开来。Docker 默认采用 veth 的方式，将容器中的虚拟网卡同 host 上的一 个Docker 网桥 docker0 连接在一起。
+
+#### ipc 命名空间
+
+容器中进程交互还是采用了 Linux 常见的进程间交互方法(interprocess communication - IPC)， 包括信号量、消息队列和共享内存等。然而同 VM 不同的是，容器的进程间交互实际上还是 host 上具有相同 pid 命名空间中的进程间交互，因此需要在 IPC 资源申请时加入命名空间信息，每个 IPC 资源有一个唯一的 32 位 id。
+
+#### mnt 命名空间
+
+类似 chroot，将一个进程放到一个特定的目录执行。mnt 命名空间允许不同命名空间的进程看到的文件结构不同，这样每个命名空间 中的进程所看到的文件目录就被隔离开了。同 chroot 不同，每个命名空间中的容器在 /proc/mounts 的信息只包含所在命名空间的 mount point。
+
+#### uts 命名空间
+
+UTS(“UNIX Time-sharing System”) 命名空间允许每个容器拥有独立的 hostname 和 domain name， 使其在网络上可以被视作一个独立的节点而非 主机上的一个进程。
+
+#### user 命名空间
+
+每个容器可以有不同的用户和组 id， 也就是说可以在容器内用容器内部的用户执行程序而非主机上的用户。
+
+*注：更多关于 Linux 上命名空间的信息，请阅读 [这篇文章](https://blog.scottlowe.org/2013/09/04/introducing-linux-network-namespaces/)。
+
+### 控制组
+
+控制组（[cgroups](https://en.wikipedia.org/wiki/Cgroups)）是 Linux 内核的一个特性，**主要用来对共享资源进行隔离、限制、审计等**。只有能控制分配到容器的资源，才能避免当多个容器同时运行时的对系统资源的竞争。
+
+控制组技术最早是由 Google 的程序员在 2006 年提出，Linux 内核自 2.6.24 开始支持。
+
+控制组可以提供对容器的内存、CPU、磁盘 IO 等资源的限制和审计管理。
+
+### 联合文件系统
+
+联合文件系统（[UnionFS](https://en.wikipedia.org/wiki/UnionFS)）**是一种分层、轻量级并且高性能的文件系统，它支持对文件系统的修改作为一次提交来一层层的叠加，同时可以将不同目录挂载到同一个虚拟文件系统下**(unite several directories into a single virtual filesystem)。
+
+联合文件系统是 Docker 镜像的基础。镜像可以通过分层来进行继承，基于基础镜像（没有父镜像），可以制作各种具体的应用镜像。
+
+另外，不同 Docker 容器就可以共享一些基础的文件系统层，同时再加上自己独有的改动层，大大提高了存储的效率。
+
+Docker 中使用的 AUFS（Advanced Multi-Layered Unification Filesystem）就是一种联合文件系统。 `AUFS` 支持为每一个成员目录（类似 Git 的分支）设定只读（readonly）、读写（readwrite）和写出（whiteout-able）权限, 同时 `AUFS` 里有一个类似分层的概念, 对只读权限的分支可以逻辑上进行增量地修改(不影响只读部分的)。
+
+Docker 目前支持的联合文件系统包括 `OverlayFS`, `AUFS`, `Btrfs`, `VFS`, `ZFS` 和 `Device Mapper`。
+
+各 Linux 发行版 Docker 推荐使用的存储驱动如下表。
+
+| Linux 发行版     | Docker 推荐使用的存储驱动                           |
+| :--------------- | :-------------------------------------------------- |
+| Docker on Ubuntu | `overlay2` (16.04 +)                                |
+| Docker on Debian | `overlay2` (Debian Stretch), `aufs`, `devicemapper` |
+| Docker on CentOS | `overlay2`                                          |
+| Docker on Fedora | `overlay2`                                          |
+
+在可能的情况下，[推荐](https://docs.docker.com/storage/storagedriver/select-storage-driver/) 使用 `overlay2` 存储驱动，`overlay2` 是目前 Docker 默认的存储驱动，以前则是 `aufs`。你可以通过配置来使用以上提到的其他类型的存储驱动。
+
+### 容器格式
+
+最初，Docker 采用了 `LXC` 中的容器格式。从 0.7 版本以后开始去除 LXC，转而使用自行开发的 [libcontainer](https://github.com/docker/libcontainer)，从 1.11 开始，则进一步演进为使用 [runC](https://github.com/opencontainers/runc) 和 [containerd](https://github.com/containerd/containerd)。
+
+### Docker 网络实现
+
+Docker 的网络实现其实就是**利用了 Linux 上的网络命名空间和虚拟网络设备**（特别是 veth pair）。建议先熟悉了解这两部分的基本概念再阅读本章。
+
+#### 基本原理
+
+首先，要实现网络通信，机器需要至少一个网络接口（物理接口或虚拟接口）来收发数据包；此外，如果不同子网之间要进行通信，需要路由机制。
+
+Docker 中的网络接口默认都是虚拟的接口。虚拟接口的优势之一是转发效率较高。 Linux 通过在内核中进行数据复制来实现虚拟接口之间的数据转发，发送接口的发送缓存中的数据包被直接复制到接收接口的接收缓存中。对于本地系统和容器内系统看来就像是一个正常的以太网卡，只是它不需要真正同外部网络设备通信，速度要快很多。
+
+Docker 容器网络就利用了这项技术。它在本地主机和容器内分别创建一个虚拟接口，并让它们彼此连通（这样的一对接口叫做 `veth pair`）。
+
+#### 创建网络参数
+
+Docker 创建一个容器的时候，会执行如下操作：
+
+- 创建一对虚拟接口，分别放到本地主机和新容器中；
+- 本地主机一端桥接到默认的 docker0 或指定网桥上，并具有一个唯一的名字，如 veth65f9；
+- 容器一端放到新容器中，并修改名字作为 eth0，这个接口只在容器的命名空间可见；
+- 从网桥可用地址段中获取一个空闲地址分配给容器的 eth0，并配置默认路由到桥接网卡 veth65f9。
+
+完成这些之后，容器就可以使用 eth0 虚拟网卡来连接其他容器和其他网络。
+
+可以在 `docker run` 的时候通过 `--net` 参数来指定容器的网络配置，有4个可选值：
+
+- `--net=bridge` 这个是默认值，连接到默认的网桥。
+- `--net=host` 告诉 Docker 不要将容器网络放到隔离的命名空间中，即不要容器化容器内的网络。此时容器使用本地主机的网络，它拥有完全的本地主机接口访问权限。容器进程可以跟主机其它 root 进程一样可以打开低范围的端口，可以访问本地网络服务比如 D-bus，还可以让容器做一些影响整个主机系统的事情，比如重启主机。因此使用这个选项的时候要非常小心。如果进一步的使用 `--privileged=true`，容器会被允许直接配置主机的网络堆栈。
+- `--net=container:NAME_or_ID` 让 Docker 将新建容器的进程放到一个已存在容器的网络栈中，新容器进程有自己的文件系统、进程列表和资源限制，但会和已存在的容器共享 IP 地址和端口等网络资源，两者进程可以直接通过 `lo` 环回接口通信。
+- `--net=none` 让 Docker 将新容器放到隔离的网络栈中，但是不进行网络配置。之后，用户可以自己进行配置。
+
+#### 网络配置细节
+
+用户使用 `--net=none` 后，可以自行配置网络，让容器达到跟平常一样具有访问网络的权限。通过这个过程，可以了解 Docker 配置网络的细节。
+
+首先，启动一个 `/bin/bash` 容器，指定 `--net=none` 参数。
+
+```
+$ docker run -i -t --rm --net=none base /bin/bashroot@63f36fc01b5f:/#
+```
+
+在本地主机查找容器的进程 id，并为它创建网络命名空间。
+
+```
+$ docker inspect -f '{{.State.Pid}}' 63f36fc01b5f2778$ pid=2778$ sudo mkdir -p /var/run/netns$ sudo ln -s /proc/$pid/ns/net /var/run/netns/$pid
+```
+
+检查桥接网卡的 IP 和子网掩码信息。
+
+```
+$ ip addr show docker021: docker0: ...inet 172.17.42.1/16 scope global docker0...
+```
+
+创建一对 “veth pair” 接口 A 和 B，绑定 A 到网桥 `docker0`，并启用它
+
+```
+$ sudo ip link add A type veth peer name B$ sudo brctl addif docker0 A$ sudo ip link set A up
+```
+
+将B放到容器的网络命名空间，命名为 eth0，启动它并配置一个可用 IP（桥接网段）和默认网关。
+
+```
+$ sudo ip link set B netns $pid$ sudo ip netns exec $pid ip link set dev B name eth0$ sudo ip netns exec $pid ip link set eth0 up$ sudo ip netns exec $pid ip addr add 172.17.42.99/16 dev eth0$ sudo ip netns exec $pid ip route add default via 172.17.42.1
+```
+
+以上，就是 Docker 配置网络的具体过程。
+
+当容器结束后，Docker 会清空容器，容器内的 eth0 会随网络命名空间一起被清除，A 接口也被自动从 `docker0` 卸载。
+
+此外，用户可以使用 `ip netns exec` 命令来在指定网络命名空间中进行配置，从而配置容器内的网络。
+
 ## 面试
 
 ### 1. 什么是 Docker 容器？
@@ -1313,6 +2725,24 @@ Linux中的PID、IPC、网络等资源是全局的，而Linux的NameSpace机制�
 - **服务器**：比作一个大型的仓管基地，包含场地与零散的货物——相当于各种服务器资源。
 - **虚拟机技术**：比作仓库，拥有独立的空间堆放各种货物或集装箱，仓库之间完全独立——仓库相当于各种系统，独立的应用系统和操作系统。
 - **Docker**：比作集装箱，操作各种货物的打包——将各种应用程序和他们所依赖的运行环境打包成标准的容器，容器之间隔离。
+
+### 解释基本的Docker使用工作流程是怎样的？
+
+答：（1）从Dockerfile开始，Dockerfile是镜像的源代码；（2）创建Dockerfile后，可以构建它以创建容器的镜像。图像只是“源代码”的“编译版本”，即Dockerfile；（3）获得容器的镜像后，应使用注册表重新分发容器。注册表就像一个git存储库，可以推送和拉取镜像；接下来，可以使用该图像来运行容器。在许多方面，正在运行的容器与虚拟机（但没有虚拟机管理程序）非常相似。
+
+### 如何在生产中监控Docker？
+
+答：Docker提供docker stats和docker事件等工具来监控生产中的Docker。我们可以使用这些命令获取重要统计数据的报告。
+
+Docker统计数据：当我们使用容器ID调用docker stats时，我们获得容器的CPU，内存使用情况等。它类似于Linux中的top命令。
+
+Docker事件：Docker事件是一个命令，用于查看Docker守护程序中正在进行的活动流。一些常见的Docker事件是：attach，commit，die，detach，rename，destroy等。
+
+
+
+
+
+
 
 ## docker 遇到的问题
 

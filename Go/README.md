@@ -80,11 +80,11 @@
 
 ## 相关问题
 
-数据类型
+[数据类型](https://github.com/Simin-hub/Learning-Programming/blob/main/Go/%E8%BF%9B%E9%98%B6/%E5%9F%BA%E7%A1%80%E6%95%B0%E6%8D%AE%E7%B1%BB%E5%9E%8B.md)
 
 编译
 
-内存
+[内存](https://github.com/Simin-hub/Learning-Programming/blob/main/Go/%E8%BF%9B%E9%98%B6/%E5%86%85%E5%AD%98%E7%AE%A1%E7%90%86.md)
 
 ## 计算机基础
 
@@ -102,11 +102,9 @@
 
 [Redis](https://github.com/Simin-hub/Golang-Learning-and-Interview/blob/main/Go/%E5%AE%9E%E6%88%98/Redis.md)
 
-缓存
+[分布式](https://github.com/Simin-hub/Learning-Programming/tree/main/Go/%E5%AE%9E%E6%88%98/%E5%88%86%E5%B8%83%E5%BC%8F%E5%92%8C%E9%9B%86%E7%BE%A4)
 
-分布式
-
-docker
+[docker](https://github.com/Simin-hub/Learning-Programming/blob/main/docker/docker.md)
 
 ## 书籍
 
