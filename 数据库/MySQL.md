@@ -1133,7 +1133,7 @@ c)对于非常容易产生死锁的业务部分，可以尝试使用升级锁定
 - 通过show global variables like “innodb_locks%”;查看
   OFF时表示开启。默认是OFF
 
-# 五、查看行级锁争用情况
+### 五、查看行级锁争用情况
 
 
 执行SQL:mysql> show status like 'InnoDB_row_lock%';
@@ -1189,7 +1189,7 @@ mysql> show status like 'InnoDB_row_lock%';
 
 具体参考：[InnoDB Monitor](https://blog.csdn.net/zyz511919766/article/details/50147283)
 
-# 六、死锁
+### 六、死锁
 
 
 什么是死锁：一般是由于两个事务同时操作两个表，但加锁的顺序是不一致出现的。比如A事务先锁a表，B事务先锁b表；当A去锁b表的时候发现b表被B事务锁住了，要等待；当B事务去锁a表的时候发现a表被A锁住了。于是出现了死锁
@@ -1208,7 +1208,7 @@ mysql> show status like 'InnoDB_row_lock%';
 
 当产生死锁的场景中涉及到不止InnoDB存储引擎的时候，InnoDB是没办法检测到该死锁的，这时候就只能通过锁定超时限制参数InnoDB_lock_wait_timeout来解决。
 
-#  七、优化行级锁定
+###  七、优化行级锁定
 
 
 （1）要想合理利用InnoDB的行级锁定，做到扬长避短，我们必须做好以下工作： 
@@ -1233,7 +1233,7 @@ c)对于非常容易产生死锁的业务部分，可以尝试使用升级锁定
 
 
 
-# **查看SQL语句的锁信息**
+### **查看SQL语句的锁信息**
 
 **查看sql句的锁信息前，需要做如下几件事**：
 
@@ -2588,6 +2588,20 @@ MySQL可以使用多个字段同时建立一个索引,叫做联合索引.在联�
 MySQL使用索引时需要索引有序,假设现在建立了"name,age,school"的联合索引,那么索引的排序为: 先按照name排序,如果name相同,则按照age排序,如果age的值也相等,则按照school进行排序.
 
 当进行查询时,此时索引仅仅按照name严格有序,因此必须首先使用name字段进行等值查询,之后对于匹配到的列而言,其按照age字段严格有序,此时可以使用age字段用做索引查找,,,以此类推.因此在建立联合索引的时候应该注意索引列的顺序,一般情况下,将查询需求频繁或者字段选择性高的列放在前面.此外可以根据特例的查询或者表结构进行单独的调整.
+
+### 索引失效的 10 种场景
+
+[参考](https://mp.weixin.qq.com/s/9Kb01g7LqPzWtoAKsLiT2w)
+
+<img src="https://mmbiz.qpic.cn/mmbiz_png/ibJZVicC7nz5ianHlF0AzOr530aPCbgeARxMduoIvwQDZJJOOSIKFHwAdXQTOzBnEWOlvY9lR9matXZ8joTruQl4Q/640?wx_fmt=png&wxfrom=5&wx_lazy=1&wx_co=1" alt="图片" style="zoom:50%;" />
+
+如果使用了`or`关键字，那么它前面和后面的字段都要加索引，不然所有的索引都会失效，这是一个大坑。
+
+如果order by语句中没有加where或limit关键字，该sql语句将不会走索引。
+
+如果对多个索引进行order by，索引也失效了
+
+order by如果满足最左匹配原则，还是会走索引。不满足最左匹配原则的情况，就不会有索引
 
 ### MySQL 连接器
 
