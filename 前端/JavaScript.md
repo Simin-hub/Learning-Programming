@@ -862,6 +862,113 @@ onload 事件会在整个页面加载完成之后才触发。为 window 绑定�
 
 ## 事件
 
+### 窗口事件：window 对象触发的事件。
+
+​	适用于 <body> 标签
+
+```
+onbeforeonload		在文档加载之前执行脚本
+onerror				当错误发生时运行脚本
+onblur				当窗口失去焦点时运行脚本
+onhaschange			当文档改变时运行脚本
+onload				当文档加载是运行脚本
+onmessage			当触发消息时运行脚本
+onoffline			当文档离线时运行脚本
+ononline			当文档上线时运行脚本
+onpagehide 			当窗口隐藏时运行脚本
+onpageshow			当窗口显示时运行脚本
+```
+
+### 表单事件：由 HTML 表单内部的动作触发的事件。
+
+​	适用于所有 HTML 5 元素，不过最常用于表单元素中
+
+```
+onblur			当元素失去焦点时运行脚本
+onblur			当元素失去焦点时运行脚本
+onchange		当元素改变时运行脚本
+oncontextmenu	当触发上下文菜单时运行脚本
+onfocus			当元素获得焦点时运行脚本
+onformchange	当表单改变时运行脚本
+onforminput		当表单获得用户输入时运行脚本
+oninput			当元素获得用户输入时运行脚本
+oninvalid		当元素无效时运行脚本
+onselect		当选取元素时运行脚本
+onsubmit		当提交表单时运行脚本
+```
+
+### 键盘事件：由键盘触发的事件
+
+​	适用于所有HTML 5元素
+
+```
+onkeydown	当按下按键时运行脚本
+onkeypress	当按下并松开按键时运行脚本
+onkeyup		当松开按键时运行脚本
+```
+
+### 鼠标事件：由鼠标或相似的用户动作触发的事件
+
+​	适用于所有HTML 5元素
+
+```
+onclick			当单击鼠标时运行脚本
+ondblclick		当双击鼠标时运行脚本
+ondrag			当拖动元素时运行脚本
+ondragend		当拖动操作结束时运行脚本
+ondragenter		当元素被拖动至有效的拖放目标时运行脚本
+ondragleave		当元素离开有效拖放目标时运行脚本
+ondragover		当元素被拖动至有效拖放目标上方时运行脚本
+ondragstart		当拖动操作开始时运行脚本
+ondrop			当被拖动元素正在被拖放时运行脚本
+onmousedown		当按下鼠标按钮时运行脚本
+onmousemove		当鼠标指针移动时运行脚本
+onmouseout		当鼠标指针移出元素时运行脚本
+onmouseover		当鼠标指针移至元素之上时运行脚本
+onmouseup		当松开鼠标按钮时运行脚本
+onmousewheel	当转动鼠标滚轮时运行脚本
+onscroll		当滚动元素滚动元素的滚动条时运行脚本
+```
+
+### 多媒体事件：通过视频（videos），图像（images）或者音频（audio） 触发该事件
+
+​	多应用于HTML媒体元素
+
+```
+onabort				当发生中止事件时运行脚本
+oncanplay			当媒介能够开始播放但可能因缓冲而需要停止时运行脚本
+oncanplaythrough	当媒介能够无需因缓冲而停止即可播放至结尾时运行脚本
+ondurationchange	当媒介长度改变时运行脚本
+onemptied			当媒介资源元素突然为空时（网络错误、加载错误等）运行脚本
+onendedNew			当媒介已抵达结尾时运行脚本
+onerrorNew			当在元素加载期间发生错误时运行脚本
+onloadeddata		当加载媒介数据时运行脚本
+onloadedmetadata	当媒介元素的持续时间以及其他媒介数据已加载时运行脚本
+onloadstart			当浏览器开始加载媒介数据时运行脚本
+onpause				当媒介数据暂停时运行脚本
+onplay				当媒介数据将要开始播放时运行脚本
+onplaying			当媒介数据已开始播放时运行脚本
+onprogress			当浏览器正在取媒介数据时运行脚本
+onratechange		当媒介数据的播放速率改变时运行脚本
+onreadystatechange	当就绪状态（ready-state）改变时运行脚本
+onseeked			当媒介元素的定位属性 [1] 不再为真且定位已结束时运行脚本
+onseeking			当媒介元素的定位属性为真且定位已开始时运行脚本
+onstalled			当取回媒介数据过程中（延迟）存在错误时运行脚本
+onsuspend			当浏览器已在取媒介数据但在取回整个媒介文件之前停止时运行脚本
+ontimeupdate		当媒介改变其播放位置时运行脚本
+onvolumechange		当媒介改变音量亦或当音量被设置为静音时运行脚本
+onwaiting			当媒介已停止播放但打算继续播放时运行脚本
+```
+
+### 其他事件
+
+```
+onshow		当元素在上下文显示时触发
+ontoggle	当用户打开或关闭 元素时触发
+```
+
+
+
 ### 事件的绑定和事件对象Event
 
 
@@ -1108,3 +1215,258 @@ event.cancelBubble = true
 - 2、事件绑定（比如说，按钮绑定点击事件之后，用户爱点不点。我们不可能卡在按钮那里，什么都不做。所以，应该用异步）
 - 3、网络请求（含接口请求）：ajax 请求、网络图片加载
 - 4、ES6 中的 Promise
+
+### Ajax
+
+#### Ajax 的概念
+
+在浏览器中，我们可以在不刷新页面的情况下，通过 Ajax 的方式去获取一些新的内容。
+
+Ajax：Asynchronous Javascript And XML（异步 JavaScript 和 XML）。它并不是凭空出现的新技术，而是对于现有技术的结合。Ajax 的核心是 js 对象：**XMLHttpRequest**。
+
+#### Ajax 原理（发送 Ajax 请求的五个步骤）
+
+> 其实也就是 使用 XMLHttpRequest 对象的五个步骤。
+
+我们先回忆一下，一个完整的 HTTP 请求需要的是：
+
+- 请求的网址、请求方法 get/post。
+- 提交请求的内容数据、请求主体等。
+- 接收响应回来的内容。
+
+发送 Ajax 请求的五个步骤：
+
+（1）创建异步对象，即 XMLHttpRequest 对象。
+
+（2）使用 open 方法设置请求参数。`open(method, url, async)`。参数解释：请求的方法、请求的 url、是否异步。第三个参数如果不写，则默认为 true。
+
+（3）发送请求：`send()`。
+
+（4）注册事件：注册 onreadystatechange 事件，状态改变时就会调用。
+
+如果要在数据完整请求回来的时候才调用，我们需要手动写一些判断的逻辑。
+
+（5）服务端响应，获取返回的数据。
+
+#### XMLHttpRequest 对象详解
+
+##### 发送请求
+
+发送请求的方法：
+
+```javascript
+open(method, url, async);
+```
+
+参数解释：
+
+- method：请求的类型；GET 或 POST
+- url：文件在服务器上的位置
+- async：true（异步）或 false（同步）
+
+另外还有个方法：（仅用于 POST 请求）
+
+```javascript
+send(string);
+```
+
+##### POST 请求时注意
+
+如果想让 像 form 表单提交数据那样使用 POST 请求，就需要使用 XMLHttpRequest 对象的 setRequestHeader()方法 来添加 HTTP 头。然后在 send() 方法中添加想要发送的数据：
+
+```javascript
+xmlhttp.open('POST', 'ajax_test.php', true);
+
+xmlhttp.setRequestHeader('Content-type', 'application/x-www-form-urlencoded');
+
+xmlhttp.send('name=smyhvae&age=27');
+```
+
+##### onreadystatechange 事件
+
+注册 onreadystatechange 事件后，每当 readyState 属性改变时，就会调用 onreadystatechange 函数。
+
+readyState：（存有 XMLHttpRequest 的状态。从 0 到 4 发生变化）
+
+- 0: 请求未初始化
+- 1: 服务器连接已建立
+- 2: 请求已接收
+- 3: 请求处理中
+- 4: 请求已完成，且响应已就绪
+
+status：
+
+- 200: "OK"。
+- 404: 未找到页面。
+
+在 onreadystatechange 事件中，**当 readyState 等于 4，且状态码为 200 时，表示响应已就绪**。
+
+##### 服务器响应的内容
+
+- responseText：获得字符串形式的响应数据。
+- responseXML：获得 XML 形式的响应数据。
+
+如果响应的是普通字符串，就使用 responseText；如果响应的是 XML，使用 responseXML。
+
+#### 手写第一个 Ajax 请求
+
+get 请求：
+
+```js
+//【发送ajax请求需要五步】
+//（1）创建XMLHttpRequest对象
+var xmlhttp = new XMLHttpRequest();
+
+//（2）设置请求的参数。包括：请求的方法、请求的url。
+xmlhttp.open('get', '02-ajax.php');
+
+//（3）发送请求
+xmlhttp.send();
+
+//（4）注册事件。 onreadystatechange事件，状态改变时就会调用。
+//如果要在数据完整请求回来的时候才调用，我们需要手动写一些判断的逻辑。
+xmlhttp.onreadystatechange = function () {
+    // 为了保证 数据 完整返回，我们一般会判断 两个值
+    if (xmlhttp.readyState == 4 && xmlhttp.status == 200) {
+        //（5）服务端相应：如果能够进入这个判断，说明数据请求成功了
+        console.log('数据返回成功：' + JSON.stringify(xmlhttp.responseText));
+
+        // 伪代码：按业务需要，将接口返回的内容显示在页面上
+        // document.querySelector('h1').innerHTML = xmlhttp.responseText;
+    }
+};
+```
+
+post 请求：
+
+```js
+//（1）异步对象
+var xmlhttp = new XMLHttpRequest();
+
+//（2）设置请求参数。包括：请求的方法、请求的url。
+xmlhttp.open('post', '02.post.php');
+
+// 如果想要使用post提交数据,必须添加此行
+xmlhttp.setRequestHeader('Content-type', 'application/x-www-form-urlencoded');
+
+//（3）发送请求
+xmlhttp.send('name=fox&age=18');
+
+//（4）注册事件
+xmlhttp.onreadystatechange = function () {
+    //（5）服务端相应
+    if (xmlhttp.readyState == 4 && xmlhttp.status == 200) {
+        alert(xmlhttp.responseText);
+    }
+};
+```
+
+##### 封装 Ajax 请求（重要）
+
+上面的代码，执行顺序很好理解，但在实战开发中，是不会这么写的。假如你的页面中，需要调十次接口，那岂不是要手写十遍 Ajax 请求？这样会导致大量的重复代码。
+
+所以，我们需要把重复代码封装成一个公共函数，然后通过**回调函数**处理成功和失败的逻辑。
+
+封装 Ajax 请求的代码如下：(get 请求为例)
+
+```js
+// 封装 Ajax为公共函数：传入回调函数 success 和 fail
+function myAjax(url, success, fail) {
+    // 1、创建XMLHttpRequest对象
+    var xmlhttp;
+    if (window.XMLHttpRequest) {
+        xmlhttp = new XMLHttpRequest();
+    } else {
+        // 兼容IE5、IE6浏览器。不写也没关系
+        xmlhttp = new ActiveXObject('Microsoft.XMLHTTP');
+    }
+    // 2、发送请求
+    xmlhttp.open('GET', url, true);
+    xmlhttp.send();
+    // 3、服务端响应
+    xmlhttp.onreadystatechange = function () {
+        if (xmlhttp.readyState === 4 && xmlhttp.status === 200) {
+            var obj = JSON.parse(xmlhttp.responseText);
+            console.log('数据返回成功：' + obj);
+            success && success(xmlhttp.responseText);
+        } else {
+            // 这里的 && 符号，意思是：如果传了 fail 参数，就调用后面的 fail()；如果没传 fail 参数，就不调用后面的内容。因为 fail 参数不一定会传。
+            fail && fail(new Error('接口请求失败'));
+        }
+    };
+}
+
+// 单次调用 ajax
+myAjax('a.json', (res) => {
+    console.log(res);
+});
+
+// 多次调用 ajax。接口请求顺序：a --> b --> c
+myAjax('a.json', (res) => {
+    console.log(res);
+    myAjax('b.json', (res) => {
+        console.log(res);
+        myAjax('c.json', (res) => {
+            console.log(res);
+        });
+    });
+});
+```
+
+学会了封装 get 请求之后，封装 post请求也是类似的写法。
+
+##### Ajax 请求：get 请求举例
+
+（1）index.html：
+
+```html
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8" />
+        <title>Document</title>
+    </head>
+    <body>
+        <h1>Ajax 发送 get 请求</h1>
+        <input type="button" value="发送get_ajax请求" id="btnAjax" />
+
+        <script type="text/javascript">
+            // 绑定点击事件
+            document.querySelector('#btnAjax').onclick = function () {
+                // 这里直接使用上面封装的 myAjax() 方法即可
+                myAjax('02-ajax.php', (res) => {
+                    console.log(res);
+                    console.log('数据返回成功');
+                    // 显示在页面上
+                    document.querySelector('h1').innerHTML = res;
+                    // alert(xhr.responseText);
+                });
+            };
+        </script>
+    </body>
+</html>
+```
+
+（2）02-ajax.php：
+
+```php
+<?php
+	echo 'smyhvae';
+ ?>
+```
+
+效果如下：
+
+![img](http://img.smyhvae.com/20180228_1605.gif)
+
+## JQuery
+
+jQuery 是 js 的一个库，封装了我们开发过程中常用的一些功能，方便我们调用，提高开发效率。
+
+js库是把我们常用的功能放到一个单独的文件中，我们用的时候，直接引用到页面里即可。
+
+以下是jQuery的相关信息：
+
+- 官网：http://jquery.com/
+- 官网API文档：http://api.jquery.com/
+- 中文汉化API文档：http://www.css88.com/jqapi-1.9/
