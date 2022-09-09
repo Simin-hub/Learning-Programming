@@ -366,7 +366,7 @@ func (m *Map) Delete(key interface{}) {
     if !ok && read.amended {
         m.mu.Lock()
         // 再检查一次，因为前文的判断和锁不是原子操作，防止期间发生了变化。
-        read, _ = m.read.0Load().(readOnly)
+        read, _ = m.read.Load().(readOnly)
         e, ok = read.m[key]
         
         if !ok && read.amended {
