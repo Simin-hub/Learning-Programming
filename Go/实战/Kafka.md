@@ -359,7 +359,7 @@ Leader 选举
 
 #### Broker 端解决方案
 
-在剖析Broker 端丢失场景的时候， 我们得出其是通过「**异步批量刷盘**」的策略，先将数据存储到「**PageCache**」，再进行异步刷盘， 由于没有提供 「**同****步刷盘**」策略，因此 Kafka 是通过「**多分区多副本**」的方式来最大限度的保证数据不丢失。
+在剖析Broker 端丢失场景的时候， 我们得出其是通过「**异步批量刷盘**」的策略，先将数据存储到「**PageCache**」，再进行异步刷盘， 由于没有提供 「**同步刷盘**」策略，因此 Kafka 是通过「**多分区多副本**」的方式来最大限度的保证数据不丢失。
 
 #### 消费者丢失消息的情况 
 
@@ -370,7 +370,7 @@ Leader 选举
 ### ISR、OSR、AR 是什么？
 
 - ISR：In-Sync Replicas 副本同步队列
-- OSR：Out-of-Sync Replicas
+- OSR：Out-of-Sync Replicas 
 - AR：Assigned Replicas 所有副本
 
 ISR是由leader维护，follower从leader同步数据有一些延迟（具体可以参见 [图文了解 Kafka 的副本复制机制](https://blog.51cto.com/u_15127589/2682641)），超过相应的阈值会把 follower 剔除出 ISR, 存入OSR（Out-of-Sync Replicas ）列表，新加入的follower也会先存放在OSR中。AR=ISR+OSR。
@@ -384,7 +384,7 @@ ISR是由leader维护，follower从leader同步数据有一些延迟（具体可
 
 ### 请谈一谈 Kafka 数据一致性原理
 
-一致性就是说不论是老的 Leader 还是新选举的 Leader，Consumer 都能读到一样的数据。
+**一致性就是说不论是老的 Leader 还是新选举的 Leader，Consumer 都能读到一样的数据**。
 
 ![img](https://s6.51cto.com/images/blog/202103/30/1e7895970e33093dbca650efb5c4dd56.png?x-oss-process=image/watermark,size_16,text_QDUxQ1RP5Y2a5a6i,color_FFFFFF,t_100,g_se,x_10,y_10,shadow_90,type_ZmFuZ3poZW5naGVpdGk=)
 
@@ -405,7 +405,7 @@ producer 直接将数据发送到 broker 的 leader(主节点)，不需要在多
 
 ### 11、Kafka consumer 是否可以消费指定分区消息吗？ 
 
-Kafa consumer 消费消息时，向 broker 发出"fetch"请求去消费特定分区的消息，consumer 指定消息在日志中的偏移量（offset），就可以消费从这个位置开始的消息，customer 拥有了 offset 的控制权，可以向后回滚去重新消费之前的消息，这是很有意义的。
+Kafa consumer 消费消息时，向 broker **发出"fetch"请求去消费特定分区的消息**，consumer 指定消息在日志中的偏移量（offset），就可以消费从这个位置开始的消息，customer 拥有了 offset 的控制权，可以向后回滚去重新消费之前的消息，这是很有意义的。
 
 ### 12、Kafka 高效文件存储设计特点是什么？ 
 
@@ -445,14 +445,15 @@ push 模式，将消息推送到下游的 consumer。这样做有好处也有坏
 ### Kafka创建Topic时如何将分区放置到不同的Broker中
 
 - 副本因子不能大于 Broker 的个数；
-- 第一个分区（编号为0）的第一个副本放置位置是随机从 brokerList 选择的；
-- 其他分区的第一个副本放置位置相对于第0个分区依次往后移。也就是如果我们有5个 Broker，5个分区，假设第一个分区放在第四个 Broker 上，那么第二个分区将会放在第五个 Broker 上；第三个分区将会放在第一个 Broker 上；第四个分区将会放在第二个 Broker 上，依次类推；
+- 第一个分区（编号为0）的**第一个副本放置位置是随机从 brokerList 选择**的；
+- 其他分区的**第一个副本放置位置相对于第0个分区依次往后移**。也就是如果我们有5个 Broker，5个分区，假设第一个分区放在第四个 Broker 上，那么第二个分区将会放在第五个 Broker 上；第三个分区将会放在第一个 Broker 上；第四个分区将会放在第二个 Broker 上，依次类推；
   剩余的副本相对于第一个副本放置位置其实是由 nextReplicaShift 决定的，而这个数也是随机产生的
 - 具体可以参见 Kafka创建Topic时如何将分区放置到不同的Broker中。
 
 ### Kafka新建的分区会在哪个目录下创建
 
 在启动 Kafka 集群之前，我们需要配置好 log.dirs 参数，其值是 Kafka 数据的存放目录，这个参数可以配置多个目录，目录之间使用逗号分隔，通常这些目录是分布在不同的磁盘上用于提高读写性能。
+
 当然我们也可以配置 log.dir 参数，含义一样。只需要设置其中一个即可。
 如果 log.dirs 参数只配置了一个目录，那么分配到各个 Broker 上的分区肯定只能在这个目录下创建文件夹用于存放数据。
 
