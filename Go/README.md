@@ -10,7 +10,9 @@
 
 [Go 开发者路线图](https://github.com/Alikhll/golang-developer-roadmap)的一张[思维导图](https://raw.githubusercontent.com/Alikhll/golang-developer-roadmap/master/i18n/zh-CN/golang-developer-roadmap-zh-CN.png)
 
-## [基本语法学习](https://github.com/Simin-hub/Golang-Learning-and-Interview/blob/main/Go/%E5%9F%BA%E7%A1%80/%E5%9F%BA%E6%9C%AC%E8%AF%AD%E6%B3%95.md)
+## Go 基础
+
+### 基本语法学习
 
 [基本数据类型](https://github.com/Simin-hub/Golang-Learning-and-Interview/blob/main/Go/%E5%9F%BA%E7%A1%80/%E5%9F%BA%E6%9C%AC%E8%AF%AD%E6%B3%95.md#%E4%B8%80%E6%95%B0%E6%8D%AE%E7%B1%BB%E5%9E%8B)
 
@@ -28,7 +30,7 @@
 
 [go基本命令](https://github.com/Simin-hub/Golang-Learning-and-Interview/blob/main/Go/%E5%9F%BA%E7%A1%80/go%E5%91%BD%E4%BB%A4.md)
 
-## [高级编程](https://github.com/Simin-hub/Golang-Learning-and-Interview/blob/main/Go/%E5%9F%BA%E7%A1%80/%E9%AB%98%E7%BA%A7%E7%BC%96%E7%A8%8B.md#%E9%AB%98%E7%BA%A7%E7%BC%96%E7%A8%8B)
+### 高级编程
 
 [错误处理](https://github.com/Simin-hub/Golang-Learning-and-Interview/blob/main/Go/%E5%9F%BA%E7%A1%80/%E9%AB%98%E7%BA%A7%E7%BC%96%E7%A8%8B.md#%E4%B8%80%E9%94%99%E8%AF%AF%E5%A4%84%E7%90%86)
 
@@ -36,7 +38,7 @@
 
 [网络、模板与网页应用](https://github.com/Simin-hub/Golang-Learning-and-Interview/blob/main/Go/%E5%9F%BA%E7%A1%80/%E9%AB%98%E7%BA%A7%E7%BC%96%E7%A8%8B.md#%E4%B8%89%E7%BD%91%E7%BB%9C%E6%A8%A1%E6%9D%BF%E4%B8%8E%E7%BD%91%E9%A1%B5%E5%BA%94%E7%94%A8)
 
-## 进阶
+### 进阶
 
 [Goroutine](https://github.com/Simin-hub/Golang-Learning-and-Interview/blob/main/Go/%E8%BF%9B%E9%98%B6/goroutine.md) 和 [channel](https://github.com/Simin-hub/Golang-Learning-and-Interview/blob/main/Go/%E5%9F%BA%E7%A1%80/channel.md)
 
@@ -48,7 +50,19 @@
 
 [内存管理](https://github.com/Simin-hub/Golang-Learning-and-Interview/blob/main/Go/%E8%BF%9B%E9%98%B6/%E5%86%85%E5%AD%98%E7%AE%A1%E7%90%86.md)
 
-## 相关标准库的学习
+https://github.com/Simin-hub/Learning-Programming/blob/main/Go/%E6%A0%87%E5%87%86%E5%BA%93/trace.md)
+
+### 相关问题
+
+[数据类型](https://github.com/Simin-hub/Learning-Programming/blob/main/Go/%E8%BF%9B%E9%98%B6/%E5%9F%BA%E7%A1%80%E6%95%B0%E6%8D%AE%E7%B1%BB%E5%9E%8B.md)
+
+编译
+
+[内存](https://github.com/Simin-hub/Learning-Programming/blob/main/Go/%E8%BF%9B%E9%98%B6/%E5%86%85%E5%AD%98%E7%AE%A1%E7%90%86.md)
+
+https://github.com/Simin-hub/Learning-Programming/blob/main/docker/docker.md)
+
+### 库学习
 
 [sync](https://github.com/Simin-hub/Golang-Learning-and-Interview/blob/main/Go/标准库/sync.md)
 
@@ -66,7 +80,7 @@
 
 [pprof(性能剖析)](https://github.com/Simin-hub/Learning-Programming/blob/main/Go/%E6%A0%87%E5%87%86%E5%BA%93/pprof.md)
 
-[trace（跟踪剖析）](https://github.com/Simin-hub/Learning-Programming/blob/main/Go/%E6%A0%87%E5%87%86%E5%BA%93/trace.md)
+trace（跟踪剖析）
 
 ## 实战
 
@@ -78,43 +92,11 @@
 
 [缓存和消息队列](https://github.com/Simin-hub/Golang-Learning-and-Interview/blob/main/Go/%E5%AE%9E%E6%88%98/%E7%BC%93%E5%AD%98%E5%92%8C%E6%B6%88%E6%81%AF%E9%98%9F%E5%88%97.md)
 
-## 相关问题
 
-[数据类型](https://github.com/Simin-hub/Learning-Programming/blob/main/Go/%E8%BF%9B%E9%98%B6/%E5%9F%BA%E7%A1%80%E6%95%B0%E6%8D%AE%E7%B1%BB%E5%9E%8B.md)
-
-编译
-
-[内存](https://github.com/Simin-hub/Learning-Programming/blob/main/Go/%E8%BF%9B%E9%98%B6/%E5%86%85%E5%AD%98%E7%AE%A1%E7%90%86.md)
-
-## 计算机基础
-
-[计算机网络](https://github.com/Simin-hub/Learning-Programming/blob/main/%E8%AE%A1%E7%AE%97%E6%9C%BA%E5%9F%BA%E7%A1%80/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BD%91%E7%BB%9C.md)
-
-[操作系统](https://github.com/Simin-hub/Learning-Programming/blob/main/%E8%AE%A1%E7%AE%97%E6%9C%BA%E5%9F%BA%E7%A1%80/%E8%AE%A1%E7%AE%97%E6%9C%BA%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F.md)
-
-[Linux](https://github.com/Simin-hub/Learning-Programming/blob/main/Linux/Linux-%E5%9F%BA%E6%9C%ACC%E8%AF%AD%E8%A8%80%E7%BC%96%E7%A8%8B%E5%92%8C%E6%8C%87%E9%92%88%E4%B8%8E%E5%86%85%E5%AD%98-%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0.md)
-
-## 其他相关学习
-
-[数据库](https://github.com/Simin-hub/Golang-Learning-and-Interview/blob/main/Go/%E5%9F%BA%E7%A1%80/%E6%95%B0%E6%8D%AE%E5%BA%93.md)
-
-[MySQL](https://github.com/Simin-hub/Learning-Programming/tree/main/%E6%95%B0%E6%8D%AE%E5%BA%93)
-
-[Redis](https://github.com/Simin-hub/Golang-Learning-and-Interview/blob/main/Go/%E5%AE%9E%E6%88%98/Redis.md)
-
-[分布式](https://github.com/Simin-hub/Learning-Programming/tree/main/Go/%E5%AE%9E%E6%88%98/%E5%88%86%E5%B8%83%E5%BC%8F%E5%92%8C%E9%9B%86%E7%BE%A4)
-
-[docker](https://github.com/Simin-hub/Learning-Programming/blob/main/docker/docker.md)
 
 ## 书籍
 
 很多Go学习的项目都会推荐相关书籍。
-
-[书栈网](https://www.bookstack.cn/)，可以通过这个网站收藏自己需要看的书，能够看到自己每本书的进度。
-
-对于基础学习，选择看完一本或两本即可，其余书籍可选择性针对一些不甚理解的内容多对照参考地看。进阶学习的书籍这需要多看一些，尽量多看完基本，这些内容相对是难点和重点。
-
-基础学习
 
 [《Go入门指南》](https://github.com/unknwon/the-way-to-go_ZH_CN)
 
@@ -122,15 +104,11 @@
 
 [topgoer](https://www.topgoer.com/)
 
-进阶学习
-
 [Go 语言设计与实现](https://draveness.me/golang/#go-语言设计与实现)
 
 [Go 语言高性能编程](https://geektutu.com/post/high-performance-go.html)
 
 [Go语言高级编程](https://www.bookstack.cn/read/advanced-go-programming-book/preface.md)
-
-实战学习
 
 [Go Web 编程](https://learnku.com/docs/build-web-application-with-golang)
 
@@ -139,16 +117,6 @@
 仅仅有书籍是不够的，还需要通过博客进行查漏补缺。
 
 [Go 语言优秀资源整理](https://github.com/shockerli/go-awesome)
-
-
-
-## 算法
-
-[LeetCode-Go](https://github.com/halfrost/LeetCode-Go)
-
-[algorithm-pattern](https://github.com/greyireland/algorithm-pattern)
-
-推荐先学习algorithm-pattern，然后自己在练习时可以参考LeetCode-Go的做题顺序。
 
 ## 实战项目
 

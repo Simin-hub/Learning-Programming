@@ -1,4 +1,8 @@
-# 注意点
+# Go 面试题（难重点）
+
+## 注意点
+
+这部分主要是收录一些易错概念，主要是作者在牛客上的错题收录。
 
 ### 指针
 
@@ -31,7 +35,7 @@ type slice struct {
 
 slice 的数据结构如下：
 
-![切片数据结构](https://raw.githubusercontent.com/jiutiananshu/Picture/master/img/sliceVSarray.png)
+<img src="https://raw.githubusercontent.com/jiutiananshu/Picture/master/img/sliceVSarray.png" alt="切片数据结构" style="zoom:50%;" />
 
 注意，底层数组是可以被多个 slice 同时指向的，因此对一个 slice 的元素进行操作是有可能影响到其他 slice 的。
 
@@ -50,7 +54,7 @@ s1 := slice[2:5]
 s2 := s1[2:6:7]
 ```
 
-![slice origin](https://raw.githubusercontent.com/jiutiananshu/Picture/master/img/splitSlice.png)
+<img src="https://raw.githubusercontent.com/jiutiananshu/Picture/master/img/splitSlice.png" alt="slice origin" style="zoom:50%;" />
 
 `s1` 从 `slice` 索引2（闭区间）到索引5（开区间，元素真正取到索引4），长度为3，，为8。 `s2` 从 `s1` 的索引2（闭区间）到索引6（开区间，元素真正取到索引5），容量到索引7（开区间，真正到索引6），为5。
 
@@ -391,7 +395,7 @@ fmt.Println(sum([]int{1, 2, 3, 4}...))
 
 nil只能赋值给指针、channel、func、interface、map或slice类型的变量。如果将nil赋值给其他变量的时候将会引发panic。
 
-![img](https://raw.githubusercontent.com/jiutiananshu/Picture/master/img/242025553_1564399633384_3538CAEF7C819BA4AD8BC262C5D1EE6D)
+<img src="https://raw.githubusercontent.com/jiutiananshu/Picture/master/img/242025553_1564399633384_3538CAEF7C819BA4AD8BC262C5D1EE6D" alt="img" style="zoom:50%;" />
 
 ### cap函数
 
@@ -407,7 +411,7 @@ cap函数不支持map,map中使用len表示大小
 
 make只用来创建slice,map,channel。 **其中map使用前必须初始化**。 append可直接动态扩容slice，而map不行。
 
-![image-20211108192201519](https://raw.githubusercontent.com/jiutiananshu/Picture/master/img/image-20211108192201519.png)
+<img src="https://raw.githubusercontent.com/jiutiananshu/Picture/master/img/image-20211108192201519.png" alt="image-20211108192201519"  />
 
 ### 通道操作
 
@@ -455,3 +459,155 @@ GO语言中访问成员变量的方式只有 **.** 号（因为->是用于通道
 ![image-20211108194025466](https://raw.githubusercontent.com/jiutiananshu/Picture/master/img/image-20211108194025466.png)
 
 ### Go 语言的函数参数传递，只有值传递，没有引用传递。
+
+
+
+## 面试题
+
+面经问题
+
+**新手**
+
+- [Golang开发新手常犯的50个错误](https://blog.csdn.net/gezhonglei2007/article/details/52237582)
+
+**数据类型（map、slice、数组、set）**
+
+[基本数据类型](https://github.com/Simin-hub/Learning-Programming/blob/main/Go/%E8%BF%9B%E9%98%B6/%E5%9F%BA%E7%A1%80%E6%95%B0%E6%8D%AE%E7%B1%BB%E5%9E%8B.md#%E5%9F%BA%E7%A1%80%E6%95%B0%E6%8D%AE%E7%B1%BB%E5%9E%8B)
+
+- [连nil切片和空切片一不一样都不清楚？那BAT面试官只好让你回去等通知了。](https://mp.weixin.qq.com/s/sW4PD1MiaunURNDIU4BbQQ)
+- [golang 中的四种类型转换总结](https://learnku.com/articles/42797)
+- [golang面试题：字符串转成byte数组，会发生内存拷贝吗？](https://mp.weixin.qq.com/s/qmlPuGVISx8NYp2b9LrqnA)
+- [golang面试题：翻转含有中文、数字、英文字母的字符串](https://mp.weixin.qq.com/s/ssinnUM22PHPWRug8EzAkg)
+- [golang面试题：拷贝大切片一定比小切片代价大吗？](https://mp.weixin.qq.com/s/8Dp2eCYzDdBbxAG5-jNevQ)
+- [map不初始化使用会怎么样](https://blog.csdn.net/qq_39920531/article/details/88103496)
+- [map不初始化长度和初始化长度的区别](https://www.kancloud.cn/kancloud/the-way-to-go/72493)
+- [map承载多大，大了怎么办](https://yangxikun.com/golang/2019/10/07/golang-map.html)
+- [map的iterator是否安全？能不能一边delete一边遍历？](https://www.bookstack.cn/read/qcrao-Go-Questions/map-%E5%8F%AF%E4%BB%A5%E8%BE%B9%E9%81%8D%E5%8E%86%E8%BE%B9%E5%88%A0%E9%99%A4%E5%90%97.md)
+- [字符串不能改，那转成数组能改吗，怎么改](http://c.biancheng.net/view/39.html)
+- [怎么判断一个数组是否已经排序](https://books.studygolang.com/The-Golang-Standard-Library-by-Example/chapter03/03.1.html)
+- [普通map如何不用锁解决协程安全问题](https://zhuanlan.zhihu.com/p/356739568)
+- [array和slice的区别](https://segmentfault.com/a/1190000013148775)
+- [golang面试题：json包变量不加tag会怎么样？](https://mp.weixin.qq.com/s/bZlKV_BWSqc-qCa4DrsCbg)
+- [golang面试题：reflect（反射包）如何获取字段tag？为什么json包不能导出私有变量的tag？](https://mp.weixin.qq.com/s/P7TEx2mInwEktXTEE6JDWQ)
+- [零切片、空切片、nil切片是什么](https://juejin.cn/post/6844903712654098446)
+- [slice深拷贝和浅拷贝](https://learnku.com/articles/59163)
+- [nil 不同于 null（或是 NULL、nullptr）](https://blog.singee.me/2020/09/24/e8cb67835ea44243b136e3cdf8d5ea84/)
+- [map触发扩容的时机，满足什么条件时扩容？](https://www.bookstack.cn/read/qcrao-Go-Questions/map-map%20%E7%9A%84%E6%89%A9%E5%AE%B9%E8%BF%87%E7%A8%8B%E6%98%AF%E6%80%8E%E6%A0%B7%E7%9A%84.md)
+- [map扩容策略是什么](https://www.bookstack.cn/read/qcrao-Go-Questions/map-map%20%E7%9A%84%E6%89%A9%E5%AE%B9%E8%BF%87%E7%A8%8B%E6%98%AF%E6%80%8E%E6%A0%B7%E7%9A%84.md)
+- [自定义类型切片转字节切片和字节切片转回自动以类型切片](https://blog.csdn.net/weixin_42506905/article/details/81359448)
+- [make和new什么区别](https://juejin.cn/post/6859145664316571661)
+- [slice ，map，chanel创建的时候的几个参数什么含义](https://blog.csdn.net/TCatTime/article/details/111567560)
+- [slice，len，cap，共享，扩容](https://cloud.tencent.com/developer/article/1822529)
+- [go struct能不能比较？](https://juejin.cn/post/6881912621616857102)
+- [使用range 迭代 map 是有序的吗?  map如何顺序读取？](https://www.jianshu.com/p/65d338bb6c82)
+- [go中怎么实现set](https://studygolang.com/articles/11179)
+- [使用值为 nil 的 sice、map 会发生什么？](https://segmentfault.com/a/1190000038175302)
+- [Golang 有没有 this 指针？](https://blog.csdn.net/ma2595162349/article/details/108632865)
+- [Golang 语言中局部变量和全局变量的缺省值是什么](https://studygolang.com/articles/15282)
+- [Golang 中的引用类型包含哪些?](https://studygolang.com/articles/27252)
+- [slice 的扩容机制是什么？](https://juejin.cn/post/6844903812331732999)
+- [Golang 中指针运算有哪些?](https://blog.csdn.net/fly910905/article/details/105989267)
+- [string 类型的值可以修改吗？](https://www.cnblogs.com/brady-wang/p/15821039.html)
+- [array 类型的值作为函数参数是引用传递还是值传递？](https://segmentfault.com/a/1190000037763005)
+- [nil](https://segmentfault.com/a/1190000039894167)
+
+**流程控制(for、select、defer、switch)**
+
+- [昨天那个在for循环里append元素的同事，今天还在么？](https://studygolang.com/articles/30844)
+- [golang面试官：for select时，如果通道已经关闭会怎么样？如果只有一个case呢？](https://cloud.tencent.com/developer/article/1796708)
+- [go defer（for defer）](https://draveness.me/golang/docs/part2-foundation/ch05-keyword/golang-defer/)
+- [select可以用于什么？](https://blog.csdn.net/zhaominpro/article/details/77570290)
+- [context包的用途？](https://zhuanlan.zhihu.com/p/76555349)
+- [switch 中如何强制执行下一个 case 代码块?](https://www.cnblogs.com/gwyy/p/13670090.html)
+- [如何从 panic 中恢复?](https://learnku.com/docs/the-way-to-go/133-recovery-from-panic-recover/3676)
+
+**解析**
+
+- [解析 JSON 数据时，默认将数值当做哪种类型](https://zhuanlan.zhihu.com/p/388124005)
+
+**包管理**
+
+- [学go mod就够了！](https://studygolang.com/articles/27293)
+
+**优化**
+
+- [golang面试题：怎么避免内存逃逸？](https://mp.weixin.qq.com/s/VzRTHz1JaDUvNRVB_yJa1A)
+- [golang面试题：简单聊聊内存逃逸？](https://mp.weixin.qq.com/s/wJmztRMB1ZAAIItyMcS0tw)
+- [给大家丢脸了，用了三年golang，我还是没答对这道内存泄漏题](https://mp.weixin.qq.com/s/-agtdhlW7Yj7S88a0z7KHg)
+- [内存碎片化问题](https://segmentfault.com/a/1190000020338427)
+- [chan相关的goroutine泄露的问题](https://segmentfault.com/a/1190000040161853)
+- [string相关的goroutine泄露的问题](cnblogs.com/ricklz/p/11262069.html)
+- [你一定会遇到的内存回收策略导致的疑似内存泄漏的问题](https://colobu.com/2019/08/28/go-memory-leak-i-dont-think-so/)
+- [sync.Pool的适用场景](https://geektutu.com/post/hpg-sync-pool.html)
+
+**goroutine**
+
+- [线程、进程、协程、goroutines ](https://zhuanlan.zhihu.com/p/27245377)
+- [golang面试题：对已经关闭的的chan进行读写，会怎么样？为什么？](https://mp.weixin.qq.com/s/izbZ3JRqX6jI6Wn7bV6xNQ)
+- [golang面试题：对未初始化的的chan进行读写，会怎么样？为什么？](https://juejin.cn/post/6844904196181852173)
+- [sync.map 的优缺点和使用场景](https://studygolang.com/articles/22128)
+- [主协程如何等其余协程完再操作](https://blog.csdn.net/weixin_42678507/article/details/102786680)
+- [有缓存的channel和没有缓存的channel区别是什么？](https://zhuanlan.zhihu.com/p/355487940)
+- [协程通信方式有哪些？](https://zhuanlan.zhihu.com/p/36907022)
+- [channel底层实现](https://i6448038.github.io/2019/04/11/go-channel/)
+- [读写锁底层是怎么实现的？](https://blog.csdn.net/sunxianghuang/article/details/104780010)
+- [golang的CSP思想](https://zhuanlan.zhihu.com/p/313763247)
+- [channel 是怎么保证线程安全？](http://www.zhoubotong.site/post/25.html)
+- [协程和线程的差别](https://segmentfault.com/a/1190000040373756)
+- [开多个线程和开多个协程会有什么区别](https://www.kancloud.cn/todo/go_learn/1222804)
+- [协程可以自己主动让出 CPU 吗？](https://studygolang.com/articles/26795)
+- [GMP](https://learnku.com/articles/41728)
+- [GMP模型](https://zboya.github.io/post/go_scheduler/?hmsr=toutiao.io&utm_medium=toutiao.io&utm_source=toutiao.io)
+- [动图图解，GMP里为什么要有P](https://mp.weixin.qq.com/s/SEE2TUeZQZ7W1BKkmnelAA)
+
+**反射**
+
+- [golang 面试题：reflect（反射包）如何获取字段 tag？为什么 json 包不能导出私有变量的 tag？](https://mp.weixin.qq.com/s/WK9StkC3Jfy-o1dUqlo7Dg)
+
+**接口（ interface）**
+
+- [开源库里会有一些类似下面这种奇怪的用法：`var _ io.Writer = (*myWriter)(nil)`，是为什么？](https://www.bookstack.cn/read/qcrao-Go-Questions/interface-%E7%BC%96%E8%AF%91%E5%99%A8%E8%87%AA%E5%8A%A8%E6%A3%80%E6%B5%8B%E7%B1%BB%E5%9E%8B%E6%98%AF%E5%90%A6%E5%AE%9E%E7%8E%B0%E6%8E%A5%E5%8F%A3.md)
+- [两个interface{} 能不能比较](https://www.jianshu.com/p/a982807819fa)
+- [断言时会发生拷贝吗](https://blog.csdn.net/qq_39397165/article/details/115500314)
+- [接口是怎么实现的？](https://juejin.cn/post/6844904082453299207)
+
+**unsafe**
+
+- [golang面试题：能说说uintptr和unsafe.Pointer的区别吗？](https://mp.weixin.qq.com/s/PSkz0zj-vqKzmIKa_b-xAA)
+
+**GC**
+
+[GC](https://github.com/Simin-hub/Learning-Programming/blob/main/Go/%E8%BF%9B%E9%98%B6/GC.md)
+
+- [重点](https://www.cnblogs.com/luozhiyun/p/14564903.html)
+
+- [垃圾回收的过程是怎么样的？](https://zhuanlan.zhihu.com/p/297177002)
+- [什么是写屏障、混合写屏障，如何实现？](https://www.bookstack.cn/read/qcrao-Go-Questions/spilt.9.GC-GC.md)
+- [为什么gc会让程序变慢](https://www.bookstack.cn/read/qcrao-Go-Questions/spilt.14.GC-GC.md)
+- [gc的stw是怎么回事](https://www.bookstack.cn/read/qcrao-Go-Questions/spilt.5.GC-GC.md)
+- [为什么小对象多了会造成 gc 压力?](https://www.modb.pro/db/148423)
+- [两次 GC 周期重叠会引发什么问题，GC 触发机制是什么样的？](https://www.jianshu.com/p/bfc3c65c05d1)
+
+**问题排查**
+
+- [trace](https://mp.weixin.qq.com/s?__biz=MzA4ODg0NDkzOA==&mid=2247487157&idx=1&sn=cbf1c87efe98433e07a2e58ee6e9899e&source=41#wechat_redirect)
+- [pprof](https://mp.weixin.qq.com/s/d0olIiZgZNyZsO-OZDiEoA)
+- [什么是 goroutine 泄漏?](https://segmentfault.com/a/1190000040161853)
+- [当go服务部署到线上了，发现有内存泄露，该怎么处理](https://blog.csdn.net/shudaqi2010/article/details/103362028?utm_medium=distribute.pc_relevant.none-task-blog-2~default~baidujs_baidulandingword~default-0.pc_relevant_default&spm=1001.2101.3001.4242.1&utm_relevant_index=3)
+
+**其他**
+
+- 利用golang特性，设计一个QPS为500的服务器
+- [必须要手动对齐内存的情况](https://geektutu.com/post/hpg-struct-alignment.html)
+- [go栈扩容和栈缩容，连续栈的缺点](https://segmentfault.com/a/1190000019570427)
+- [golang怎么做代码优化](https://tangheng1995.github.io/golang/2020/06/03/Golang-optimize.html)
+- [golang隐藏技能:怎么访问私有成员](https://www.jianshu.com/p/7b3638b47845)
+- [一个协程能保证绑定在一个内核线程上吗？](https://studygolang.com/articles/26795)
+- [闭包怎么实现的,闭包的主要应用场景](https://zhuanlan.zhihu.com/p/56750616)
+- [Goroutinue 什么时候会被挂起？](https://developer.51cto.com/article/681462.html)
+- [Data Race 问题怎么检测？怎么解决?](https://learnku.com/articles/45279)
+- [Golang 触发异常的场景有哪些?](http://xueyuan.coder55.com/read/go-senior-learn/go-question-14.2)
+- [net/http包中client如何实现长连接？](net/http包中client如何实现长连接？)
+- [net/http怎么做连接池和长链接？](net/http怎么做连接池和长链接？)
+
+## 
