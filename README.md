@@ -2,9 +2,19 @@
 
 作为一个golang初学者，自己在学习过程中感觉到特别混乱，特此创建这个项目整理自己所学以及准备面试,大部分都是copy书中或者博客内容，**主要用途是作者自己进行整理复盘**。所以很多内容都会重复，在后续中可能会进行删减。
 
-## Go
+计算机网络
+
+操作系统
 
 [golang 学习](https://github.com/Simin-hub/Learning-Programming/tree/main/Go)
+
+docker
+
+Linux
+
+前端
+
+
 
 ## 网站与书籍
 
