@@ -8,13 +8,15 @@
 
 [golang 学习](https://github.com/Simin-hub/Learning-Programming/tree/main/Go)
 
+[算法](https://github.com/Simin-hub/Learning-Programming/tree/main/Go/%E7%AE%97%E6%B3%95)
+
+数据库（MySQL、Redis）
+
 docker
 
 [Linux](https://github.com/Simin-hub/Learning-Programming/blob/main/Linux/Linux.md)
 
 前端
-
-
 
 ## 网站与书籍
 
