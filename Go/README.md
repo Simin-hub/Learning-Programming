@@ -40,27 +40,27 @@
 
 ### 进阶
 
-[Goroutine](https://github.com/Simin-hub/Golang-Learning-and-Interview/blob/main/Go/%E8%BF%9B%E9%98%B6/goroutine.md) 和 [channel](https://github.com/Simin-hub/Golang-Learning-and-Interview/blob/main/Go/%E5%9F%BA%E7%A1%80/channel.md)
+[基础数据类型的底层实现、比较](https://github.com/Simin-hub/Learning-Programming/blob/main/Go/%E8%BF%9B%E9%98%B6/%E5%9F%BA%E7%A1%80%E6%95%B0%E6%8D%AE%E7%B1%BB%E5%9E%8B.md#string%E7%B1%BB%E5%9E%8B)
 
-[数据类型的底层实现](https://github.com/Simin-hub/Golang-Learning-and-Interview/blob/main/Go/%E8%BF%9B%E9%98%B6/%E5%9F%BA%E7%A1%80%E6%95%B0%E6%8D%AE%E7%B1%BB%E5%9E%8B.md)
+[函数、方法、接口](https://github.com/Simin-hub/Learning-Programming/blob/main/Go/%E8%BF%9B%E9%98%B6/%E5%9F%BA%E7%A1%80%E6%95%B0%E6%8D%AE%E7%B1%BB%E5%9E%8B.md#%E5%87%BD%E6%95%B0)
 
-[函数、接口和方法](https://github.com/Simin-hub/Golang-Learning-and-Interview/blob/main/Go/%E8%BF%9B%E9%98%B6/%E5%87%BD%E6%95%B0%E3%80%81%E6%8E%A5%E5%8F%A3%E4%B8%8E%E6%96%B9%E6%B3%95.md)
+### 协程调度
 
-[CGO](https://github.com/Simin-hub/Golang-Learning-and-Interview/blob/main/Go/%E8%BF%9B%E9%98%B6/CGO.md)
+[GMP](https://github.com/Simin-hub/Learning-Programming/blob/main/Go/%E8%BF%9B%E9%98%B6/goroutine.md)
 
-[内存管理](https://github.com/Simin-hub/Golang-Learning-and-Interview/blob/main/Go/%E8%BF%9B%E9%98%B6/%E5%86%85%E5%AD%98%E7%AE%A1%E7%90%86.md)
+### 内存管理
 
-https://github.com/Simin-hub/Learning-Programming/blob/main/Go/%E6%A0%87%E5%87%86%E5%BA%93/trace.md)
+[内存分配](https://github.com/Simin-hub/Learning-Programming/blob/main/Go/%E8%BF%9B%E9%98%B6/%E5%86%85%E5%AD%98%E7%AE%A1%E7%90%86.md#%E5%86%85%E5%AD%98%E7%AE%A1%E7%90%86)
 
-### 相关问题
+[内存逃逸](https://github.com/Simin-hub/Learning-Programming/blob/main/Go/%E8%BF%9B%E9%98%B6/%E5%86%85%E5%AD%98%E7%AE%A1%E7%90%86.md#%E5%86%85%E5%AD%98%E7%AE%A1%E7%90%86)
 
-[数据类型](https://github.com/Simin-hub/Learning-Programming/blob/main/Go/%E8%BF%9B%E9%98%B6/%E5%9F%BA%E7%A1%80%E6%95%B0%E6%8D%AE%E7%B1%BB%E5%9E%8B.md)
+[GC](https://github.com/Simin-hub/Learning-Programming/blob/main/Go/%E8%BF%9B%E9%98%B6/%E5%86%85%E5%AD%98%E7%AE%A1%E7%90%86.md#%E5%86%85%E5%AD%98%E7%AE%A1%E7%90%86)
 
-编译
+[内存泄漏](https://github.com/Simin-hub/Learning-Programming/blob/main/Go/%E8%BF%9B%E9%98%B6/%E5%86%85%E5%AD%98%E7%AE%A1%E7%90%86.md#%E5%86%85%E5%AD%98%E7%AE%A1%E7%90%86)
 
-[内存](https://github.com/Simin-hub/Learning-Programming/blob/main/Go/%E8%BF%9B%E9%98%B6/%E5%86%85%E5%AD%98%E7%AE%A1%E7%90%86.md)
+### 编译过程
 
-https://github.com/Simin-hub/Learning-Programming/blob/main/docker/docker.md)
+
 
 ### 库学习
 

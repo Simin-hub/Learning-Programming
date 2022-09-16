@@ -10,7 +10,11 @@ go语言的自动内存管理机制使得**只要还有一个指针引用一个�
 
 ![img](https://raw.githubusercontent.com/jiutiananshu/Picture/master/img/go%E6%8C%87%E9%92%881.png)
 
-代码中的指针p不是野指针（即空指针），因为返回的栈内存在函数结束时不会被释放
+代码中的指针p不是野指针（即空指针），因为返回的栈内存在函数结束时不会被释放。
+
+**即函数返回指针时发生内存逃逸**。[逃逸场景](https://github.com/Simin-hub/Learning-Programming/blob/main/Go/%E8%BF%9B%E9%98%B6/%E9%80%83%E9%80%B8%E5%88%86%E6%9E%90.md#%E9%80%83%E9%80%B8%E5%9C%BA%E6%99%AF)
+
+考察的内容是逃逸分析。
 
 ### 数组与切片
 
@@ -62,12 +66,6 @@ s2 := s1[2:6:7]
 
 **当添加切片超过其拥有的容量时，则会复制一个新的切片并增加原先一倍的容量。**
 
-### 切片增加元素
-
-追加的是一个slice而不是元素，故应该加上...。
-
-函数 append 向 slice s 追加零值或其他 x 值，并且返回追加后的新的、与 s有相同类型的 slice。如果 s 没有足够的容量存储追加的值， append 分配一个足够大的、新的 slice 来存放原有 slice 的元素和追加的值。因此，返回的 slice 可能指向不同的底层 array。
-
 ### 函数失败回收资源
 
 下面函数能回收资源
@@ -84,90 +82,21 @@ s2 := s1[2:6:7]
 
 如果第三次资源分配也成功了，则函数不会返回失败。
 
-### 字符串与数组不能修改属于值类型
+**若程序在定义 defer 之前退出，则程序结束后 defer 并不会执行， 若在定义 defer 之后程序退出，则会在程序退出后执行 defer**。
 
-GO语言中字符串是不可变的，所以不能对字符串中某个字符单独赋值。
-
-### 给类型添加方法
-
-必须是自定义的类型，若要给内置类型添加方法则需要设置别名
-
-例如：`type Interger int`
-
-这时可以给`Interget`添加方法
-
-### Go中类型区分
-
-golang中分为值类型和引用类型
-
-值类型分别有：int系列、float系列、bool、string、数组和**结构体**
-
-引用类型有：指针、slice切片、管道channel、接口interface、map、函数等
-
-值类型的特点是：变量直接存储值，内存通常在栈中分配
-
-引用类型的特点是：变量存储的是一个地址，这个地址对应的空间里才是真正存储的值，内存通常在堆中分配
-
-### go不支持指针运算
-
-指针不能进行自增或自减、下标运算。
-
-### go中++、--操作符
-
-都是后置操作符，必须跟在操作数后面，并且它们没有返回值，所以它们不能用于表达式。
+若使用`os.Exit(1)` 退出也不会执行 defer
 
 ```
-i := 1
-i++ //这样是对的
-```
-
-### 结构体编译
-
-在Golang中
-
-使用结构体作为接收者实现接口，此时无论使用结构体初始化变量还是结构体指针初始化变量，都可以编译通过
-
-使用结构体指针作为接收者实现接口，如果使用结构体指针初始化变量， 如果结构体初始化变量，则不能编译通过
-
-![image-20211105204146819](https://raw.githubusercontent.com/jiutiananshu/Picture/master/img/image-20211105204146819.png)
-
-### 反射
-
-反射最常见的使用场景是做对象的序列化（serialization，有时候也叫Marshal & Unmarshal）。例如，Go语言标准库的encoding/json、encoding/xml、encoding/gob、encoding/binary等包就大量依赖于反射功能来实现。
-
-### 包名
-
-一个文件夹下只能有一个包，可以多个.go文件，但这些文件必须属于同一个包。
-
-### 取反
+func main() {
+	defer func() {
+		fmt.Println("exit")
+	}()
+	os.Exit(1)
+}
 
 ```
-^x// Go语言取反方式和C语言不同，Go语言不支持~符号
-```
 
-### 缓冲通道与无缓冲通道
-
-无缓冲的channel是同步的，而有缓冲的channel是非同步的
-
-比如
-
-```
-c1:=make(chan int)    无缓冲
-
-c2:=make(chan int,1)   有缓冲
-
-c1<-1               
-```
-
-无缓冲的 不仅仅是 向 c1 通道放 1 而是 一直要有别的携程 <-c1 接手了 这个参数，那么c1<-1才会继续下去，要不然就一直阻塞着
-
-而 c2<-1 则不会阻塞，因为缓冲大小是1 只有当 放第二个值的时候 第一个还没被人拿走，这时候才会阻塞。
-
-对于channel来说，是否阻塞不能根据有无缓冲来定义。本质上channel就是阻塞的。只不过是在接收一个后阻塞还是在接收N个后阻塞的问题。应该更关注于channel的阻塞时机。
-
-无缓冲通道在没有接收方的时候，发送方会阻塞
-
-有缓冲通道在没有接收方的时候，如果缓冲区未满，则发送方并不会阻塞
+[defer](https://github.com/Simin-hub/Learning-Programming/blob/main/Go/%E8%BF%9B%E9%98%B6/%E5%9F%BA%E7%A1%80%E6%95%B0%E6%8D%AE%E7%B1%BB%E5%9E%8B.md#defer)
 
 ### panic()函数
 
@@ -177,21 +106,7 @@ c1<-1
 
 CGO是C语言和Go语言之间的桥梁，原则上无法直接支持C++的类。CGO不支持C++语法的根本原因是C++至今为止还没有一个二进制接口规范(ABI)。CGO只支持C语言中值类型的数据类型，所以我们是无法直接使用C++的引用参数等特性的。
 
-### gofmt
-
-![image-20211105211009202](https://raw.githubusercontent.com/jiutiananshu/Picture/master/img/image-20211105211009202.png)
-
-go语言编译器会自动在以标识符、数字字面量、字母字面量、字符串字面量、特定的关键字（break、continue、fallthrough和return）、增减操作符（++和--）、或者一个右括号、右方括号和右大括号（即)、]、}）结束的非空行的末尾自动加上分号。
-
-对于B选项，6是数字字面量，所以在6的后面会自动加上一个分号，导致编译出错。
-
-对于D选项，gofmt会自动把6后面的“,”去掉，关掉gofmt后测试，也能通过编译，正常运行
-
-**定义切片时，新起一行时，上一行必须是逗号或者右括号**
-
 ### 常量定义
-
-![image-20211105211236672](https://raw.githubusercontent.com/jiutiananshu/Picture/master/img/image-20211105211236672.png)
 
 **go语言常量要是编译时就能确定的数据，C选项中errors.New("xxx") 要等到运行时才能确定，所以它不满足**
 
@@ -211,7 +126,7 @@ go语言编译器会自动在以标识符、数字字面量、字母字面量、
 
 ### switch
 
-switch后面的**声明语句**和**表达式语句**都是***可选\***的
+switch后面的**声明语句**和**表达式语句**都是**可选**的
 
 ### Go语言类型转换语法
 
@@ -257,17 +172,9 @@ map用于声明map类型数据
 
 range用于读取slice、map、channel数据
 
-### 内存泄漏
-
-内存泄漏（Memory Leak）是指程序中己动态分配的堆内存由于某种原因程序未释放或无法释放，造成系统内存的浪费，导致程序运行速度减慢甚至系统崩溃等严重后果。
-
-在影响软件系统稳定性的因素里，我们最担心的一个问题是内存泄漏，随着系统的运行，系统消耗的内存越来越多，直到最后整个操作系统越来越慢，甚至还会导致系统崩溃。在Go语言里，我们检测内存泄漏主要依靠的是go里面的[pprof包](http://golang.org/pkg/runtime/pprof/)，除此之外，我们还可以使用浏览器来查看系统的实时内存信息(包括CPU、goroutine等的信息)。
-
 ### main函数
 
-![image-20211107102437564](https://raw.githubusercontent.com/jiutiananshu/Picture/master/img/image-20211107102437564.png)
-
-Main函数和init函数都没有参数和返回值的定义
+**Main函数和init函数都没有参数和返回值的定义**
 
 ### select
 
@@ -275,19 +182,9 @@ golang 的 select 就是监听 IO 操作，当 IO 操作发生时，触发相应
 
 在执行select语句的时候，运行时系统会自上而下地判断每个case中的发送或接收操作是否可以被立即执行(立即执行：意思是当前Goroutine不会因此操作而被阻塞)
 
-select的用法与switch非常类似，由select开始一个新的选择块，每个选择条件由case语句来描述。与switch语句可以选择任何可使用相等比较的条件相比，select有比较多的限制，其中最大的一条限制就是每个case语句里必须是一个IO操作，确切的说，应该是一个面向channel的IO操作。
+select的用法与switch非常类似，由select开始一个新的选择块，每个选择条件由case语句来描述。与switch语句可以选择任何可使用相等比较的条件相比，select有比较多的限制，**其中最大的一条限制就是每个case语句里必须是一个IO操作**，确切的说，应该是一个面向channel的IO操作。
 
 select后不用带判断条件，是case后带判断条件。
-
-![image-20211107102635461](https://raw.githubusercontent.com/jiutiananshu/Picture/master/img/image-20211107102635461.png)
-
-### channel特性
-
-![image-20211107102734971](https://raw.githubusercontent.com/jiutiananshu/Picture/master/img/image-20211107102734971.png)
-
-nil channel代表channel未初始化，向未初始化的channel读写数据会造成永久阻塞。
-
-Ps.关闭(close)未初始化的channel会引起panic。
 
 ### go 的 [] rune 和 [] byte 区别
 
@@ -301,48 +198,7 @@ Ps.关闭(close)未初始化的channel会引起panic。
 
 map、切片和结构体都是引用类型，他们的值都是地址
 
-### 函数参数
-
-要求返回参数要么都有变量名要么都没有，必须统一。
-
-![image-20211107190849556](https://raw.githubusercontent.com/jiutiananshu/Picture/master/img/image-20211107190849556.png)
-
-### 结构体序列化时小写字母开头变量
-
-序列化通常将类型结构传入标准库或第三方包，类型结构中没有大写的变量未导出，对第三方包不可见，无法进行任何操作，依旧是默认的零值。
-
-![image-20211107191203349](https://raw.githubusercontent.com/jiutiananshu/Picture/master/img/image-20211107191203349.png)
-
-### 内置函数 delete 只能删除 map
-
-
-
-### 函数调用
-
-![img](https://raw.githubusercontent.com/jiutiananshu/Picture/master/img/3367369_1512278991120_B659301F69DE7418A8F267367B9DE044)
-
-![img](https://raw.githubusercontent.com/jiutiananshu/Picture/master/img/3367369_1512279047175_80B1DE630D18B2A3971EDA079B83B3EF)
-
-选A
-
-Add函数带入的是b而不是*b，所以只能在AC中选，但是i.(Integer)经过类型断言以后就是Integer类型了，无法自动转成*Integer，所以只能选A了
-
-### 循环语句
-
-![image-20211107191547383](https://raw.githubusercontent.com/jiutiananshu/Picture/master/img/image-20211107191547383.png)
-
-### 声明变量三种方式
-
-```
-单个变量
-var 变量名称 数据类型 = 变量值 
-var 变量名称 = 变量值
-变量名称 := 变量值
-多个变量
-var 变量名称，变量名称，… 数据类型 = 变量值，变量值，…
-var 变量名称，变量名称，… = 变量值，变量值，…
-变量名称，变量名称，… := 变量值，变量值，…
-```
+序列化通常将类型结构传入标准库或第三方包，**类型结构中没有大写的变量未导出，对第三方包不可见，无法进行任何操作，依旧是默认的零值**。
 
 ### 字符串的表达方式
 
@@ -350,25 +206,17 @@ var 变量名称，变量名称，… = 变量值，变量值，…
 
 ### 接口
 
-![image-20211107192414348](https://raw.githubusercontent.com/jiutiananshu/Picture/master/img/image-20211107192414348.png)
+拥有相同方法列表，那么两个接口实质上同一个接口
 
-A：拥有相同方法列表，那么两个接口实质上同一个接口
+A是B的子集，意味着A的方法B中都有，那么A是B的基类，所以A=B是可行的
 
-B：A是B的子集，意味着A的方法B中都有，那么A是B的基类，所以A=B是可行的
+接口是否能够调用成功是需要运行的时候才能知道
 
-C：接口是否能够调用成功是需要运行的时候才能知道
-
-D：接口赋值是否可行在编译阶段就可以知道
+**接口赋值是否可行在编译阶段就可以知道**
 
 ### **import后面的最后一个元素应该是路径，就是目录，并非包名**。
 
 go语言的惯例只是一个特例，即恰好目录名与包名一致。
-
-### open文件和defer
-
-![image-20211108191219430](https://raw.githubusercontent.com/jiutiananshu/Picture/master/img/image-20211108191219430.png)
-
-defer应该在if后面，如果文件为空，close会崩溃
 
 ### 可变参数
 
@@ -405,26 +253,7 @@ cap的作用：
 - slice：返回slice的最大容量
 -  channel：返回channel的buffer容量
 
-cap函数不支持map,map中使用len表示大小
-
-### slice和map初始化和赋值时区别
-
-make只用来创建slice,map,channel。 **其中map使用前必须初始化**。 append可直接动态扩容slice，而map不行。
-
-<img src="https://raw.githubusercontent.com/jiutiananshu/Picture/master/img/image-20211108192201519.png" alt="image-20211108192201519"  />
-
-### 通道操作
-
-```
-ch := make(chan int) // ch has type 'chan int'
-ch <- x  // a send statement
-x = <-ch // a receive expression in an assignment statement
-<-ch     // a receive statement; result is discarded
-```
-
-### interface{}是可以指向任意对象的Any类型
-
-
+**cap函数不支持map**,map中使用len表示大小
 
 ### 错误和异常的区别
 
@@ -443,22 +272,6 @@ Golang错误和异常是可以互相转换的：
 
 1. 错误转异常，比如程序逻辑上尝试请求某个URL，最多尝试三次，尝试三次的过程中请求失败是错误，尝试完第三次还不成功的话，失败就被提升为异常了。
 2. 异常转错误，比如panic触发的异常被recover恢复后，将返回值中error类型的变量进行赋值，以便上层函数继续走错误处理流程。
-
-### 通过指针变量访问成员变量
-
-GO语言中访问成员变量的方式只有 **.** 号（因为->是用于通道的操作符，所以go语言中指针不支持->操作符），并且GO语言足够智能，能够自动解引用，但智能也是有限的，只能解一次引用，指针的指针还得自己动手解引用。
-
-### switch相关
-
-单个case中，可以出现多个结果选项
-
-只有在case中明确添加fallthrough关键字，才会继续执行紧跟的下一个case
-
-### 函数返回值的错误设计
-
-![image-20211108194025466](https://raw.githubusercontent.com/jiutiananshu/Picture/master/img/image-20211108194025466.png)
-
-### Go 语言的函数参数传递，只有值传递，没有引用传递。
 
 
 
@@ -609,5 +422,3 @@ GO语言中访问成员变量的方式只有 **.** 号（因为->是用于通道
 - [Golang 触发异常的场景有哪些?](http://xueyuan.coder55.com/read/go-senior-learn/go-question-14.2)
 - [net/http包中client如何实现长连接？](net/http包中client如何实现长连接？)
 - [net/http怎么做连接池和长链接？](net/http怎么做连接池和长链接？)
-
-## 
