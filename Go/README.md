@@ -80,7 +80,7 @@
 
 [pprof(性能剖析)](https://github.com/Simin-hub/Learning-Programming/blob/main/Go/%E6%A0%87%E5%87%86%E5%BA%93/pprof.md)
 
-trace（跟踪剖析）
+[trace（跟踪剖析）](https://github.com/Simin-hub/Learning-Programming/blob/main/Go/%E6%A0%87%E5%87%86%E5%BA%93/trace.md)
 
 ## 实战
 
