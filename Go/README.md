@@ -10,6 +10,8 @@
 
 [Go 开发者路线图](https://github.com/Alikhll/golang-developer-roadmap)的一张[思维导图](https://raw.githubusercontent.com/Alikhll/golang-developer-roadmap/master/i18n/zh-CN/golang-developer-roadmap-zh-CN.png)
 
+![](https://raw.githubusercontent.com/Alikhll/golang-developer-roadmap/master/i18n/zh-CN/golang-developer-roadmap-zh-CN.png)
+
 ## Go 基础
 
 ### 基本语法学习
@@ -60,9 +62,9 @@
 
 ### 编译过程
 
-编译器
+[编译器](https://github.com/Simin-hub/Learning-Programming/blob/main/Go/%E8%BF%9B%E9%98%B6/%E7%BC%96%E8%AF%91%E8%BF%87%E7%A8%8B.md#%E7%BC%96%E8%AF%91%E5%8E%9F%E7%90%86)
 
-链接器
+[链接器](https://github.com/Simin-hub/Learning-Programming/blob/main/Go/%E8%BF%9B%E9%98%B6/%E7%BC%96%E8%AF%91%E8%BF%87%E7%A8%8B.md#%E9%93%BE%E6%8E%A5%E8%BF%87%E7%A8%8B)
 
 ### 库学习
 
@@ -117,6 +119,8 @@
 [Go语言高级编程](https://www.bookstack.cn/read/advanced-go-programming-book/preface.md)
 
 [Go Web 编程](https://learnku.com/docs/build-web-application-with-golang)
+
+[Go 程序员面试笔试宝典 ](https://golang.design/go-questions/#go-程序员面试笔试宝典)
 
 ## 精品博客及网站
 
