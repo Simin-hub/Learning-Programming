@@ -60,7 +60,9 @@
 
 ### 编译过程
 
+编译器
 
+链接器
 
 ### 库学习
 
@@ -106,6 +108,8 @@
 
 [topgoer](https://www.topgoer.com/)
 
+[跟煎鱼学Go](https://eddycjy.gitbook.io/golang/)
+
 [Go 语言设计与实现](https://draveness.me/golang/#go-语言设计与实现)
 
 [Go 语言高性能编程](https://geektutu.com/post/high-performance-go.html)
@@ -119,6 +123,26 @@
 仅仅有书籍是不够的，还需要通过博客进行查漏补缺。
 
 [Go 语言优秀资源整理](https://github.com/shockerli/go-awesome)
+
+[极客兔兔](https://geektutu.com/)
+
+[Go 夜读](https://talkgo.org/)
+
+[Go 语言充电站](https://lessisbetter.site/)
+
+[煎鱼](https://eddycjy.com/)
+
+[mohuishou](https://lailin.xyz/)
+
+[曹大](https://qcrao.com/)
+
+[鸟窝](https://colobu.com/)
+
+https://halfrost.com/
+
+https://geekr.dev/
+
+https://cizixs.com/
 
 ## 实战项目
 
