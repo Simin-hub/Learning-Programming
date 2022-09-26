@@ -118,11 +118,15 @@
 
 [Go 程序员面试笔试宝典 ](https://golang.design/go-questions/#go-程序员面试笔试宝典)
 
+[Go语言精进之路](https://golang.coding3min.com/)
+
 [go实战小技巧100例](https://www.kancloud.cn/anqingfei/go_100#/catalog)
 
 ## 精品博客及网站
 
 仅仅有书籍是不够的，还需要通过博客进行查漏补缺。
+
+#### 网站
 
 [Go 语言优秀资源整理](https://github.com/shockerli/go-awesome)
 
@@ -149,6 +153,10 @@ https://geekr.dev/
 https://cizixs.com/
 
 [李文周](https://www.liwenzhou.com/)
+
+#### 博客
+
+[Uber Go语言编码规范](https://tonybai.com/2019/10/12/uber-go-style-guide/)
 
 ## 实战项目
 

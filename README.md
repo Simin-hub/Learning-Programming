@@ -12,6 +12,8 @@
 
 数据库（[MySQL](https://github.com/Simin-hub/Learning-Programming/blob/main/%E6%95%B0%E6%8D%AE%E5%BA%93/MySQL.md)、[Redis](https://github.com/Simin-hub/Learning-Programming/blob/main/%E6%95%B0%E6%8D%AE%E5%BA%93/Redis.md)）
 
+[设计模式](https://github.com/Simin-hub/Learning-Programming/blob/main/%E8%AE%A1%E7%AE%97%E6%9C%BA%E5%9F%BA%E7%A1%80/%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F.md)
+
 [docker](https://github.com/Simin-hub/Learning-Programming/blob/main/docker/docker.md)
 
 [Linux](https://github.com/Simin-hub/Learning-Programming/blob/main/Linux/Linux.md)
@@ -48,7 +50,7 @@
 
 [技术文章摘抄](http://learn.lianglianglee.com/)
 
-### 书籍
+### 读书笔记
 
 Linux内核设计与实现
 
