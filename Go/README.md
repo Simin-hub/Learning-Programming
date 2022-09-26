@@ -60,6 +60,18 @@
 
 [内存泄漏](https://github.com/Simin-hub/Learning-Programming/blob/main/Go/%E8%BF%9B%E9%98%B6/%E5%86%85%E5%AD%98%E7%AE%A1%E7%90%86.md#%E5%86%85%E5%AD%98%E7%AE%A1%E7%90%86)
 
+### 排错调优
+
+[代码规范](https://github.com/Simin-hub/Learning-Programming/blob/main/Go/%E8%BF%9B%E9%98%B6/Go%E7%BC%96%E7%A8%8B%E8%A7%84%E8%8C%83.md)
+
+[pprof](https://github.com/Simin-hub/Learning-Programming/blob/main/Go/package/pprof.md)、[trace](https://github.com/Simin-hub/Learning-Programming/blob/main/Go/package/trace.md)
+
+[单元测试](https://github.com/Simin-hub/Learning-Programming/blob/main/Go/%E8%BF%9B%E9%98%B6/%E5%8D%95%E5%85%83%E6%B5%8B%E8%AF%95.md)（排错）
+
+[性能调优](https://github.com/Simin-hub/Learning-Programming/blob/main/Go/%E8%BF%9B%E9%98%B6/%E6%80%A7%E8%83%BD%E8%B0%83%E4%BC%98.md#%E6%80%A7%E8%83%BD%E4%BC%98%E5%8C%96)（基准测试）
+
+[数据竞争（data race）](https://github.com/Simin-hub/Learning-Programming/blob/main/Go/%E8%BF%9B%E9%98%B6/%E6%80%A7%E8%83%BD%E8%B0%83%E4%BC%98.md#%E6%95%B0%E6%8D%AE%E7%AB%9E%E4%BA%89data-race)
+
 ### 编译过程
 
 [编译器](https://github.com/Simin-hub/Learning-Programming/blob/main/Go/%E8%BF%9B%E9%98%B6/%E7%BC%96%E8%AF%91%E8%BF%87%E7%A8%8B.md#%E7%BC%96%E8%AF%91%E5%8E%9F%E7%90%86)
@@ -69,8 +81,6 @@
 ### 库学习
 
 [库学习](https://github.com/Simin-hub/Learning-Programming/tree/main/Go/package#package)
-
-
 
 ## 实战
 
@@ -108,6 +118,8 @@
 
 [Go 程序员面试笔试宝典 ](https://golang.design/go-questions/#go-程序员面试笔试宝典)
 
+[go实战小技巧100例](https://www.kancloud.cn/anqingfei/go_100#/catalog)
+
 ## 精品博客及网站
 
 仅仅有书籍是不够的，还需要通过博客进行查漏补缺。
@@ -127,6 +139,8 @@
 [曹大](https://qcrao.com/)
 
 [鸟窝](https://colobu.com/)
+
+[TIGERB](http://tigerb.cn/)
 
 https://halfrost.com/
 
