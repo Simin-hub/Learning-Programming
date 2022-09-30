@@ -10,11 +10,19 @@
 
 #### 1. 数据结构
 
-B Tree 指的是 Balance Tree，也就是**平衡树**。平衡树是一颗查找树，并且**所有叶子节点位于同一层**。
+B Tree 指的是 Balance Tree，也就是**平衡多路查找树**。平衡树是一颗查找树，并且**所有叶子节点位于同一层**。
 
-B+ Tree 是基于 B Tree 和叶子节点顺序访问指针进行实现，它具有 B Tree 的平衡性，并且通过顺序访问指针来提高区间查询的性能。
+B+ Tree 是基于 B Tree 和叶子节点顺序访问指针进行实现，它具有 B Tree 的平衡性，并且通过顺序访问指针来提高区间查询的性能。B+树是在B树的基础上又一次的改进，其主要对两个方面进行了提升，一方面是查询的稳定性，另外一方面是在数据排序方面更友好。
 
 在 B+ Tree 中，一个节点中的 key 从左到右非递减排列，如果某个指针的左右相邻 key 分别是 keyi 和 keyi+1，且不为 null，则该指针指向节点的所有 key 大于等于 keyi 且小于等于 keyi+1。
+
+**B+树构建规则**
+
+（1）B+树的**非叶子**节点**不保存具体的数据，而只保存关键字的索引**，而所有的数据最终都会保存到叶子节点。因为所有数据必须要到叶子节点才能获取到，所以每次数据查询的次数都一样，这样一来B+树的查询速度也就会比较稳定，而B树的查找过程中，不同的关键字查找的次数很有可能都是不同的（有的数据可能在根节点，有的数据可能在最下层的叶节点），所以在数据库的应用层面，B+树就显得更合适。
+
+（2）B+树叶子节点的关键字从小到大有序排列，左边结尾数据都会保存右边节点开始数据的指针。因为叶子节点都是有序排列的，所以B+树对于数据的排序有着更好的支持。
+
+（3）非叶子节点的子节点数=关键字数（来源百度百科）（根据各种资料 这里有两种算法的实现方式，另一种为非叶节点的关键字数=子节点数-1（来源维基百科)，虽然他们数据排列结构不一样，但其原理还是一样的Mysql 的B+树是用第一种方式实现）;
 
 [![img](https://camo.githubusercontent.com/4d682f9aa8dd74bd32712b7ca85a85b2c213fd4282d62fcc137488dea23ddde9/68747470733a2f2f63732d6e6f7465732d313235363130393739362e636f732e61702d6775616e677a686f752e6d7971636c6f75642e636f6d2f33333537363834392d393237352d343762622d616461372d3864656435663565376337332e706e67)](https://camo.githubusercontent.com/4d682f9aa8dd74bd32712b7ca85a85b2c213fd4282d62fcc137488dea23ddde9/68747470733a2f2f63732d6e6f7465732d313235363130393739362e636f732e61702d6775616e677a686f752e6d7971636c6f75642e636f6d2f33333537363834392d393237352d343762622d616461372d3864656435663565376337332e706e67)
 
@@ -364,10 +372,10 @@ SELECT * FROM post WHERE post.id IN (123,456,567,9098,8904);
 
 在数据库系统中，一个事务是指：由一系列数据库操作组成的一个完整的逻辑过程。例如银行转帐，从原账户扣除金额，以及向目标账户添加金额，这两个数据库操作的总和，构成一个完整的逻辑过程，不可拆分。这个过程被称为一个事务，具有ACID特性。ACID的概念在[ISO](https://zh.wikipedia.org/wiki/ISO)/IEC 10026-1:1992文件的第四段内有所说明。
 
-- 原子性（Atomicity）：**一个事务（transaction）中的所有操作，或者全部完成，或者全部不完成**，不会结束在中间某个环节。事务在执行过程中发生错误，会被[回滚](https://zh.wikipedia.org/wiki/回滚_(数据管理))（Rollback）到事务开始前的状态，就像这个事务从来没有执行过一样。即，事务不可分割、不可约简。
-- [一致性](https://zh.wikipedia.org/wiki/一致性_(数据库))（Consistency）：**在事务开始之前和事务结束以后，数据库的完整性没有被破坏**。这表示写入的资料必须完全符合所有的预设[约束](https://zh.wikipedia.org/wiki/数据完整性)、[触发器](https://zh.wikipedia.org/wiki/触发器_(数据库))、[级联回滚](https://zh.wikipedia.org/wiki/级联回滚)等。
-- [事务隔离](https://zh.wikipedia.org/wiki/事務隔離)（Isolation）：数据库**允许多个并发事务同时对其数据进行读写和修改的能力**，隔离性可以防止多个事务并发执行时由于交叉执行而导致数据的不一致。事务隔离分为不同级别，包括未提交读（Read uncommitted）、提交读（read committed）、可重复读（repeatable read）和串行化（Serializable）。
-- [持久性](https://zh.wikipedia.org/wiki/持久性)（Durability）：事务处理结束后，**对数据的修改就是永久的**，即便系统故障也不会丢失。
+- **原子性**（Atomicity）：**一个事务（transaction）中的所有操作，或者全部完成，或者全部不完成**，不会结束在中间某个环节。事务在执行过程中发生错误，会被[回滚](https://zh.wikipedia.org/wiki/回滚_(数据管理))（Rollback）到事务开始前的状态，就像这个事务从来没有执行过一样。即，事务不可分割、不可约简。
+- [**一致性**](https://zh.wikipedia.org/wiki/一致性_(数据库))（Consistency）：**在事务开始之前和事务结束以后，数据库的完整性没有被破坏**。这表示写入的资料必须完全符合所有的预设[约束](https://zh.wikipedia.org/wiki/数据完整性)、[触发器](https://zh.wikipedia.org/wiki/触发器_(数据库))、[级联回滚](https://zh.wikipedia.org/wiki/级联回滚)等。
+- [**事务隔离**](https://zh.wikipedia.org/wiki/事務隔離)（Isolation）：数据库**允许多个并发事务同时对其数据进行读写和修改的能力**，隔离性可以防止多个事务并发执行时由于交叉执行而导致数据的不一致。事务隔离分为不同级别，包括未提交读（Read uncommitted）、提交读（read committed）、可重复读（repeatable read）和串行化（Serializable）。
+- [**持久性**](https://zh.wikipedia.org/wiki/持久性)（Durability）：事务处理结束后，**对数据的修改就是永久的**，即便系统故障也不会丢失。
 
 #### redo log、undo log、binlog
 
@@ -478,7 +486,7 @@ innodb_flush_log_at_trx_commit = 2
 
 ###### `binlog`日志的作用
 
-可以说`MySQL`数据库的**数据备份、主备、主主、住从**都离不开`binlog`，需要依赖`binlog`来同步数据，保证数据一致性。
+可以说`MySQL`数据库的**数据备份、主备、主主、主从**都离不开`binlog`，需要依赖`binlog`来同步数据，保证数据一致性。
 
 ![img](https://raw.githubusercontent.com/Simin-hub/Picture/master/img/1460000041758796)
 
@@ -633,7 +641,7 @@ mysql发生崩溃恢复的过程中，会根据redo log日志，结合 binlog �
 
 2、如果redo log存在而binlog**不存在，逻辑上不一致，那么回滚事务**；
 
-最后大家可发现，这里的两阶段提交，实际是存在与redo log与binlog。所以当未开启binlog，那就是提交事务直接写到redo log里面。这也就是redo log事务两阶段提交，看场景区分的原因。
+最后大家可发现，**这里的两阶段提交，实际是存在与redo log与binlog**。所以当未开启binlog，那就是提交事务直接写到redo log里面。这也就是redo log事务两阶段提交，看场景区分的原因。
 
 **两阶段提交的主要用意是：为了保证redolog和binlog数据的安全一致性**。只有在这两个日志文件逻辑上高度一致了。你才能放心地使用redolog帮你将数据库中的状态恢复成crash之前的状态，使用binlog实现数据备份、恢复、以及主从复制。而两阶段提交的机制可以保证这两个日志文件的逻辑是高度一致的。没有错误、没有冲突。
 
@@ -728,7 +736,7 @@ MySQL的大多数事务型存储引擎实现的都不是简单的行级锁。基
 
 与 **快照读** 相对应的则是 **当前读**，**当前读**就是**读取最新数据**，而不是历史版本的数据。
 
-当前读：像select lock in share mode(共享锁), select for update ; update, insert ,delete(排他锁)这些操作都是一种当前读，为什么叫当前读？就是它读取的是记录的最新版本，**读取时还要保证其他并发事务不能修改当前记录，会对读取的记录进行加锁**。
+**当前读**：像select lock in share mode(共享锁), select for update ; update, insert ,delete(排他锁)这些操作都是一种当前读，为什么叫当前读？就是它读取的是记录的最新版本，**读取时还要保证其他并发事务不能修改当前记录，会对读取的记录进行加锁**。
 
 加锁的 SELECT 就属于当前读，例如：
 
@@ -1075,7 +1083,7 @@ mysql> show status like 'InnoDB_row_lock%';
 
 ### 六、死锁
 
-什么是死锁：一般是由于两个事务同时操作两个表，但加锁的顺序是不一致出现的。比如A事务先锁a表，B事务先锁b表；当A去锁b表的时候发现b表被B事务锁住了，要等待；当B事务去锁a表的时候发现a表被A锁住了。于是出现了死锁
+**什么是死锁：一般是由于两个事务同时操作两个表，但加锁的顺序是不一致出现的**。比如A事务先锁a表，B事务先锁b表；当A去锁b表的时候发现b表被B事务锁住了，要等待；当B事务去锁a表的时候发现a表被A锁住了。于是出现了死锁
 
 如何发现死锁： 在InnoDB的事务管理和锁定机制中，有专门检测死锁的机制，会在系统中产生死锁之后的很短时间内就检测到该死锁的存在，一般像一些运维系统是能发现的
 
@@ -1110,128 +1118,6 @@ a)类似业务模块中，尽可能按照相同的访问顺序来访问，防止
 b)在同一个事务中，尽可能做到一次锁定所需要的所有资源，减少死锁产生概率； 
 
 c)对于非常容易产生死锁的业务部分，可以尝试使用升级锁定颗粒度，通过表级锁定来减少死锁产生的概率。
-
-
-
-### **查看SQL语句的锁信息**
-
-**查看sql句的锁信息前，需要做如下几件事**：
-
-查看事务的隔离级别：
-
-- 通过show global variables like “tx_isolation”; 命令查看。
-  可通过执行set session transaction isolation level repeatable read;更改成我们想要隔离级别，隔离级别取值如下：
-  read uncommitted、read committed、repeatable read、serializable
-
-保证事务为手动提交：
-
-- 通过show global variables like “autocommit”;查看。
-  如果为ON，则通过执行set session autocommit=0;改为手动提交。
-
-保证间隙锁开启：
-
-- 通过show global variables like “innodb_locks%”;查看
-  OFF时表示开启。默认是OFF
-
-### 五、查看行级锁争用情况
-
-
-执行SQL:mysql> show status like 'InnoDB_row_lock%';
-
-```sql
-mysql> show status like 'InnoDB_row_lock%';
-
-
-
-+-------------------------------+-------+
-
-
-
-| Variable_name                 | Value |
-
-
-
-+-------------------------------+-------+
-
-
-
-| InnoDB_row_lock_current_waits | 0     |
-
-
-
-| InnoDB_row_lock_time          | 0     |
-
-
-
-| InnoDB_row_lock_time_avg      | 0     |
-
-
-
-| InnoDB_row_lock_time_max      | 0     |
-
-
-
-| InnoDB_row_lock_waits         | 0     |
-
-
-
-+-------------------------------+-------+
-```
-
-
-如果发现锁争用比较严重，还可以通过设置InnoDB Monitors 来进一步观察发生锁冲突的表、数据行等，并分析锁争用的原因。如：
-
-设置监视器：mysql> create table InnoDB_monitor(a INT) engine=InnoDB;
-
-查看：mysql> show engine InnoDB status;
-
-停止查看：mysql> drop table InnoDB_monitor;
-
-具体参考：[InnoDB Monitor](https://blog.csdn.net/zyz511919766/article/details/50147283)
-
-### 六、死锁
-
-
-什么是死锁：一般是由于两个事务同时操作两个表，但加锁的顺序是不一致出现的。比如A事务先锁a表，B事务先锁b表；当A去锁b表的时候发现b表被B事务锁住了，要等待；当B事务去锁a表的时候发现a表被A锁住了。于是出现了死锁
-
-如何发现死锁： 在InnoDB的事务管理和锁定机制中，有专门检测死锁的机制，会在系统中产生死锁之后的很短时间内就检测到该死锁的存在，一般像一些运维系统是能发现的
-
-解决办法：回滚较小的那个事务
-
-
-在REPEATABLE-READ隔离级别下，如果两个线程同时对相同条件记录用SELECT…FOR UPDATE加排他锁，在没有符合该条件记录情况下，两个线程都会加锁成功。程序发现记录尚不存在，就试图插入一条新记录，如果两个线程都这么做，就会出现死锁。这种情况下，将隔离级别改成READ COMMITTED，就可避免问题。
-
-
-如何判断事务大小：事务各自插入、更新或者删除的数据量
-
-注意：
-
-当产生死锁的场景中涉及到不止InnoDB存储引擎的时候，InnoDB是没办法检测到该死锁的，这时候就只能通过锁定超时限制参数InnoDB_lock_wait_timeout来解决。
-
-###  七、优化行级锁定
-
-
-（1）要想合理利用InnoDB的行级锁定，做到扬长避短，我们必须做好以下工作： 
-
-a)尽可能让所有的数据检索都通过索引来完成，从而避免InnoDB因为无法通过索引键加锁而升级为表级锁定； 
-
-b)合理设计索引，让InnoDB在索引键上面加锁的时候尽可能准确，尽可能的缩小锁定范围，避免造成不必要的锁定而影响其他Query的执行； 
-
-c)尽可能减少基于范围的数据检索过滤条件，避免因为间隙锁带来的负面影响而锁定了不该锁定的记录； 
-
-d)尽量控制事务的大小，减少锁定的资源量和锁定时间长度； 
-
-e)在业务环境允许的情况下，尽量使用较低级别的事务隔离，以减少MySQL因为实现事务隔离级别所带来的附加成本。
-
-（2）由于InnoDB的行级锁定和事务性，所以肯定会产生死锁，下面是一些比较常用的减少死锁产生概率的小建议：
-
-a)类似业务模块中，尽可能按照相同的访问顺序来访问，防止产生死锁； 
-
-b)在同一个事务中，尽可能做到一次锁定所需要的所有资源，减少死锁产生概率； 
-
-c)对于非常容易产生死锁的业务部分，可以尝试使用升级锁定颗粒度，通过表级锁定来减少死锁产生的概率。
-
-
 
 ### **查看SQL语句的锁信息**
 
@@ -1772,7 +1658,9 @@ MySQL 服务器通过权限表来控制用户对数据库的访问，权限表�
 select * from test where id=c_id;
 ```
 
-#### [存在NULL值条件](http://mp.weixin.qq.com/s?__biz=MzI3ODcxMzQzMw==&mid=2247524678&idx=3&sn=a153fd4fae16c357d55414e067d7bf25&chksm=eb50e470dc276d6676c923b597cbd28cf29e7a31393f1f03afedaf22f6aaf9e0e5517b9bdb32&scene=21#wechat_redirect)
+#### 存在NULL值条件
+
+[参考](http://mp.weixin.qq.com/s?__biz=MzI3ODcxMzQzMw==&mid=2247524678&idx=3&sn=a153fd4fae16c357d55414e067d7bf25&chksm=eb50e470dc276d6676c923b597cbd28cf29e7a31393f1f03afedaf22f6aaf9e0e5517b9bdb32&scene=21#wechat_redirect)
 
 [我们在设计数据库表时，应该尽力避免NULL值出现，如果非要不可避免的要出现NULL值，也要给一个DEFAULT值，数值型可以给0、-1之类的， 字符串有时候给空串有问题，就给一个空格或其他。如果索引列是可空的，是不会给其建索引的，索引值是少于表的count(*)值的，所以这种情况下，执行计划自然就去扫描全表了](http://mp.weixin.qq.com/s?__biz=MzI3ODcxMzQzMw==&mid=2247524678&idx=3&sn=a153fd4fae16c357d55414e067d7bf25&chksm=eb50e470dc276d6676c923b597cbd28cf29e7a31393f1f03afedaf22f6aaf9e0e5517b9bdb32&scene=21#wechat_redirect)
 
@@ -1995,7 +1883,7 @@ EXPLAIN SELECT * from innodb1 where sex='男';
 
 1）B树索引
 
-mysql通过存储引擎取数据，基本上90%的人用的就是InnoDB了，按照实现方式分，InnoDB的索引类型目前只有两种：BTREE（B树）索引和HASH索引。B树索引是Mysql数据库中使用最频繁的索引类型，基本所有存储引擎都支持BTree索引。通常我们说的索引不出意外指的就是（B树）索引（实际是用B+树实现的，因为在查看表索引时，mysql一律打印BTREE，所以简称为B树索引）
+mysql通 过存储引擎取数据，基本上90%的人用的就是InnoDB了，按照实现方式分，InnoDB的索引类型目前只有两种：BTREE（B树）索引和HASH索引。B树索引是Mysql数据库中使用最频繁的索引类型，基本所有存储引擎都支持BTree索引。通常我们说的索引不出意外指的就是（B树）索引（实际是用B+树实现的，因为在查看表索引时，mysql一律打印BTREE，所以简称为B树索引）
 
 ![1.jpg](https://raw.githubusercontent.com/Simin-hub/Picture/master/img/4e146c2f85664adaba86496264a6c9bb.jpg)
 
