@@ -54,6 +54,8 @@
 
 Linux内核设计与实现
 
+微服务架构模式
+
 ## 学习路径
 
 ![img](https://cdn.learnku.com/uploads/images/202008/26/22816/V5R9KWwGmr.png!large)
