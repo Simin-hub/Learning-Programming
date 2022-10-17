@@ -93,6 +93,33 @@ Kubernetes：
 - 不提供也不采用任何全面的机器配置、维护、管理或自我修复系统。
 - 此外，**Kubernetes 不仅仅是一个编排系统，实际上它消除了编排的需要**。 **编排的技术定义是执行已定义的工作流程：首先执行 A，然后执行 B，再执行 C**。 而 Kubernetes 包含了一组独立可组合的控制过程，可以连续地将当前状态驱动到所提供的预期状态。 你不需要在乎如何从 A 移动到 C，也不需要集中控制，这使得系统更易于使用 且功能更强大、系统更健壮，更为弹性和可扩展。
 
+### K8s 和 Docker 的关系
+
+[参考](https://juejin.cn/post/7106406444043337759)
+
+Docker 和 K8s 这两个经常一起出现，两者的Logo 看着也有一定联系一个是背上驮着集装箱的鲸鱼一个是船的舵轮。
+
+![kubernetes and docker](https://p3-juejin.byteimg.com/tos-cn-i-k3u1fbpfcp/e854ee1fcca44654adcf652dc0ed5d7e~tplv-k3u1fbpfcp-zoom-in-crop-mark:4536:0:0:0.awebp)
+
+不过两者不能放在一个维度上讨论，**Docker 是当前流行的 Linux 容器解决方案，利用 Namespaces 、Cgroups 以及联合文件系统UnionFS 实现了同一主机上容器进程间的相互隔离**。
+
+![容器的原理](https://p3-juejin.byteimg.com/tos-cn-i-k3u1fbpfcp/84853fe366f04dc0a1ce4cc23ef660b0~tplv-k3u1fbpfcp-zoom-in-crop-mark:4536:0:0:0.awebp)
+
+- NameSpaces：隔离进程，让进程只能访问到本命名空间里的挂载目录、PID、NetWork 等资源
+- Cgroups:  限制进程能使用的计算机系统各项资源的上限，包括 CPU、内存、磁盘、网络带宽等等
+- 联合文件系统UnionFS : 保存一个操作系统的所有文件和目录，在它基础之上添加应用运行依赖的文件。创建容器进程的时候给进程指定Mount Namespace 把镜像文件挂载到容器里，用 chroot 把进程的 Root目录切换到挂载的目录里，从而让容器进程各自拥有独立的操作系统目录。
+
+而 **K8s 是拥有容器编排能力的集群管理解决方案，可以按照应用的定义调度各个运行着应用组件 Docker 容器，但是 Docker 并不是 K8s 对容器的唯一选择，K8s 的 容器运行时支持对接多种容器** ，比如CoreOS公司的Rkt容器（之前称为Rocket，现更名为Rkt），Apache 开源的 Mesos 容器等。只要容器实现了 K8s 容器运行时的接口约定，都能让 K8s 进行调度。
+
+![红框里的容器运行时负责对接具体的容器实现](https://p3-juejin.byteimg.com/tos-cn-i-k3u1fbpfcp/fc28709010d548e399e30057b8db943a~tplv-k3u1fbpfcp-zoom-in-crop-mark:4536:0:0:0.awebp)
+
+Docker 公司也推出过自己的容器集群管理方案 Docker Swarm ，跟 K8s 算是竞品，但是在生产上几乎没人使用。
+
+Docker Swarm 没有流行起来的深层次的原因就不深究了，从一些IT媒体的报道看，可能的原因是
+
+- 跟 Docker 深度绑定，人天生对集权主义非常反感。
+- Docker 公司在大规模集群管理上的经验不足，不像谷歌那样能高屋建瓴地给出好的解决方法。
+
 #### 名词解释
 
 - **标签（Label）**
