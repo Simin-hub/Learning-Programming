@@ -696,5 +696,8 @@ Bash 脚本有时需要创建临时文件或临时目录。常见的做法是，
 
 ## 实例解析
 
+## 实例练习
+[23 个非常实用的 Shell 拿来就用脚本实例](https://zhuanlan.zhihu.com/p/361002716)
+[shell编程100例](https://blog.csdn.net/yugemengjing/article/details/82469785)
 
 
