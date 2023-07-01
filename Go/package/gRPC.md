@@ -570,3 +570,195 @@ func (b *baseBalancer) UpdateSubConnState(sc balancer.SubConn, state balancer.Su
 
 通过学习 gRPC 负载均衡我们可以看到不同类型负载均衡器的优缺点, gRPC 所采用的客户端负载均衡虽然解决了性能问题, 但是也为客户端代码增加了很多复杂度, 虽然我们使用者不太感知得到, 而且文章开头也说明了 gRPC 是支持多种语言的, 也就意味着每种语言客户端都得实现. 然而现状是不同语言的客户端对于一些新特性的实现周期有很大差异, 例如: `c++`, `golang`, `java` 的客户端新特性支持情况会最好, 但是 NodeJS 之类的语言支持情况就不那么好, 这也是长期 gRPC 面临的问题. 例如至今 NodeJS client 库还是 callback 的形式, 并且仍不支持 `server interceptor`.
 
+## 使用
+
+[参考](https://learnku.com/articles/68062)
+
+### protobuf 介绍
+
+protobuf 全称 Google Protocol Buffers，是 google 开发的的一套用于数据存储，网络通信时用于协议编解码的工具库。protobuf 是一种灵活高效的独立于语言平台的结构化数据表示方法。在通信协议和数据存储等领域中使用比较多。protobuf 对于结构中的每个成员会提供 set 系列函数和 get 系列函数。与 XML 相比，protoBuf 更小更快更简单。你可以用定义 protobuf 的数据结构。用 protobuf 编译器生成特定语言的源代码，如 C++，Java，go，Python 等，proto 文件是以 xxx.proto 命名的。
+
+### 基本类型
+
+
+
+### 参数作用
+
+先来看一个简单的 proto 文件
+
+```protobuf
+syntax = "proto3";  //proto3的语法
+
+// 指定输出 go 语言的源码到哪个目录以及文件名称
+option go_package="./;protofile";
+// 引入其他的proto文件，  empty.proto的包名 package google.protobuf;
+import "google/protobuf/empty.proto";  
+// 指定包名，一般与go_package的包名相同
+package protofile;
+
+message Req {
+  string message = 1;
+}
+
+message Res {
+  string message = 1;
+}
+
+message StatusResponse {
+	string status = 1
+}
+
+service HelloGRPC {
+  rpc SayHi(Req) returns (Res);
+  // 无请求参数
+  rpc Status(google.protobuf.Empty) returns (StatusResponse)
+}
+```
+
+##### syntax:
+
+文件的第一行指定当前proto文档使用的是proto3语法，这是必须的，因为当不指定版本时，默认使用的是proto2语法。
+这也必须是文件的第一个**非空**、**非注释**行
+
+##### `option`
+
+`go_package`: 指生成 go 语言的代码，`"/.;proto"`：指在当前文件下生成，并且包名为 proto
+
+##### [package](https://so.csdn.net/so/search?q=package&spm=1001.2101.3001.7020)
+
+package 的作用是用于定义服务的命名空间。它可以用来区分不同的服务，避免命名冲突，并且使得服务的定义更加清晰和有组织。
+
+同样的，在proto文件内也可以使用包说明符package定义包的名字。包说明符影响生成代码的方式取决于选择的语言：
+
+- 在C++ 中，生成的类被包装在 C++ 命名空间中。例如，Open将在命名空间中foo::bar。
+- 在Java和Kotlin 中，该包用作 Java 包，除非您option java_package在.proto文件中明确提供。
+- 在Python 中， package 指令被忽略，因为 Python 模块是根据它们在文件系统中的位置组织的。
+- 在Go 中，包用作 Go 包名称，除非您option go_package在.proto文件中明确提供。
+- 在Ruby 中，生成的类被包裹在嵌套的 Ruby 命名空间中，转换为所需的 Ruby 大写样式（第一个字母大写；如果第一个字符不是字母，PB_则在前面）。例如，Open将在命名空间中Foo::Bar。
+- 在C# 中，包在转换为 PascalCase 后用作命名空间，除非您option csharp_namespace在.proto文件中明确提供 an 。例如，Open将在命名空间中Foo.Bar。
+
+每个 gRPC 服务都必须定义在一个 package 中，它可以是一个单独的文件，也可以是多个文件组成的包。在定义 gRPC 服务时，通常会指定 package 的名称，以确保不同的服务在命名空间上是相互独立的。这也使得在使用多个 gRPC 服务时，我们可以轻松地区分它们并避免命名冲突。Protocol buffer语言中类型名称的解析：首先从最内部开始查找，依次向外进行，每个包会被看作是其父类包的内部类。
+
+##### import
+
+导入其他的proto文件
+
+### message
+
+两个message均只指定了三个字段(名称/值对)，这是内部在进行序列话与反序列化时的依赖。
+
+**字段编号：**消息定义中的每个字段应当在当前消息中有唯一的编号，而且一旦使用就不应该进行修改。
+
+1到15范围内的字段编号占用一个字节进行编码，包括字段编号和字段类型。
+
+16到2047范围内的字段编号占用两个字节，所以当某一些元素出现频率非常高时，应当分配到1到15之间，但是也应当适当保留一些
+
+1到15之间到字段出来，为将来可能出添加的频繁出现的元素预留空间。
+
+**嵌套 message**
+
+```
+message HolleRequest {
+    string name = 1;
+    string url = 2;
+}
+
+message HolleReply {
+    string id = 1;
+    HelloRequest request = 2;   //HelloReply中嵌套HelloRequest
+}
+```
+
+字段格式：`限定修饰符 | 数据类型 | 字段名称 | = | 字段编码值 | [字段默认值]`
+
+2.限定修饰符包含 required\optional\repeated
+
+Required：表示是一个必须字段，必须相对于发送方，在发送消息之前必须设置该字段的值，对于接收方，必须能够识别该字段的意思。发送之前没有设置required字段或者无法识别required字段都会引发编解码异常，导致消息被丢弃
+
+Optional：表示是一个可选字段，可选对于发送方，在发送消息时，可以有选择性的设置或者不设置该字段的值。对于接收方，如果能够识别可选字段就进行相应的处理，如果无法识别，则忽略该字段，消息中的其它字段正常处理。---因为optional字段的特性，很多接口在升级版本中都把后来添加的字段都统一的设置为optional字段，这样老的版本无需升级程序也可以正常的与新的软件进行通信，只不过新的字段无法识别而已，因为并不是每个节点都需要新的功能，因此可以做到按需升级和平滑过渡
+
+Repeated：表示该字段可以包含0~N个元素。其特性和optional一样，但是每一次可以包含多个值。可以看作是在传递一个数组的值
+
+### service
+
+如果想在 RPC（远程过程调用）系统中使用定义消息类型，可以在.proto文件中定义一个 RPC 服务接口，协议缓冲区编译器将以选择的语言生成服务接口代码和存根。因此，例如，如果想使用接受定义的Req并返回 a的方法定义 RPC 服务Res，可以在定义的.proto文件中按如下方式定义它：
+
+```
+service HelloGRPC {
+  rpc SayHi(Req) returns (Res);
+}
+```
+
+可以发现，定义时还是非常简单的，通过rpc关键字，服务名(SayHi)，请求(Req)， returns关键字，响应(Res)，就可以定义一个rpc服务。
+
+### 自动编译脚本
+
+[参考](https://blog.csdn.net/qq_41004932/article/details/120421552)
+
+```
+protoc --go_out=. --go_opt=paths=source_relative --go-grpc_out=. --go-grpc_opt=paths=source_relative ./xxxx.proto
+```
+
+- protoc 是 protobuf 文件的编译器，可以将 .proto 文件转译成各编程语言对应的代码，需要安装 protobuf。
+- go_out / go_opt 参数是转译成 go 代码需要的，但原生 protoc 不包含 go 的插件，需要安装 protoc-gen-go
+
+```
+这里的go_out是生成go代码，同样的也支持其他语言：
+–cpp_out=OUT_DIR Generate C++ header and source.
+–csharp_out=OUT_DIR Generate C# source file.
+–java_out=OUT_DIR Generate Java source file.
+–js_out=OUT_DIR Generate JavaScript source.
+–kotlin_out=OUT_DIR Generate Kotlin file.
+–objc_out=OUT_DIR Generate Objective-C header and source.
+–php_out=OUT_DIR Generate PHP source file.
+–python_out=OUT_DIR Generate Python source file.
+–ruby_out=OUT_DIR Generate Ruby source file.
+```
+
+- go-grpc_out / go-grpc_opt 可以转译成 grpc 需要的 go 代码，需要 protoc-gen-go-grpc 编译插件
+
+```
+这里以go_out / go_opt为例说一下这俩的使用方式
+--go_out=.指的是生成go文件，且生成后输出在本目录
+–go_out 参数是用来指定 protoc-gen-go 插件的工作方式 和 go 代码目录架构的生成位置，可以向 --go_out 传递很多参数。
+```
+
+```
+主要的两个参数为 plugins 和 paths ，代表 生成 go 代码所使用的插件 和 生成的 go 代码的目录怎样架构。
+```
+
+```
+paths 参数有两个选项，import和 source_relative。默认为 import ，代表按照生成的 go 代码的包的全路径去创建目录层级，source_relative 代表按照 proto 源文件的目录层级去创建 go 代码的目录层级，如果目录已存在则不用创建。
+```
+
+示例：
+
+```
+protoc \
+-I=. \
+--go_out=. \
+--go_opt=paths=source_relative \
+--go-grpc_out=. \
+--go-grpc_opt=paths=source_relative \
+*.proto
+```
+
+含义：
+
+- protoc 是 protobuf 文件的编译器，可以将 .proto 文件转译成各编程语言对应的代码，需要安装 protobuf。
+- go_out / go_opt 参数是转译成 go 代码需要的，但原生 protoc 不包含 go 的插件，需要安装 protoc-gen-go: go get github.com/golang/protobuf/protoc-gen-go
+- go-grpc_out / go-grpc_opt 可以转译成 grpc 需要的 go 代码，需要 protoc-gen-go-grpc 编译插件：go get google.golang.org/grpc/cmd/protoc-gen-go-grpc
+- -I: 指定 .proto 文件路径。如果 .proto 中 import 了其他 .proto 文件，还需要追加 -I=xxx，关于 import 的注意，见后面。
+- –go_out: .pb.go 文件生成后放在哪
+- –go_opt=paths=source_relative: .pb.go 文件依赖相对路径，不加这个参数则会在当前目录下生成完整的 go_package 指定的路径
+- –go-grpc_out: 同时生成 _grpc.pb.go 文件，里面是原本在 .pb.go 文件中的和 gRPC，client，server 相关的代码
+- –go_grpc_opt=paths=source_relative: _grpc.pb.go 文件依赖相对路径，不加这个参数则会在当前目录下生成完整的 go_package 指定的路径
+- *.proto: 需要生成 go 代码的 .proto 文件
+
+## 示例
+
+[参考](https://www.cnblogs.com/taotaozhuanyong/p/14780926.html)
+
+[官方示例](https://grpc.io/docs/languages/go/basics/#client)
+
+![gRPC.drawio](https://raw.githubusercontent.com/Simin-hub/Picture/master/img/gRPC.drawio.png)
