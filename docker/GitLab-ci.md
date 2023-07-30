@@ -405,7 +405,7 @@ cache：
 
 ### 在Docker容器中运行CI/CD工作
 
-####　注册一个使用Docker executor 器的runner
+#### 注册一个使用Docker executor 器的runner
 
 要将 GitLab Runner 与 Docker 一起使用，您需要注册一个使用 Docker executor 的 runner。
 
