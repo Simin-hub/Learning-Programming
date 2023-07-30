@@ -31,7 +31,7 @@ Kubernetes是Google 2014年创建管理的，是Google 10多年大规模容器�
 
 ![为什么是容器？](https://d33wubrfki0l68.cloudfront.net/e7b766e0175f30ae37f7e0e349b87cfe2034a1ae/3e391/images/docs/why_containers.svg)
 
-**传统的应用部署方式是通过插件或脚本来安装应用。**这样做的缺点是应用的运行、配置、管理、所有生存周期将与当前操作系统绑定，这样做并不利于应用的升级更新/回滚等操作，当然也可以通过创建虚机的方式来实现某些功能，但是虚拟机非常重，并不利于可移植性。
+**传统的应用部署方式是通过插件或脚本来安装应用**。这样做的缺点是应用的运行、配置、管理、所有生存周期将与当前操作系统绑定，这样做并不利于应用的升级更新/回滚等操作，当然也可以通过创建虚机的方式来实现某些功能，但是虚拟机非常重，并不利于可移植性。
 
 新的方式是**通过部署容器方式实现，每个容器之间互相隔离，每个容器有自己的文件系统 ，容器之间进程不会相互影响，能区分计算资源**。相对于虚拟机，容器能快速部署，由于容器与底层设施、机器文件系统解耦的，所以它能在不同云、不同版本操作系统间进行迁移。
 
@@ -39,14 +39,14 @@ Kubernetes是Google 2014年创建管理的，是Google 10多年大规模容器�
 
 容器优势总结：
 
-- **快速创建/部署应用：**与VM虚拟机相比，容器镜像的创建更加容易。
-- **持续开发、集成和部署：**提供可靠且频繁的容器镜像构建/部署，并使用快速和简单的回滚(由于镜像不可变性)。
-- **开发和运行相分离：**在build或者release阶段创建容器镜像，使得应用和基础设施解耦。
-- **开发，测试和生产环境一致性：**在本地或外网（生产环境）运行的一致性。
-- **云平台或其他操作系统：**可以在 Ubuntu、RHEL、 CoreOS、on-prem、Google Container Engine或其它任何环境中运行。
-- **Loosely coupled，分布式，弹性，微服务化：**应用程序分为更小的、独立的部件，可以动态部署和管理。
+- **快速创建/部署应用**：与VM虚拟机相比，容器镜像的创建更加容易。
+- **持续开发、集成和部署**：提供可靠且频繁的容器镜像构建/部署，并使用快速和简单的回滚(由于镜像不可变性)。
+- **开发和运行相分离**：在build或者release阶段创建容器镜像，使得应用和基础设施解耦。
+- **开发，测试和生产环境一致性**：在本地或外网（生产环境）运行的一致性。
+- **云平台或其他操作系统**：可以在 Ubuntu、RHEL、 CoreOS、on-prem、Google Container Engine或其它任何环境中运行。
+- **Loosely coupled，分布式，弹性，微服务化**：应用程序分为更小的、独立的部件，可以动态部署和管理。
 - **资源隔离**
-- **资源利用：**更高效
+- **资源利用**：更高效
 
 #### 使用Kubernetes能做什么？
 
@@ -122,22 +122,23 @@ Docker Swarm 没有流行起来的深层次的原因就不深究了，从一些I
 
 #### 名词解释
 
+- **Node**，节点
+
+  Kubernetes 通过将容器放入在节点（Node）上运行的 Pod 中来执行你的工作负载。 节点可以是一个**虚拟机或者物理机器**，取决于所在的集群配置。 每个节点包含运行 Pod 所需的服务； 这些节点由控制面负责管理。
+
 - **标签（Label）**
 
   用来为对象设置可标识的属性标记；这些标记对用户而言是有意义且重要的。
-
   标签是一些关联到 [Pods](https://kubernetes.io/docs/concepts/workloads/pods/pod-overview/) 这类对象上的键值对。 它们通常用来组织和选择对象子集。
 
 - **Pod**
 
   Pod 是 Kubernetes 的原子对象。Pod 表示您的集群上**一组**正在运行的[容器（containers）](https://kubernetes.io/zh-cn/docs/concepts/overview/what-is-kubernetes/#why-containers)（一个或者多个容器）。
-
   **通常创建 Pod 是为了运行单个主容器**。Pod 还可以运行可选的边车（sidecar）容器，以添加诸如日志记录之类的补充特性。通常用 [Deployment](https://kubernetes.io/zh-cn/docs/concepts/workloads/controllers/deployment/) 来管理 Pod。
 
 - **Job**
 
   Job 是**需要运行完成的确定性的或批量的任务**。
-
   Job 创建一个或多个 [Pod](https://kubernetes.io/docs/concepts/workloads/pods/pod-overview/) 对象，并确保指定数量的 Pod 成功终止。 随着各 Pod 成功结束，Job 会跟踪记录成功完成的个数
 
 - **Deployment**
@@ -168,7 +169,7 @@ Docker Swarm 没有流行起来的深层次的原因就不深究了，从一些I
 
 - **ReplicaSets**
 
-  ReplicaSet是下一代复本控制器。ReplicaSet和 [*Replication Controller*](https://www.kubernetes.org.cn/replication-controller-kubernetes)之间的唯一区别是现在的选择器支持。*Replication Controller*只支持基于等式的selector（env=dev或environment!=qa），但ReplicaSet还支持新的，基于集合的selector（version in (v1.0, v2.0)或env notin (dev, qa)）。在试用时官方推荐ReplicaSet。
+  ReplicaSet是下一代副本控制器。ReplicaSet和 [*Replication Controller*](https://www.kubernetes.org.cn/replication-controller-kubernetes)之间的唯一区别是现在的选择器支持。*Replication Controller*只支持基于等式的selector（env=dev或environment!=qa），但ReplicaSet还支持新的，基于集合的selector（version in (v1.0, v2.0)或env notin (dev, qa)）。在试用时官方推荐ReplicaSet。
 
 - **选择算符（Selector）**
 
